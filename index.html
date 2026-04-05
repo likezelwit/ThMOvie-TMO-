@@ -3,439 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BosIlham - Jual Beli Akun Free Fire Terpercaya</title>
-    <!-- Link Font Awesome untuk Ikon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary-color: #FFC107; /* Kuning/Emas */
-            --secondary-color: #212121; /* Hitam */
-            --accent-color: #FF5722; /* Orange untuk tombol */
-            --bg-dark: #121212;
-            --card-bg: #1E1E1E;
-            --text-light: #FFFFFF;
-            --text-gray: #B0B0B0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            line-height: 1.6;
-        }
-
-        /* Navbar */
-        nav {
-            background-color: rgba(18, 18, 18, 0.95);
-            padding: 1rem 5%;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--primary-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--primary-color);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .logo span {
-            color: var(--text-light);
-        }
-
-        .nav-links a {
-            color: var(--text-light);
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: 500;
-            transition: 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary-color);
-        }
-
-        /* Hero Section */
-        .hero {
-            height: 100vh;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url('https://wallpapers.com/images/hd/free-fire-background-xb0ttj4rvr37g8ov.jpg');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 20px;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
-        }
-
-        .hero h1 span {
-            color: var(--primary-color);
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            color: var(--text-gray);
-            max-width: 600px;
-            margin-bottom: 2rem;
-        }
-
-        .btn-main {
-            background-color: var(--primary-color);
-            color: var(--secondary-color);
-            padding: 15px 40px;
-            border: none;
-            border-radius: 30px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: transform 0.3s, box-shadow 0.3s;
-            text-decoration: none;
-        }
-
-        .btn-main:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.3);
-        }
-
-        /* Section Umum */
-        section {
-            padding: 80px 5%;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .section-title h2 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .section-title p {
-            color: var(--text-gray);
-        }
-
-        /* Keunggulan */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-
-        .feature-card {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid #333;
-            transition: 0.3s;
-        }
-
-        .feature-card:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-5px);
-        }
-
-        .feature-card i {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-
-        /* Katalog Produk */
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-        }
-
-        .product-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #333;
-            transition: 0.3s;
-        }
-
-        .product-card:hover {
-            border-color: var(--accent-color);
-        }
-
-        .product-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-bottom: 1px solid #333;
-        }
-
-        .product-info {
-            padding: 20px;
-        }
-
-        .badge {
-            background: var(--accent-color);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-
-        .price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 10px 0;
-        }
-
-        .btn-buy {
-            width: 100%;
-            background-color: #333;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .btn-buy:hover {
-            background-color: var(--primary-color);
-            color: var(--secondary-color);
-        }
-
-        /* Testimoni */
-        #testimoni {
-            background-color: #1a1a1a;
-        }
-
-        .testimonial-card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .testimonial-card h4 {
-            color: var(--primary-color);
-        }
-
-        /* Footer */
-        footer {
-            background-color: #0a0a0a;
-            padding: 40px 5%;
-            text-align: center;
-            border-top: 1px solid #333;
-        }
-
-        .social-icons a {
-            color: var(--text-light);
-            font-size: 1.5rem;
-            margin: 0 10px;
-            transition: 0.3s;
-        }
-
-        .social-icons a:hover {
-            color: var(--primary-color);
-        }
-
-        /* Floating WhatsApp Button */
-        .wa-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background-color: #25D366;
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 60px;
-            font-size: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 999;
-            transition: transform 0.3s;
-        }
-
-        .wa-btn:hover {
-            transform: scale(1.1);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 2.2rem; }
-            .nav-links { display: none; } /* Simplified for demo */
-        }
-    </style>
+    <title>chatMe</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <header>
+            <div class="logo">🔐</div>
+            <h1>PrivateChat</h1>
+            <p class="tagline">Obrolan Tanpa Jejak. Enkripsi Total di Browser Anda.</p>
+        </header>
 
-    <!-- Navbar -->
-    <nav>
-        <div class="logo">Bos<span>Ilham</span></div>
-        <div class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#katalog">Katalog</a>
-            <a href="#keunggulan">Keunggulan</a>
-            <a href="#testimoni">Testimoni</a>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <header class="hero" id="home">
-        <h1>Marketplace Akun FF <span>Terpercaya</span></h1>
-        <p>Jual beli akun Free Fire paling aman, murah, dan legkap dengan garansi. Proses cepat dan diproses oleh BosIlham langsung!</p>
-        <a href="#katalog" class="btn-main">Lihat Katalog</a>
-    </header>
-
-    <!-- Keunggulan -->
-    <section id="keunggulan">
-        <div class="section-title">
-            <h2>Mengapa Memilih Kami?</h2>
-            <p>BosIlham memberikan pelayanan terbaik untuk para burner Free Fire.</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <i class="fas fa-shield-alt"></i>
-                <h3>100% Aman</h3>
-                <p>Transaksi dijamin aman tanpa resiko penipuan. Data akun asli.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-bolt"></i>
-                <h3>Proses Cepat</h3>
-                <p>Akun dikirim maksimal 5 menit setelah pembayaran dikonfirmasi.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-medal"></i>
-                <h3>Garansi Penuh</h3>
-                <p>Garansi akun selama 3 hari jika terjadi masalah (bukan banned).</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-headset"></i>
-                <h3>Support 24/7</h3>
-                <p>Admin BosIlham siap membantu Anda kapan saja via WhatsApp.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Katalog Produk -->
-    <section id="katalog">
-        <div class="section-title">
-            <h2>Katalog Akun Tersedia</h2>
-            <p>Pilih akun impian Anda sekarang juga!</p>
-        </div>
-        <div class="product-grid">
-            <!-- Produk 1 -->
-            <div class="product-card">
-                <img src="https://placehold.co/600x400/222/FFC107?text=AKUN+SEMI+S" alt="Akun Semi S" class="product-img">
-                <div class="product-info">
-                    <span class="badge">HOT SALE</span>
-                    <h3>Akun Semi S Clean</h3>
-                    <p>Bundle S, Skin Epic 20+, Emote Alok</p>
-                    <div class="price">Rp 75.000</div>
-                    <button class="btn-buy" onclick="beliAkun('Akun Semi S Clean - Rp 75.000')">Beli via WhatsApp</button>
+        <main class="hero">
+            <div class="feature-list">
+                <div class="feature-item">
+                    <span>🛡️</span>
+                    <p>End-to-End Encryption (RSA-2048)</p>
+                </div>
+                <div class="feature-item">
+                    <span>🚫</span>
+                    <p>Zero-Knowledge Server (Relay Only)</p>
+                </div>
+                <div class="feature-item">
+                    <span>💨</span>
+                    <p>Tanpa Database, Tanpa Jejak</p>
                 </div>
             </div>
-            <!-- Produk 2 -->
-            <div class="product-card">
-                <img src="https://placehold.co/600x400/222/FFC107?text=AKUN+SULTAN" alt="Akun Sultan" class="product-img">
-                <div class="product-info">
-                    <span class="badge">BEST SELLER</span>
-                    <h3>Akun Sultan VVIP</h3>
-                    <p>Bundle S & E, All Evo, 50+ Skin Legend</p>
-                    <div class="price">Rp 350.000</div>
-                    <button class="btn-buy" onclick="beliAkun('Akun Sultan VVIP - Rp 350.000')">Beli via WhatsApp</button>
-                </div>
-            </div>
-            <!-- Produk 3 -->
-            <div class="product-card">
-                <img src="https://placehold.co/600x400/222/FFC107?text=AKUN+NOOB" alt="Akun Noob" class="product-img">
-                <div class="product-info">
-                    <span class="badge">MURAH</span>
-                    <h3>Akun Noob Pass</h3>
-                    <p>Level 10, Belum Ada Rank, Cocok Push</p>
-                    <div class="price">Rp 25.000</div>
-                    <button class="btn-buy" onclick="beliAkun('Akun Noob Pass - Rp 25.000')">Beli via WhatsApp</button>
-                </div>
-            </div>
-        </div>
-    </section>
+            
+            <button id="startBtn" class="primary-button">Memeriksa Sesi...</button>
+        </main>
 
-    <!-- Testimoni -->
-    <section id="testimoni">
-        <div class="section-title">
-            <h2>Kata Mereka</h2>
-            <p>Dipercaya ribuan player di Indonesia.</p>
-        </div>
-        <div class="testimonial-card">
-            <p>"Pelayanan cepat banget, adminnya ramah. Akun yang dibeli sesuai deskripsi. Recommended!"</p>
-            <br>
-            <h4>- Rizky (Malang)</h4>
-        </div>
-        <div class="testimonial-card">
-            <p>"Awalnya takut tipu, tapi setelah coba beli yang murah, prosesnya mulus. Sekarang jadi langganan tetap di BosIlham."</p>
-            <br>
-            <h4>- Dian (Jakarta)</h4>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="logo" style="margin-bottom: 20px;">Bos<span>Ilham</span></div>
-        <div class="social-icons">
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-facebook"></i></a>
-            <a href="#"><i class="fab fa-tiktok"></i></a>
-        </div>
-        <p style="margin-top: 20px; color: #666;">&copy; 2023 BosIlham. All Rights Reserved.</p>
-    </footer>
-
-    <!-- Floating WhatsApp Button -->
-    <a href="https://wa.me/6281234567890?text=Halo%20BosIlham,%20saya%20ingin%20order%20akun" target="_blank" class="wa-btn">
-        <i class="fab fa-whatsapp"></i>
-    </a>
+        <footer>
+            <p>&copy; 2024 PrivateChat. Semua kunci dibuat secara lokal.</p>
+        </footer>
+    </div>
 
     <script>
-        // Fungsi untuk tombol beli
-        function beliAkun(namaAkun) {
-            // Ganti 6281234567890 dengan nomor WhatsApp Anda (tanpa + atau 0 di depan)
-            var nomorWa = "6281234567890"; 
-            var pesan = `Halo BosIlham, saya tertarik membeli: ${namaAkun}. Apakah masih tersedia?`;
-            var link = `https://wa.me/${nomorWa}?text=${encodeURIComponent(pesan)}`;
-            window.open(link, '_blank');
-        }
-    </script>
+        const startBtn = document.getElementById('startBtn');
+        const hasKey = localStorage.getItem('privateKey');
 
+        // Update teks tombol berdasarkan status login
+        if (hasKey) {
+            startBtn.innerText = "Lanjutkan ke Obrolan";
+        } else {
+            startBtn.innerText = "Mulai Setup Privasi";
+        }
+
+        startBtn.onclick = () => {
+            if (hasKey) {
+                // Jika sudah punya kunci, langsung ke chat
+                window.location.href = './chat/index.html';
+            } else {
+                // Jika belum, lakukan setup dulu
+                window.location.href = './welcome/index.html';
+            }
+        };
+    </script>
 </body>
 </html>
