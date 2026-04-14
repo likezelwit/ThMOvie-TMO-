@@ -6,6 +6,10 @@
     <title>ThMOvie (TMO) | Watch Party</title>
     <!-- Google Fonts Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Perbaikan 1: Menambahkan Favicon (Data URI kosong) agar tidak error 404 -->
+    <link rel="icon" href="data:,">
+
     <style>
         :root {
             /* Variabel Warna Mode Terang (Default) */
@@ -40,7 +44,7 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'Poppins', sans-serif;
-            overflow: hidden; /* Mencegah scroll body utama */
+            overflow: hidden;
             transition: background-color 0.8s ease, color 0.8s ease;
             height: 100vh;
             width: 100vw;
@@ -140,7 +144,7 @@
         .video-section {
             flex: 3;
             position: relative;
-            background: #000; /* Video area selalu hitam agar kontras */
+            background: #000; /* Video area selalu hitam */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -310,8 +314,8 @@
     <script>
         // Konfigurasi
         var introId = '9v1atEBmUIc'; // ID Intro
-        var movieId = ''; // Akan diisi user
-        var hasStarted = false; // Flag mencegah play ganda
+        var movieId = ''; 
+        var hasStarted = false; 
 
         // Elemen DOM
         const setupScreen = document.getElementById('setup-screen');
@@ -325,9 +329,6 @@
         startBtn.addEventListener('click', function() {
             const inputVal = movieInput.value.trim();
             if(!inputVal) {
-                // Jika kosong, pakai default atau minta isi ulang
-                // Disini kita gunakan sample jika kosong agar tidak error
-                // movieId = 'dqw4w9WgXcQ'; 
                 alert("Mohon masukkan ID YouTube terlebih dahulu!");
                 return;
             }
@@ -335,12 +336,12 @@
             startCinema();
         });
 
-        // Fungsi Memulai Bioskop (Efek Redup)
+        // Fungsi Memulai Bioskop
         function startCinema() {
             if(hasStarted) return;
             hasStarted = true;
 
-            // 1. Ubah body jadi dark mode (Efek Mati Lampu)
+            // 1. Ubah body jadi dark mode
             document.body.classList.add('dark-mode');
 
             // 2. Sembunyikan layar setup
@@ -349,7 +350,6 @@
             // 3. Tampilkan UI Cinema
             setTimeout(() => {
                 cinemaUI.classList.add('active');
-                // Inisialisasi Player YouTube setelah transisi visual dimulai
                 initPlayer();
             }, 500);
         }
@@ -369,24 +369,33 @@
         }
 
         function onYouTubeIframeAPIReady() {
-            // Menunggu user klik start sebelum membuat player
-            // Fungsi ini dipanggil oleh API otomatis, tapi kita handle createPlayer di dalam initPlayer()
+            // Fungsi ini dipanggil oleh API otomatis saat siap
+            // Kita biarkan kosong karena kita panggil createPlayer secara manual di initPlayer
+            // Namun untuk keamanan, kita cek apakah sudah start
+            if (hasStarted) {
+                createPlayer();
+            }
         }
 
         function createPlayer() {
+            // Perbaikan 2: Menambahkan origin window.location.href
+            // Ini untuk memperbaiki error "The target origin provided does not match"
             player = new YT.Player('player', {
-                videoId: introId, // Putar intro dulu
+                videoId: introId, 
                 playerVars: {
                     'autoplay': 1,
-                    'controls': 1, // Kita set 1 agar user bisa kontrol volume, tapi pause kita block
+                    'controls': 1, 
                     'rel': 0,
-                    'disablekb': 1, // Matikan keyboard shortcut
-                    'fs': 1, // Izinkan fullscreen
-                    'modestbranding': 1
+                    'disablekb': 1, 
+                    'fs': 1,
+                    'modestbranding': 1,
+                    'origin': window.location.href, // <--- PENTING: Perbaiki Origin Mismatch
+                    'widgetid': 1
                 },
                 events: {
                     'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError // Menangani error video
                 }
             });
         }
@@ -395,34 +404,42 @@
             event.target.playVideo();
         }
 
+        function onPlayerError(event) {
+            // Perbaikan 3: Menangani error (misal video tidak tersedia)
+            console.error("Player Error:", event.data);
+            addSystemMessage("Terjadi kesalahan saat memuat video. Coba ID lain.");
+        }
+
         function onPlayerStateChange(event) {
-            // Ambil ID video yang sedang aktif
-            let currentVideoId = player.getVideoData().video_id;
+            try {
+                // Ambil ID video yang sedang aktif
+                // Gunakan cek keamanan untuk menghindari crash jika player belum siap
+                let currentVideoId = player && player.getVideoData() ? player.getVideoData().video_id : null;
 
-            // 1. Logika Perpindahan Video
-            if (event.data == YT.PlayerState.ENDED) {
-                // Jika yang selesai adalah Intro, lanjut ke Film User
-                if (currentVideoId === introId) {
-                    addSystemMessage("Intro selesai. Memutar film utama...");
-                    player.loadVideoById(movieId);
-                } 
-                // Jika film utama selesai
-                else if (currentVideoId === movieId) {
-                    addSystemMessage("Film telah selesai. Terima kasih telah menonton di ThMOvie!");
-                }
-            }
-
-            // 2. Proteksi Anti-Pause (Inti Permintaan User)
-            // Jika statusnya PAUSED (2), kita paksa PLAY lagi.
-            // Kita gunakan setTimeout sedikit agar tidak konflik dengan event loading
-            if (event.data == YT.PlayerState.PAUSED) {
-                setTimeout(() => {
-                    // Cek lagi state nya, karena mungkin user cepat klik play lagi
-                    if (player.getPlayerState() === YT.PlayerState.PAUSED) {
-                        player.playVideo();
-                        addSystemMessage("Video dipaksa berjalan (Anti-Pause Aktif).");
+                // 1. Logika Perpindahan Video
+                if (event.data == YT.PlayerState.ENDED) {
+                    if (currentVideoId === introId && movieId) {
+                        addSystemMessage("Intro selesai. Memutar film utama...");
+                        player.loadVideoById(movieId);
+                    } else if (currentVideoId === movieId) {
+                        addSystemMessage("Film telah selesai. Terima kasih!");
                     }
-                }, 100);
+                }
+
+                // 2. Proteksi Anti-Pause
+                if (event.data == YT.PlayerState.PAUSED) {
+                    // Gunakan interval pendek untuk memastikan status benar-benar pause
+                    setTimeout(() => {
+                        if (player && player.getPlayerState() === YT.PlayerState.PAUSED) {
+                            player.playVideo();
+                            // Hanya log ke console agar tidak spam chat
+                            console.log("Anti-Pause Triggered");
+                        }
+                    }, 200);
+                }
+            } catch (error) {
+                // Perbaikan 4: Mencegah crash jika ada error internal (misal dari extension)
+                console.warn("Terjebak error di onPlayerStateChange:", error);
             }
         }
 
