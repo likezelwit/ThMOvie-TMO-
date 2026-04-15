@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThMOvie (TMO) | Watch Party</title>
+    <title>ThMOvie (TMO) | Private Watch Party</title>
     <!-- Google Fonts Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Perbaikan 1: Menambahkan Favicon (Data URI kosong) agar tidak error 404 -->
+    <!-- Favicon (Data URI kosong) -->
     <link rel="icon" href="data:,">
 
     <style>
@@ -21,17 +21,18 @@
             --chat-bg: #f9f9f9;
             --chat-input-bg: #eee;
             --input-text: #333;
+            --error-color: #e74c3c;
         }
 
         /* Class untuk Mode Gelap (Saat Nonton) */
         body.dark-mode {
-            --bg-color: #000000;
+            --bg-color: #050505;
             --text-color: #ffffff;
-            --secondary-bg: #111111;
+            --secondary-bg: #121212;
             --accent-color: #ff0055;
             --border-color: #333;
-            --chat-bg: #111111;
-            --chat-input-bg: #222222;
+            --chat-bg: #0a0a0a;
+            --chat-input-bg: #1a1a1a;
             --input-text: #fff;
         }
 
@@ -90,12 +91,16 @@
 
         .input-group {
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 15px;
             background: var(--secondary-bg);
-            padding: 20px;
+            padding: 30px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             transition: background 0.8s ease;
+            width: 90%;
+            max-width: 400px;
+            align-items: center;
         }
 
         #movie-input {
@@ -103,11 +108,16 @@
             border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 16px;
-            width: 300px;
+            width: 100%;
             outline: none;
             font-family: 'Poppins', sans-serif;
             background: #fff;
             color: #333;
+            transition: border-color 0.3s;
+        }
+
+        #movie-input:focus {
+            border-color: var(--accent-color);
         }
 
         #start-btn {
@@ -120,11 +130,29 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
         }
 
         #start-btn:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
             box-shadow: 0 5px 15px rgba(255, 0, 85, 0.4);
+        }
+
+        #start-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Pesan Error Inline */
+        .error-msg {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            height: 20px; /* Space reservasi */
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-align: center;
+        }
+        .error-msg.visible {
+            opacity: 1;
         }
 
         /* Container Utama Bioskop */
@@ -156,7 +184,7 @@
             height: 100%;
         }
 
-        /* Overlay Transparan (Anti-Pause) */
+        /* Overlay Transparan (Anti-Pause visual layer jika diperlukan) */
         .video-overlay {
             position: absolute;
             top: 0;
@@ -178,6 +206,7 @@
             font-size: 1.2rem;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
             pointer-events: none;
+            letter-spacing: 1px;
         }
 
         /* Area Chat */
@@ -189,6 +218,7 @@
             border-left: 1px solid var(--border-color);
             transition: background 0.8s ease, border-color 0.8s ease;
             min-width: 300px;
+            max-width: 400px;
         }
 
         .chat-header {
@@ -199,6 +229,9 @@
             color: var(--accent-color);
             border-bottom: 1px solid var(--border-color);
             transition: background 0.8s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
         }
 
         .chat-messages {
@@ -209,26 +242,42 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            /* Scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 3px;
         }
 
         /* Style pesan chat */
         .msg {
             background: var(--secondary-bg);
-            padding: 8px 12px;
-            border-radius: 8px;
-            border-top-left-radius: 0;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border-top-left-radius: 2px;
             align-self: flex-start;
-            max-width: 85%;
+            max-width: 90%;
             color: var(--text-color);
             transition: background 0.8s ease, color 0.8s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            line-height: 1.4;
         }
 
         .msg.system {
             background: transparent;
             color: #888;
             font-style: italic;
-            font-size: 0.9em;
+            font-size: 0.85em;
             align-self: center;
+            text-align: center;
+            box-shadow: none;
+            padding: 5px;
         }
 
         .chat-input {
@@ -243,11 +292,16 @@
             flex: 1;
             background: var(--chat-input-bg);
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 12px;
             color: var(--input-text);
-            border-radius: 5px;
+            border-radius: 25px;
             outline: none;
             font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input input:focus {
+            border-color: var(--accent-color);
         }
 
         /* Responsif Mobile */
@@ -260,83 +314,108 @@
                 width: 100%;
                 border-left: none;
                 border-top: 1px solid var(--border-color);
+                max-width: none;
             }
             .logo-area h1 {
                 font-size: 2rem;
             }
-            #movie-input {
-                width: 100%;
-            }
             .input-group {
-                width: 90%;
-                flex-direction: column;
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Layar Setup / Awal (Putih) -->
+    <!-- Layar Setup / Awal -->
     <div id="setup-screen">
         <div class="logo-area">
-            <h1>Th<span>MOvie</span> <small style="font-size: 0.5em; color: var(--text-color);">(TMO)</small></h1>
-            <p style="color: #666;">Private Cinema Experience</p>
+            <h1>Th<span>MOvie</span></h1>
+            <p style="margin-top: -10px; color: #666; font-weight: 300;">Private Cinema Experience</p>
         </div>
         
         <div class="input-group">
-            <input type="text" id="movie-input" placeholder="Masukkan ID YouTube Film (Contoh: dqw4w9WgXcQ)">
-            <button id="start-btn">Mulai Nonton</button>
+            <div style="width: 100%; text-align: left; font-size: 0.9rem; margin-bottom: 5px; color: var(--text-color);">YouTube Video ID</div>
+            <input type="text" id="movie-input" placeholder="Contoh: dqw4w9WgXcQ">
+            <div id="error-display" class="error-msg">ID tidak boleh kosong!</div>
+            <button id="start-btn">MULAI NONTON</button>
         </div>
-        <p style="margin-top: 15px; font-size: 0.8rem; color: #999;">Klik tombol untuk meredupkan lampu dan memutar.</p>
+        <p style="margin-top: 20px; font-size: 0.8rem; color: #999; opacity: 0.7;">System will dim lights automatically.</p>
     </div>
 
     <!-- Container Utama Bioskop -->
     <div class="cinema-container" id="cinema-ui">
         <!-- Area Video -->
         <div class="video-section">
-            <div class="watermark">ThMOvie</div>
-            <div class="video-overlay" id="blocker"></div>
+            <div class="watermark">TMO CINEMA</div>
+            <!-- Overlay ini menangkap klik jika kita ingin mencegah pause melalui klik -->
+            <div class="video-overlay" id="blocker"></div> 
             <div id="player"></div>
         </div>
 
         <!-- Area Chat -->
         <div class="chat-section">
-            <div class="chat-header">LIVE CHAT TMO</div>
+            <div class="chat-header">Live Interaction</div>
             <div class="chat-messages" id="chat-box">
-                <div class="msg system">Selamat datang di ThMOvie! 👋</div>
+                <div class="msg system">Terhubung ke server TMO... 👋</div>
+                <div class="msg system">Menunggu pemutaran dimulai.</div>
             </div>
             <div class="chat-input">
-                <input type="text" id="chat-text" placeholder="Ketik pesan...">
+                <input type="text" id="chat-text" placeholder="Ketik pesan..." autocomplete="off">
             </div>
         </div>
     </div>
 
     <script>
-        // Konfigurasi
-        var introId = '9v1atEBmUIc'; // ID Intro
+        // --- KONFIGURASI ---
+        var introId = '9v1atEBmUIc'; // ID Video Intro VowViw / Cinema Intro
         var movieId = ''; 
         var hasStarted = false; 
 
-        // Elemen DOM
+        // --- DOM ELEMENTS ---
         const setupScreen = document.getElementById('setup-screen');
         const cinemaUI = document.getElementById('cinema-ui');
         const startBtn = document.getElementById('start-btn');
         const movieInput = document.getElementById('movie-input');
+        const errorDisplay = document.getElementById('error-display');
         const chatInput = document.getElementById('chat-text');
         const chatBox = document.getElementById('chat-box');
 
-        // Event Listener Tombol Mulai
+        // --- EVENT LISTENERS ---
+        
+        // Validasi Input Sederhana
+        movieInput.addEventListener('input', function() {
+            if(this.value.trim() !== '') {
+                errorDisplay.classList.remove('visible');
+                this.style.borderColor = 'var(--border-color)';
+            }
+        });
+
+        // Tombol Mulai
         startBtn.addEventListener('click', function() {
             const inputVal = movieInput.value.trim();
             if(!inputVal) {
-                alert("Mohon masukkan ID YouTube terlebih dahulu!");
+                // Tampilkan error inline, bukan alert
+                errorDisplay.textContent = "Mohon masukkan ID YouTube terlebih dahulu!";
+                errorDisplay.classList.add('visible');
+                movieInput.style.borderColor = 'var(--error-color)';
+                movieInput.focus();
                 return;
             }
             movieId = inputVal;
             startCinema();
         });
 
-        // Fungsi Memulai Bioskop
+        // Chat Interaction
+        chatInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && this.value.trim() !== '') {
+                addMessage("Anda", this.value);
+                this.value = '';
+            }
+        });
+
+        // --- FUNGSI UTAMA ---
+
         function startCinema() {
             if(hasStarted) return;
             hasStarted = true;
@@ -350,11 +429,17 @@
             // 3. Tampilkan UI Cinema
             setTimeout(() => {
                 cinemaUI.classList.add('active');
+                // Pastikan player di-resize dengan benar saat container muncul
+                if(player && typeof player.setSize === 'function') {
+                    player.setSize(window.innerWidth * 0.75, window.innerHeight); // Perkiraan awal
+                }
                 initPlayer();
-            }, 500);
+            }, 800); // Delay sedikit lebih lama agar transisi dark mode selesai
         }
 
-        // Load YouTube IFrame API
+        // --- YOUTUBE API LOGIC ---
+
+        // Load API
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -363,39 +448,40 @@
         var player;
 
         function initPlayer() {
-            if (typeof YT !== 'undefined') {
+            if (typeof YT !== 'undefined' && YT.Player) {
                 createPlayer();
             }
         }
 
+        // Callback otomatis dari YouTube API
         function onYouTubeIframeAPIReady() {
-            // Fungsi ini dipanggil oleh API otomatis saat siap
-            // Kita biarkan kosong karena kita panggil createPlayer secara manual di initPlayer
-            // Namun untuk keamanan, kita cek apakah sudah start
+            // Jika user sudah klik start sebelum API siap
             if (hasStarted) {
                 createPlayer();
             }
         }
 
         function createPlayer() {
-            // Perbaikan 2: Menambahkan origin window.location.href
-            // Ini untuk memperbaiki error "The target origin provided does not match"
+            // Perbaikan sesuai request:
+            // 1. Menggunakan window.location.origin agar fleksibel di Vercel/Localhost
+            // 2. Menambahkan enablejsapi: 1
             player = new YT.Player('player', {
                 videoId: introId, 
                 playerVars: {
                     'autoplay': 1,
                     'controls': 1, 
                     'rel': 0,
-                    'disablekb': 1, 
+                    'disablekb': 1, // Disable keyboard shortcut (optional, untuk cinema feel)
                     'fs': 1,
                     'modestbranding': 1,
-                    'origin': window.location.href, // <--- PENTING: Perbaiki Origin Mismatch
+                    'origin': window.location.origin, 
+                    'enablejsapi': 1, // API JS aktif sempurna
                     'widgetid': 1
                 },
                 events: {
                     'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange,
-                    'onError': onPlayerError // Menangani error video
+                    'onError': onPlayerError
                 }
             });
         }
@@ -405,56 +491,54 @@
         }
 
         function onPlayerError(event) {
-            // Perbaikan 3: Menangani error (misal video tidak tersedia)
             console.error("Player Error:", event.data);
-            addSystemMessage("Terjadi kesalahan saat memuat video. Coba ID lain.");
+            let msg = "Terjadi kesalahan video.";
+            if(event.data === 2) msg = "Parameter ID Video tidak valid.";
+            if(event.data === 100) msg = "Video tidak ditemukan atau telah dihapus.";
+            if(event.data === 101 || event.data === 150) msg = "Video ini tidak diizinkan untuk embed di situs lain.";
+            addSystemMessage("Error: " + msg);
         }
 
+        // --- LOGIKA UTAMA (GABUNGAN) ---
         function onPlayerStateChange(event) {
             try {
-                // Ambil ID video yang sedang aktif
-                // Gunakan cek keamanan untuk menghindari crash jika player belum siap
-                let currentVideoId = player && player.getVideoData() ? player.getVideoData().video_id : null;
+                // Ambil data video dengan aman
+                let videoData = player.getVideoData();
+                let currentVideoId = videoData ? videoData.video_id : null;
 
-                // 1. Logika Perpindahan Video
+                // 1. Logika Perpindahan Video (Intro ke Film)
                 if (event.data == YT.PlayerState.ENDED) {
                     if (currentVideoId === introId && movieId) {
-                        addSystemMessage("Intro selesai. Memutar film utama...");
+                        addSystemMessage("Intro selesai. Menikmati film utama...");
                         player.loadVideoById(movieId);
                     } else if (currentVideoId === movieId) {
-                        addSystemMessage("Film telah selesai. Terima kasih!");
+                        addSystemMessage("Film telah selesai. Sampai jumpa di pemutaran berikutnya!");
                     }
                 }
 
-                // 2. Proteksi Anti-Pause
+                // 2. Proteksi Anti-Pause (Dengan Delay 200ms)
+                // Delay penting agar sistem YouTube tidak mendeteksi sebagai bot/spamming play
                 if (event.data == YT.PlayerState.PAUSED) {
-                    // Gunakan interval pendek untuk memastikan status benar-benar pause
                     setTimeout(() => {
+                        // Cek ulang status player setelah delay
                         if (player && player.getPlayerState() === YT.PlayerState.PAUSED) {
                             player.playVideo();
-                            // Hanya log ke console agar tidak spam chat
-                            console.log("Anti-Pause Triggered");
+                            console.log("TMO Anti-Pause: Force playing...");
                         }
                     }, 200);
                 }
-            } catch (error) {
-                // Perbaikan 4: Mencegah crash jika ada error internal (misal dari extension)
-                console.warn("Terjebak error di onPlayerStateChange:", error);
+            } catch (e) {
+                console.warn("State Change Error: ", e);
             }
         }
 
-        // Fitur Chat Sederhana
-        chatInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter' && this.value.trim() !== '') {
-                addMessage(this.value);
-                this.value = '';
-            }
-        });
+        // --- CHAT SYSTEM ---
 
-        function addMessage(text) {
+        function addMessage(sender, text) {
             const div = document.createElement('div');
             div.className = 'msg';
-            div.textContent = "Anda: " + text;
+            // Menambahkan style bold untuk sender
+            div.innerHTML = `<strong>${sender}:</strong> ${text}`;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -466,6 +550,15 @@
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
+
+        // Resize handler untuk responsif
+        window.addEventListener('resize', () => {
+            if (player && player.setSize) {
+                // Opsional: trigger resize ulang jika layout berubah drastis
+                // Biasanya API iframe YouTube handle ini otomatis dengan CSS width: 100%
+            }
+        });
+
     </script>
 
 </body>
