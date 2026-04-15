@@ -275,7 +275,7 @@
         @keyframes printTicket { 0% { top: 40px; opacity: 1; } 100% { top: 400px; opacity: 1; } }
         .printer-status { margin-top: 450px; color: white; font-size: 0.9rem; text-align: center; }
 
-        /* Cinema View */
+        /* Cinema View - FIXED FOR MOBILE */
         #cinema-view {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #ffffff; z-index: 80; display: flex; flex-direction: column;
@@ -284,28 +284,94 @@
         #cinema-view.active { opacity: 1; pointer-events: auto; }
         #cinema-view.lights-off { background-color: #000000; } 
         
-        .cinema-video-container { flex: 3; position: relative; background: #000; display: flex; align-items: center; justify-content: center;}
-        .cinema-chat-container { 
-            flex: 1; background: #f5f5f5; display: flex; flex-direction: column; 
-            border-top: 1px solid #ddd; min-height: 200px; max-height: 40vh; transition: background-color 3s;
+        .cinema-video-container { 
+            flex: 1; 
+            position: relative; 
+            background: #000; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            min-height: 0; /* Important for flex child */
         }
+        
+        /* FIXED: Cinema chat container for mobile */
+        .cinema-chat-container { 
+            height: 180px; /* Fixed height instead of flex */
+            min-height: 150px;
+            max-height: 250px;
+            background: #f5f5f5; 
+            display: flex; 
+            flex-direction: column; 
+            border-top: 1px solid #ddd; 
+            flex-shrink: 0; /* Prevent shrinking */
+            transition: background-color 3s;
+        }
+        
         #cinema-view.lights-off .cinema-chat-container { background: #111; border-top: 1px solid #333; }
         
-        .chat-box-cinema { flex: 1; overflow-y: auto; padding: 10px; font-size: 0.85rem; color: #333; transition: color 3s;}
+        .chat-box-cinema { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 10px; 
+            font-size: 0.85rem; 
+            color: #333; 
+            transition: color 3s;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+        }
         #cinema-view.lights-off .chat-box-cinema { color: #fff; }
         
-        .chat-msg { margin-bottom: 5px; background: #e0e0e0; color: #000; padding: 8px; border-radius: 6px; display: inline-block; max-width: 80%; word-wrap: break-word; transition: background 3s, color 3s;}
+        .chat-msg { 
+            margin-bottom: 5px; 
+            background: #e0e0e0; 
+            color: #000; 
+            padding: 8px; 
+            border-radius: 6px; 
+            display: inline-block; 
+            max-width: 80%; 
+            word-wrap: break-word; 
+            transition: background 3s, color 3s;
+        }
         #cinema-view.lights-off .chat-msg { background: #222; color: #fff; }
         .chat-msg.system { color: #666; font-style: italic; display: block; font-size: 0.75rem; text-align: center; background: none !important; margin: 10px 0;}
         
-        .chat-input-area { padding: 10px; display: flex; border-top: 1px solid #ddd; background: #fff; transition: background 3s, border 3s;}
+        /* FIXED: Chat input area - always visible and clickable */
+        .chat-input-area { 
+            padding: 10px; 
+            display: flex; 
+            border-top: 1px solid #ddd; 
+            background: #fff; 
+            transition: background 3s, border 3s;
+            flex-shrink: 0; /* Prevent shrinking */
+            min-height: 50px;
+        }
         #cinema-view.lights-off .chat-input-area { background: #0a0a0a; border-top: 1px solid #333; }
         
         .chat-input-area input { 
-            flex: 1; background: #f0f0f0; border: 1px solid #ccc; color: #000; 
-            padding: 10px; border-radius: 20px; outline: none; font-family: inherit;
+            flex: 1; 
+            background: #f0f0f0; 
+            border: 1px solid #ccc; 
+            color: #000; 
+            padding: 12px 15px; 
+            border-radius: 20px; 
+            outline: none; 
+            font-family: inherit;
+            font-size: 16px; /* Prevent zoom on iOS */
+            min-height: 44px; /* Minimum touch target */
         }
         #cinema-view.lights-off .chat-input-area input { background: #222; border: 1px solid #444; color: #fff; }
+        
+        /* Send button for mobile */
+        .chat-send-btn {
+            background: var(--cobalt);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: none; /* Hidden on desktop, shown on mobile */
+        }
         
         .cinema-info-overlay {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -399,6 +465,90 @@
         .movie-item-info { padding: 10px; }
         .movie-item-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .movie-item-meta { font-size: 0.7rem; color: #888; margin-top: 3px; }
+
+        /* Reconnect Overlay */
+        #reconnect-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 150; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        #reconnect-overlay.active { display: flex; }
+        .reconnect-content { text-align: center; padding: 20px; }
+        .reconnect-content h2 { color: var(--cobalt); margin-bottom: 15px; }
+        .reconnect-content p { color: #aaa; margin-bottom: 20px; }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .cinema-video-container {
+                flex: 1;
+                min-height: 40vh;
+            }
+            
+            .cinema-chat-container {
+                height: 200px;
+                max-height: 35vh;
+            }
+            
+            .chat-send-btn {
+                display: block;
+            }
+            
+            .timer-display {
+                font-size: 3rem;
+            }
+            
+            .waiting-text {
+                font-size: 1rem;
+            }
+            
+            .cinema-badge {
+                font-size: 0.7rem;
+                padding: 4px 8px;
+            }
+            
+            .badge-top-right {
+                padding: 8px 12px;
+            }
+            
+            .chat-input-area input {
+                font-size: 16px; /* Prevent iOS zoom */
+            }
+            
+            .movie-card {
+                height: 120px;
+            }
+            
+            .movie-poster {
+                width: 80px;
+            }
+            
+            .pintu-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            
+            .pintu-item {
+                min-height: 80px;
+            }
+            
+            .nav-arrow {
+                width: 35px;
+                height: 35px;
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* Landscape mode fix */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .cinema-chat-container {
+                height: 120px;
+                min-height: 100px;
+            }
+            
+            .chat-input-area {
+                padding: 5px 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -411,6 +561,16 @@
         <div class="loading-spinner"></div>
         <div class="loading-text" id="loading-text">Mengecek database...</div>
         <div class="loading-progress"><div class="loading-progress-bar" id="progress-bar"></div></div>
+    </div>
+
+    <!-- Reconnect Overlay -->
+    <div id="reconnect-overlay">
+        <div class="reconnect-content">
+            <h2>🎬 Lanjutkan Menonton?</h2>
+            <p id="reconnect-info">Anda sedang menonton film sebelumnya</p>
+            <button class="btn btn-cobalt" onclick="reconnectToRoom()" style="margin-right: 10px;">Lanjutkan</button>
+            <button class="btn btn-secondary" onclick="skipReconnect()">Tutup</button>
+        </div>
     </div>
 
     <!-- Ticket Badge -->
@@ -552,11 +712,14 @@
             <div class="cinema-info-overlay" id="cinema-overlay-ui">
                 <div class="timer-display" id="countdown-timer">--:--</div>
                 <div class="waiting-text">Menunggu Waktu Tayang</div>
+                <button class="btn btn-cobalt" id="play-btn" onclick="requestUserInteraction()" style="margin-top: 20px; display: none;">
+                    ▶️ Klik untuk Play
+                </button>
             </div>
             
             <!-- Native Video Player (No YouTube/Ads) -->
             <div id="native-player" class="player-wrapper">
-                <video id="video-element" controls></video>
+                <video id="video-element" controls playsinline></video>
             </div>
             
             <!-- YouTube Fallback -->
@@ -569,6 +732,7 @@
             <div class="chat-box-cinema" id="chat-box"></div>
             <div class="chat-input-area">
                 <input type="text" id="chat-msg" placeholder="Ketik pesan..." onkeypress="handleChat(event)">
+                <button class="chat-send-btn" onclick="sendChatMessage()">Kirim</button>
             </div>
         </div>
     </div>
@@ -599,7 +763,7 @@
             authDomain: "thmovie-3646f.firebaseapp.com",
             databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "thmovie-3646f",
-            storageBucket: "thmovie-3646f.appspot.com", // Fixed storage bucket
+            storageBucket: "thmovie-3646f.appspot.com",
             messagingSenderId: "1041137356432",
             appId: "1:1041137356432:web:96edbe3402937c82f09215"
         };
@@ -629,11 +793,15 @@
         let currentTicketData = null;
         let isUsingNativePlayer = false;
         let cachedVideoURL = null;
+        let userInteracted = false;
+        let lastKnownTime = 0;
+        let sessionSaveInterval = null;
         
         // Konstanta
         const INTRO_VIDEO_ID = "9v1atEBmUIc";
         const INTRO_DURATION_SEC = 15;
         const COBALT_API = "https://api.cobalt.tools/api/json";
+        const SESSION_KEY = 'thmovie_session';
 
         // --- DOM ELEMENTS ---
         const createRoomView = document.getElementById('create-room-view');
@@ -648,6 +816,101 @@
         const ytPlayerWrapper = document.getElementById('yt-player-wrapper');
         const ticketBadge = document.getElementById('ticket-badge');
         const loadingOverlay = document.getElementById('loading-overlay');
+        const reconnectOverlay = document.getElementById('reconnect-overlay');
+
+        // --- SESSION MANAGEMENT (PERSISTENCE) ---
+        function saveSession() {
+            if (currentRoomId && roomData) {
+                const sessionData = {
+                    roomId: currentRoomId,
+                    loket: roomData.loket,
+                    pintu: roomData.pintu,
+                    videoUrl: roomData.videoUrl,
+                    scheduleTime: roomData.scheduleTime,
+                    phase: currentVideoPhase,
+                    currentTime: isUsingNativePlayer ? videoElement.currentTime : 0,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+            }
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem(SESSION_KEY);
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        function clearSession() {
+            localStorage.removeItem(SESSION_KEY);
+            if (sessionSaveInterval) {
+                clearInterval(sessionSaveInterval);
+                sessionSaveInterval = null;
+            }
+        }
+
+        function checkForReconnect() {
+            const session = loadSession();
+            if (session && session.roomId) {
+                // Check if session is not too old (max 2 hours)
+                const sessionAge = Date.now() - session.timestamp;
+                if (sessionAge < 2 * 60 * 60 * 1000) {
+                    document.getElementById('reconnect-info').textContent = 
+                        `Anda sedang menonton di Loket ${session.loket} Pintu ${session.pintu}`;
+                    reconnectOverlay.classList.add('active');
+                    return true;
+                } else {
+                    clearSession();
+                }
+            }
+            return false;
+        }
+
+        async function reconnectToRoom() {
+            const session = loadSession();
+            if (!session || !session.roomId) {
+                skipReconnect();
+                return;
+            }
+
+            reconnectOverlay.classList.remove('active');
+            showLoading('Menghubungkan kembali...', 30);
+
+            try {
+                const snapshot = await db.ref('rooms/' + session.roomId).once('value');
+                const room = snapshot.val();
+                
+                if (room) {
+                    // Calculate elapsed time since last session
+                    const elapsedSeconds = Math.floor((Date.now() - session.timestamp) / 1000);
+                    const savedTime = session.currentTime || 0;
+                    
+                    // Restore session with adjusted time
+                    await enterCinema(session.roomId, room, savedTime + elapsedSeconds);
+                    showToast('Berhasil terhubung kembali!', 'success');
+                } else {
+                    showToast('Room sudah tidak tersedia', 'error');
+                    clearSession();
+                }
+            } catch (error) {
+                console.error("Reconnect error:", error);
+                showToast('Gagal terhubung kembali', 'error');
+                clearSession();
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function skipReconnect() {
+            reconnectOverlay.classList.remove('active');
+            clearSession();
+        }
 
         // --- INIT ---
         window.onload = function() {
@@ -661,7 +924,42 @@
                     if (snap.val() === true) console.log("Connected to Firebase");
                 });
             }
+
+            // Check for existing session
+            setTimeout(checkForReconnect, 500);
+
+            // Handle page visibility change (tab switch/minimize)
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+
+            // Handle before unload
+            window.addEventListener('beforeunload', function() {
+                saveSession();
+            });
         };
+
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                // Page is hidden, save session
+                saveSession();
+            } else {
+                // Page is visible again, sync video
+                if (currentRoomId && roomData && currentVideoPhase === 'main') {
+                    syncVideoWithServer();
+                }
+            }
+        }
+
+        function syncVideoWithServer() {
+            if (!roomData || !isUsingNativePlayer) return;
+            
+            const now = Date.now();
+            const schedule = roomData.scheduleTime;
+            const expectedTime = Math.max(0, Math.floor((now - schedule - (INTRO_DURATION_SEC * 1000)) / 1000));
+            
+            if (Math.abs(videoElement.currentTime - expectedTime) > 3) {
+                videoElement.currentTime = expectedTime;
+            }
+        }
 
         // --- UI FUNCTIONS ---
         function showToast(msg, type = 'default') {
@@ -711,17 +1009,21 @@
             hallway.scrollBy({ left: hallway.clientWidth * 0.85 * direction, behavior: 'smooth' });
         }
 
+        function requestUserInteraction() {
+            userInteracted = true;
+            document.getElementById('play-btn').style.display = 'none';
+            if (isUsingNativePlayer && videoElement.paused) {
+                videoElement.play().catch(e => console.log("Play error:", e));
+            }
+        }
+
         // --- VIDEO CACHE SYSTEM (COBALT INTEGRATION) ---
         
         function extractVideoID(url) {
+            if (!url) return null;
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
             const match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : null;
-        }
-
-        function getVideoHash(videoId) {
-            // Create a simple hash for deduplication
-            return btoa(videoId).replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
         }
 
         async function checkVideoCache() {
@@ -795,49 +1097,66 @@
                     // Step 2: Fetch from YouTube oEmbed for metadata
                     verifyText.textContent = 'Mengambil metadata...';
                     const oembedRes = await fetch(`https://youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+                    
+                    if (!oembedRes.ok) {
+                        throw new Error('Gagal mengambil metadata video');
+                    }
+                    
                     const oembedData = await oembedRes.json();
 
-                    // Step 3: Call cobalt.tools API
+                    // Step 3: Call cobalt.tools API with CORS handling
                     verifyText.textContent = 'Memproses via cobalt.tools...';
                     showLoading('Mengirim ke cobalt.tools...', 30);
                     
-                    const cobaltRes = await fetch(COBALT_API, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify({
-                            url: `https://www.youtube.com/watch?v=${videoId}`,
-                            isAudioOnly: false,
-                            filenamePattern: 'basic'
-                        })
-                    });
+                    let cobaltData = null;
+                    let downloadUrl = null;
+                    
+                    try {
+                        const cobaltRes = await fetch(COBALT_API, {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json', 
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                url: `https://www.youtube.com/watch?v=${videoId}`,
+                                isAudioOnly: false,
+                                filenamePattern: 'basic'
+                            })
+                        });
+                        
+                        if (cobaltRes.ok) {
+                            cobaltData = await cobaltRes.json();
+                            
+                            if (cobaltData.status === 'error') {
+                                throw new Error(cobaltData.text || 'Download failed');
+                            }
+                            
+                            if (cobaltData.url) {
+                                downloadUrl = cobaltData.url;
+                            } else if (cobaltData.picker && cobaltData.picker[0]) {
+                                downloadUrl = cobaltData.picker[0].url;
+                            }
+                        }
+                    } catch (corsError) {
+                        console.warn("CORS error with cobalt, using fallback:", corsError);
+                        // Fallback: Use YouTube embed directly (with ads warning)
+                        showToast('CORS terdeteksi, menggunakan fallback player', 'error');
+                    }
                     
                     hideLoading();
                     
-                    if (!cobaltRes.ok) throw new Error('Cobalt API failed');
-                    
-                    const cobaltData = await cobaltRes.json();
-                    
-                    if (cobaltData.status === 'error') {
-                        throw new Error(cobaltData.text || 'Download failed');
-                    }
-
-                    // Handle different cobalt response types
-                    let downloadUrl = null;
-                    if (cobaltData.url) {
-                        downloadUrl = cobaltData.url;
-                    } else if (cobaltData.picker && cobaltData.picker[0]) {
-                        downloadUrl = cobaltData.picker[0].url;
-                    }
-
+                    // If cobalt failed, use fallback
                     if (!downloadUrl) {
-                        throw new Error('No download URL received');
+                        downloadUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+                        showToast('Menggunakan YouTube player (mungkin ada iklan)', 'error');
                     }
 
                     verifiedVideoData = {
                         id: videoId,
-                        title: oembedData.title,
-                        channel: oembedData.author_name,
-                        thumbnail: oembedData.thumbnail_url,
+                        title: oembedData.title || 'Unknown Title',
+                        channel: oembedData.author_name || 'Unknown Channel',
+                        thumbnail: oembedData.thumbnail_url || '',
                         duration: 'N/A',
                         downloadUrl: downloadUrl,
                         isCached: false,
@@ -848,7 +1167,7 @@
                     await saveVideoToCache(videoId, verifiedVideoData);
                     
                     updateVideoInfoUI(verifiedVideoData, false);
-                    showToast('Video berhasil diproses via cobalt.tools!', 'cobalt');
+                    showToast('Video berhasil diproses!', 'cobalt');
                     verifyText.textContent = '✓ Berhasil di-cache';
                 }
                 
@@ -897,11 +1216,11 @@
         }
 
         function updateVideoInfoUI(data, isCached) {
-            document.getElementById('video-title').textContent = data.title;
-            document.getElementById('video-channel').textContent = data.channel;
+            document.getElementById('video-title').textContent = data.title || '-';
+            document.getElementById('video-channel').textContent = data.channel || '-';
             document.getElementById('video-duration').textContent = data.duration || 'N/A';
-            document.getElementById('video-id-display').textContent = data.id;
-            document.getElementById('video-thumbnail').src = data.thumbnail;
+            document.getElementById('video-id-display').textContent = data.id || '-';
+            document.getElementById('video-thumbnail').src = data.thumbnail || '';
             document.getElementById('video-cache-info').textContent = isCached ? '✓ Tersedia di Database (Instant)' : '✓ Di-cache via cobalt.tools';
             document.getElementById('video-info-display').classList.add('active');
         }
@@ -920,7 +1239,6 @@
         }
 
         function showMovieCollection() {
-            // Navigate to movie collection view (can be implemented)
             showToast('Koleksi Film: ' + document.getElementById('cached-count').textContent + ' film tersedia', 'cobalt');
         }
 
@@ -1072,7 +1390,7 @@
                 pintu: rPintu, 
                 videoId: verifiedVideoData.id,
                 videoTitle: verifiedVideoData.title,
-                videoUrl: verifiedVideoData.downloadUrl, // Direct MP4 URL!
+                videoUrl: verifiedVideoData.downloadUrl,
                 isCached: verifiedVideoData.isCached,
                 capacity: capacity,
                 scheduleTime: scheduleTime, 
@@ -1146,12 +1464,13 @@
 
         // --- CINEMA PLAYER & SYNC LOGIC ---
 
-        function enterCinema(roomId, room) {
+        async function enterCinema(roomId, room, resumeTime = 0) {
             currentRoomId = roomId;
             roomData = room;
             dbRoomRef = db.ref('rooms/' + roomId);
             currentVideoPhase = null;
             isUsingNativePlayer = false;
+            userInteracted = false;
             
             hideTicketBadge();
             
@@ -1163,6 +1482,7 @@
             nativePlayer.classList.remove('active');
             ytPlayerWrapper.classList.add('hidden');
             document.getElementById('chat-box').innerHTML = '';
+            document.getElementById('play-btn').style.display = 'none';
 
             cinemaView.classList.add('active');
 
@@ -1170,7 +1490,10 @@
             addSystemChat("✅ Video diputar langsung dari server (No YouTube Ads!)");
             addSystemChat("💡 REKOMENDASI: Gunakan headset & WiFi stabil");
 
-            dbRoomRef.on('value', handleDatabaseUpdate, (error) => {
+            // Start session saving interval
+            sessionSaveInterval = setInterval(saveSession, 5000);
+
+            dbRoomRef.on('value', (snapshot) => handleDatabaseUpdate(snapshot, resumeTime), (error) => {
                 console.error("Cinema DB error:", error);
                 showToast("Koneksi terputus", "error");
             });
@@ -1186,6 +1509,17 @@
                     updateCountdownDisplay();
                 }
             }, 1000);
+
+            // If resuming, handle the time offset
+            if (resumeTime > 0) {
+                showToast(`Melanjutkan dari ${formatTime(resumeTime)}`, 'success');
+            }
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0'+s : s}`;
         }
 
         function updateCountdownDisplay() {
@@ -1201,7 +1535,7 @@
             }
         }
 
-        function handleDatabaseUpdate(snapshot) {
+        function handleDatabaseUpdate(snapshot, resumeTime = 0) {
             const data = snapshot.val();
             if (!data) return exitCinema();
             
@@ -1237,13 +1571,17 @@
 
             // FASE 2: MAIN VIDEO (AD-FREE!)
             if (serverPhase === 'main') {
-                const expectedTime = Math.max(0, Math.floor((now - schedule - (INTRO_DURATION_SEC * 1000)) / 1000));
+                const elapsedSinceSchedule = now - schedule - (INTRO_DURATION_SEC * 1000);
+                const expectedTime = Math.max(0, Math.floor(elapsedSinceSchedule / 1000));
+                
+                // Use resume time if provided (for reconnection)
+                const startTime = resumeTime > 0 ? resumeTime : expectedTime;
 
                 if (currentVideoPhase !== 'main') {
                     currentVideoPhase = 'main';
                     cinemaView.classList.add('lights-off');
                     cinemaOverlayUi.classList.add('hidden');
-                    playMainVideo(data.videoUrl, expectedTime);
+                    playMainVideo(data.videoUrl, startTime);
                 } else {
                     syncVideoTime(expectedTime);
                 }
@@ -1269,7 +1607,15 @@
             player = new YT.Player('player', {
                 height: '100%', width: '100%', videoId: INTRO_VIDEO_ID,
                 playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0 },
-                events: { 'onReady': (e) => e.target.playVideo() }
+                events: { 
+                    'onReady': (e) => {
+                        e.target.playVideo();
+                    },
+                    'onError': (e) => {
+                        console.error("YouTube player error:", e);
+                        showToast('Error memutar intro', 'error');
+                    }
+                }
             });
             isUsingNativePlayer = false;
         }
@@ -1284,14 +1630,38 @@
             ytPlayerWrapper.classList.add('hidden');
             nativePlayer.classList.add('active');
             
+            // Validate video URL
+            if (!videoUrl || videoUrl === 'undefined') {
+                showToast('Error: URL video tidak valid', 'error');
+                console.error("Invalid video URL:", videoUrl);
+                return;
+            }
+            
             // Use native HTML5 video player (NO ADS!)
             videoElement.src = videoUrl;
             videoElement.currentTime = startTime;
-            videoElement.play().catch(e => console.log("Autoplay prevented:", e));
+            
+            // Handle autoplay restrictions
+            const playPromise = videoElement.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Autoplay started
+                    userInteracted = true;
+                }).catch(error => {
+                    // Autoplay was prevented
+                    console.log("Autoplay prevented:", error);
+                    document.getElementById('play-btn').style.display = 'block';
+                    showToast('Klik tombol Play untuk memulai video', 'cobalt');
+                });
+            }
             
             isUsingNativePlayer = true;
             
             addSystemChat("▶️ Memutar video tanpa iklan!");
+            
+            // Save initial session
+            saveSession();
         }
 
         function syncVideoTime(expectedTime) {
@@ -1301,7 +1671,7 @@
             if (Math.abs(currentTime - expectedTime) > 2) {
                 videoElement.currentTime = expectedTime;
             }
-            if (videoElement.paused) {
+            if (videoElement.paused && userInteracted) {
                 videoElement.play().catch(e => console.log("Play error:", e));
             }
         }
@@ -1324,6 +1694,9 @@
                 countdownInterval = null;
             }
             
+            // Clear session
+            clearSession();
+            
             stopVideo();
             
             if (dbRoomRef) { 
@@ -1335,21 +1708,28 @@
             currentVideoPhase = null;
             currentRoomId = null;
             isUsingNativePlayer = false;
+            userInteracted = false;
         }
 
         // --- CHAT SYSTEM ---
         function handleChat(e) {
             if (e.key === 'Enter') {
-                const input = document.getElementById('chat-msg');
-                const text = input.value.trim();
-                if (text && dbRoomRef) {
-                    dbRoomRef.child('chat').push({
-                        sender: myUsername,
-                        text: text,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    }).catch(err => console.log("Chat send error:", err));
-                    input.value = '';
-                }
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-msg');
+            const text = input.value.trim();
+            if (text && dbRoomRef) {
+                dbRoomRef.child('chat').push({
+                    sender: myUsername,
+                    text: text,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).catch(err => console.log("Chat send error:", err));
+                input.value = '';
+                // Keep focus on mobile
+                input.focus();
             }
         }
 
