@@ -134,7 +134,6 @@
         }
         .pintu-item:active { transform: scale(0.95); }
         
-        /* PERUBAHAN WARNA PINTU MENJADI KUNING SAAT TERISI */
         .pintu-item.occupied { 
             border-color: var(--yellow); 
             background: rgba(255, 235, 59, 0.15); 
@@ -192,12 +191,12 @@
         /* Cinema View */
         #cinema-view {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ffffff; /* AWALNYA PUTIH SAAT MASUK ROOM (HITUNG MUNDUR) */
+            background: #ffffff; 
             z-index: 80; display: flex; flex-direction: column;
             opacity: 0; pointer-events: none; transition: background-color 3s ease-in-out, opacity 0.5s;
         }
         #cinema-view.active { opacity: 1; pointer-events: auto; }
-        #cinema-view.lights-off { background-color: #000000; } /* EFek MATI LAMPU */
+        #cinema-view.lights-off { background-color: #000000; } 
         
         .cinema-video-container { flex: 3; position: relative; background: #000; display: flex; align-items: center; justify-content: center;}
         .cinema-chat-container { 
@@ -235,7 +234,6 @@
         }
         .badge-top-left { top: 10px; left: 10px; }
         .badge-top-right { top: 10px; right: 10px; cursor: pointer; background: rgba(255,0,0,0.6); }
-        .badge-bottom-center { bottom: 10px; left: 50%; transform: translateX(-50%); }
         
         .timer-display { color: var(--accent-color); font-weight: bold; font-size: 4rem; margin-bottom: 10px;}
         .waiting-text { color: #555; font-weight: 600; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px;}
@@ -335,12 +333,10 @@
         <div class="cinema-badge badge-top-right" onclick="exitCinema()">KELUAR</div>
         
         <div class="cinema-video-container">
-            <!-- Overlay Hitung Mundur (Muncul saat belum mulai, menghilang saat main) -->
             <div class="cinema-info-overlay" id="cinema-overlay-ui">
                 <div class="timer-display" id="countdown-timer">--:--</div>
                 <div class="waiting-text">Menunggu Waktu Tayang</div>
             </div>
-            <!-- Tempat Player Muncul -->
             <div class="player-wrapper hidden" id="player-wrapper">
                 <div id="player"></div>
             </div>
@@ -390,13 +386,13 @@
         let currentRoomId = null;
         let player = null;
         let roomData = null;
-        let dbRoomRef = null; // Referensi spesifik room di Firebase untuk listener
+        let dbRoomRef = null; 
         let myUsername = "User_" + Math.floor(Math.random() * 1000);
-        let isIntroPlaying = false;
+        let currentVideoPhase = null; // Pelacak lokal: 'waiting', 'intro', 'main'
         
         // Konstanta Video
         const INTRO_VIDEO_ID = "9v1atEBmUIc";
-        const INTRO_DURATION_SEC = 15; // Durasi intro dalam detik (disesuaikan jika perlu)
+        const INTRO_DURATION_SEC = 15; 
 
         // --- DOM ELEMENTS ---
         const createRoomView = document.getElementById('create-room-view');
@@ -459,7 +455,6 @@
 
         function listenToRooms() {
             db.ref('rooms').on('value', (snapshot) => {
-                // Reset semua pintu
                 document.querySelectorAll('.pintu-item').forEach(el => {
                     el.classList.remove('occupied');
                     el.querySelector('.pintu-status').innerText = "KOSONG";
@@ -544,7 +539,7 @@
             const roomObj = {
                 loket: rLoket, pintu: rPintu, videoId: videoId, capacity: capacity,
                 scheduleTime: scheduleTime, createdAt: firebase.database.ServerValue.TIMESTAMP,
-                status: 'waiting', currentPlayTime: 0, isPlayingIntro: false
+                status: 'waiting', currentPlayTime: 0, isPlayingIntro: false, phase: 'waiting'
             };
 
             newRoomRef.set(roomObj).then(() => {
@@ -591,6 +586,7 @@
             currentRoomId = roomId;
             roomData = room;
             dbRoomRef = db.ref('rooms/' + roomId);
+            currentVideoPhase = null; // Reset phase lokal
             
             document.getElementById('cinema-loket').innerText = room.loket;
             document.getElementById('cinema-pintu').innerText = room.pintu;
@@ -610,90 +606,92 @@
             addSystemChat("2. Naikan volume HP/PC Anda ke 89% atau lebih.");
             addSystemChat("3. Gunakan koneksi WiFi yang stabil.");
 
-            // Listener Utama untuk Sinkronisasi Realtime dari Firebase
-            dbRoomRef.on('value', snapshot => {
-                const data = snapshot.val();
-                if (!data) return exitCinema();
-                
-                roomData = data;
-                syncPlayerWithFirebase(data);
+            // Hanya 1 listener value utama untuk menghindari bentrokan update
+            dbRoomRef.on('value', handleDatabaseUpdate);
+            
+            // Listener Chat terpisah
+            dbRoomRef.child('chat').orderByChild('timestamp').limitToLast(50).on('child_added', snapshot => {
+                const msg = snapshot.val();
+                addChatMessage(msg.sender, msg.text);
             });
         }
 
-        function syncPlayerWithFirebase(data) {
+        function handleDatabaseUpdate(snapshot) {
+            const data = snapshot.val();
+            if (!data) return exitCinema();
+            
+            roomData = data;
             const now = Date.now();
             const schedule = data.scheduleTime;
-            const diff = schedule - now;
+            const serverPhase = data.phase || 'waiting';
 
             // ------------------------------
-            // FASE 1: HITUNG MUNDUR (WAITING)
+            // FASE 0: HITUNG MUNDUR (WAITING)
             // ------------------------------
-            if (diff > 0) {
-                cinemaView.classList.remove('lights-off'); // Pastikan tetap putih
-                cinemaOverlayUi.classList.remove('hidden'); // Tampilkan Timer
-                playerWrapper.classList.add('hidden'); // Sembunyikan Player
-                
+            if (now < schedule) {
+                if (currentVideoPhase !== 'waiting') {
+                    currentVideoPhase = 'waiting';
+                    cinemaView.classList.remove('lights-off');
+                    cinemaOverlayUi.classList.remove('hidden');
+                    playerWrapper.classList.add('hidden');
+                    if (player) { player.destroy(); player = null; }
+                }
+                const diff = schedule - now;
                 const m = Math.floor(diff / 60000);
                 const s = Math.floor((diff % 60000) / 1000);
                 document.getElementById('countdown-timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                
-                if (player) player.destroy();
-                player = null;
                 return;
             }
 
             // ------------------------------
-            // FASE 2: WAKTUNYA TAYANG
+            // FASE 1: INTRO
             // ------------------------------
-            cinemaOverlayUi.classList.add('hidden'); // Sembunyikan Timer
-            playerWrapper.classList.remove('hidden'); // Tampilkan Player Area
-
-            // Cek apakah sedang main INTRO atau FILM UTAMA
-            const isIntroPhase = data.isPlayingIntro === true;
-            
-            // Hitung durasi intro (asumsikan 15 detik, bisa diubah)
-            const introElapsed = now - schedule;
-            
-            if (isIntroPhase && introElapsed < (INTRO_DURATION_SEC * 1000)) {
-                // MATIKAN LAMPU PERLAHAN SAAT INTRO DIMULAI
-                cinemaView.classList.add('lights-off');
-                
-                if (!player || player.getIframe().src.indexOf(INTRO_VIDEO_ID) === -1) {
+            if (serverPhase === 'intro') {
+                if (currentVideoPhase !== 'intro') {
+                    currentVideoPhase = 'intro';
+                    cinemaView.classList.add('lights-off'); // Matikan lampu pelan-pelan
+                    cinemaOverlayUi.classList.add('hidden');
+                    playerWrapper.classList.remove('hidden');
+                    
                     if (player) player.destroy();
                     player = createYTPlayer(INTRO_VIDEO_ID);
                 }
-                // Lock player agar tidak bisa di-skip/di-ubah saat intro
-                lockPlayerControls(true);
-            } 
-            else {
-                // FASE 3: FILM UTAMA
-                cinemaView.classList.add('lights-off'); // Pastikan hitam
-                
-                // Ganti ke film utama jika masih di intro
-                if (player && player.getIframe().src.indexOf(INTRO_VIDEO_ID) !== -1) {
-                    player.destroy();
-                    player = createYTPlayer(data.videoId);
-                    lockPlayerControls(false); // Boleh kontrol biasa saat film (tapi waktu dikunci server)
-                } else if (!player) {
-                    player = createYTPlayer(data.videoId);
-                    lockPlayerControls(false);
+                return;
+            }
+
+            // ------------------------------
+            // FASE 2: FILM UTAMA
+            // ------------------------------
+            if (serverPhase === 'main') {
+                // Hitung waktu seharusnya berdasarkan real-time clock
+                const expectedTime = Math.max(0, Math.floor((now - schedule - (INTRO_DURATION_SEC * 1000)) / 1000));
+
+                if (currentVideoPhase !== 'main') {
+                    currentVideoPhase = 'main';
+                    cinemaView.classList.add('lights-off');
+                    cinemaOverlayUi.classList.add('hidden');
+                    playerWrapper.classList.remove('hidden');
+                    
+                    if (player) player.destroy();
+                    // Load film langsung ke posisi yang benar
+                    player = createYTPlayerAtTime(data.videoId, expectedTime);
+                } else {
+                    // Jika player sudah ada, lakukan sinkronisasi keras setiap 2 detik
+                    if (player && player.getCurrentTime) {
+                        const currTime = Math.floor(player.getCurrentTime());
+                        if (Math.abs(currTime - expectedTime) > 2) {
+                            player.seekTo(expectedTime, true);
+                        }
+                        if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                            player.playVideo();
+                        }
+                    }
                 }
 
-                // Update Database Waktu Realtime (Jika ini user pertama yang memicu)
-                const expectedTime = Math.floor((now - schedule - (INTRO_DURATION_SEC * 1000)) / 1000);
-                
-                // Hanya update DB jika tidak ada data waktu, atau data waktu sudah tidak sinkron (miss-sync)
-                if (data.currentPlayTime === 0 || data.currentPlayTime === undefined || Math.abs(data.currentPlayTime - expectedTime) > 3) {
-                    dbRoomRef.update({ 
-                        isPlayingIntro: false, 
-                        currentPlayTime: expectedTime 
-                    });
-                } else {
-                    // Ikuti waktu dari database secara paksa
-                    forceSeekPlayer(data.currentPlayTime);
-                    if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
-                        player.playVideo();
-                    }
+                // HANYA UPDATE DB JIKA ANDA USER PALING AKTIF YANG MENJALANKAN FILM PERTAMA KALI
+                // (Cegah 50 user saling menimpa waktu dan menyebabkan bug)
+                if (data.currentPlayTime < 1) {
+                    dbRoomRef.update({ currentPlayTime: expectedTime });
                 }
             }
         }
@@ -712,43 +710,49 @@
             });
         }
 
+        function createYTPlayerAtTime(videoId, startTime) {
+            return new YT.Player('player', {
+                height: '100%', width: '100%', videoId: videoId,
+                playerVars: { 
+                    'autoplay': 1, 'controls': 1, 'rel': 0, 
+                    'disablekb': 1, 'modestbranding': 1, 'iv_load_policy': 3,
+                    'start': startTime 
+                },
+                events: { 
+                    'onReady': (e) => e.target.playVideo(),
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
         // MENCEGAH USER MEMUTAR MUNDIR/MEMPERCEPAT
         function onPlayerStateChange(event) {
-            if (!roomData || roomData.isPlayingIntro) return;
+            if (!roomData || currentVideoPhase !== 'main') return;
             
-            const targetTime = roomData.currentPlayTime;
+            // Gunakan Realtime clock, BUKAN data.currentPlayTime dari DB untuk menghindari delay
+            const now = Date.now();
+            const expectedTime = Math.max(0, Math.floor((now - roomData.scheduleTime - (INTRO_DURATION_SEC * 1000)) / 1000));
             const currentTime = Math.floor(player.getCurrentTime());
 
-            // Jika user mencoba seek mundir atau maju melebihi batas sinkronisasi (2 detik)
-            if (Math.abs(currentTime - targetTime) > 2) {
-                forceSeekPlayer(targetTime);
+            if (Math.abs(currentTime - expectedTime) > 3) {
+                player.seekTo(expectedTime, true);
             }
-        }
-
-        function forceSeekPlayer(time) {
-            if (player && typeof player.seekTo === 'function') {
-                const curr = Math.floor(player.getCurrentTime());
-                if (Math.abs(curr - time) > 1) {
-                    player.seekTo(time, true);
-                }
-            }
-        }
-
-        function lockPlayerControls(lock) {
-            // Note: API iframe YouTube tidak mendukung disable seek bar secara penuh,
-            // tetapi kita menangkap aksi seek di onPlayerStateChange dan memaksanya kembali.
         }
 
         function exitCinema() {
             cinemaView.classList.remove('active', 'lights-off');
-            cinemaView.style.backgroundColor = ''; // Reset
             
             if (player) { player.destroy(); player = null; }
-            if (dbRoomRef) { dbRoomRef.off(); dbRoomRef = null; }
+            if (dbRoomRef) { 
+                dbRoomRef.off(); 
+                dbRoomRef.child('chat').off();
+                dbRoomRef = null; 
+            }
             roomData = null;
+            currentVideoPhase = null;
         }
 
-        // --- CHAT SYSTEM (FIREBASE REALTIME) ---
+        // --- CHAT SYSTEM ---
         function handleChat(e) {
             if (e.key === 'Enter') {
                 const input = document.getElementById('chat-msg');
@@ -762,14 +766,6 @@
                     input.value = '';
                 }
             }
-        }
-
-        // Listener Chat terpisah agar tidak bentrok dengan listener sync video
-        function startChatListener() {
-            dbRoomRef.child('chat').orderByChild('timestamp').limitToLast(50).on('child_added', snapshot => {
-                const msg = snapshot.val();
-                addChatMessage(msg.sender, msg.text);
-            });
         }
 
         function addChatMessage(sender, text) {
@@ -790,18 +786,25 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        // Tambahkan listener chat saat masuk cinema (Modifikasi fungsi enterCinema sedikit)
-        const originalEnterCinema = enterCinema;
-        enterCinema = function(roomId, room) {
-            originalEnterCinema(roomId, room);
-            startChatListener();
-        };
-
-        const originalExitCinema = exitCinema;
-        exitCinema = function() {
-            if(dbRoomRef) dbRoomRef.child('chat').off();
-            originalExitCinema();
-        };
+        // --- SERVER SIDE CRON (MENJALANKAN PHASE SECARA OTOMATIS TANPA HARUS USER PERTAMA ONLINE) ---
+        // Ini memastikan jika user terlambat masuk, database sudah otomatis berpindah phase
+        setInterval(() => {
+            const now = Date.now();
+            db.ref('rooms').once('value', snapshot => {
+                if (!snapshot.val()) return;
+                snapshot.forEach(child => {
+                    const room = child.val();
+                    if (room.phase === 'waiting' && now >= room.scheduleTime) {
+                        // Waktu habis, mulai intro
+                        child.ref.update({ phase: 'intro', isPlayingIntro: true });
+                    } else if (room.phase === 'intro' && (now - room.scheduleTime) >= (INTRO_DURATION_SEC * 1000)) {
+                        // Intro selesai, mulai film utama
+                        const mainTime = Math.floor((now - room.scheduleTime - (INTRO_DURATION_SEC * 1000)) / 1000);
+                        child.ref.update({ phase: 'main', isPlayingIntro: false, currentPlayTime: mainTime });
+                    }
+                });
+            });
+        }, 3000); // Cek setiap 3 detik
 
         // --- AUTO CLEANUP ---
         function cleanOldRooms() {
