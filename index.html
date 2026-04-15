@@ -22,6 +22,8 @@
             --input-bg: #2a2a2a;
             --success: #00c851;
             --yellow: #ffeb3b;
+            --cyan: #00d4ff;
+            --purple: #9d4edd;
         }
 
         * { box-sizing: border-box; user-select: none; }
@@ -37,7 +39,11 @@
         }
         .btn:active { transform: scale(0.95); }
         .btn-primary { background: var(--accent-color); color: white; box-shadow: 0 4px 15px rgba(255,0,85,0.4); }
+        .btn-primary:hover { background: #ff1a6a; box-shadow: 0 6px 20px rgba(255,0,85,0.6); }
         .btn-secondary { background: var(--card-bg); color: white; border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: #2a2a2a; border-color: var(--accent-color); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-gold { background: var(--gold); color: #000; }
         
         /* Toast */
         #toast-container {
@@ -50,6 +56,9 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideDown 0.3s ease-out;
             pointer-events: auto; font-size: 0.9rem;
         }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: #ff3333; }
+        .toast.warning { border-left-color: var(--yellow); }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         /* View: LOBBY */
@@ -143,7 +152,7 @@
         .pintu-status { font-size: 0.6rem; margin-top: 5px; color: #666; }
         .pintu-item.occupied .pintu-status { color: var(--yellow); font-weight: 600; }
 
-        /* View: CREATE ROOM */
+        /* View: CREATE ROOM - ENHANCED */
         #create-room-view {
             padding: 20px; height: 100%; overflow-y: auto; background: var(--bg-color);
             position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
@@ -159,6 +168,115 @@
         }
         .form-input:focus { border-color: var(--accent-color); }
         .back-btn { background: transparent; color: #fff; padding: 10px; margin-bottom: 10px; font-size: 0.9rem; }
+
+        /* Video Info Display */
+        #video-info-display {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        #video-info-display.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .video-preview-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        .video-thumbnail {
+            width: 120px;
+            height: 90px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #333;
+        }
+        .video-details { flex: 1; }
+        .video-title-display {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+        .video-meta-display {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 3px;
+        }
+        .video-meta-display span { color: var(--cyan); }
+
+        /* Privacy Options */
+        .privacy-options {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .privacy-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: var(--input-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .privacy-option:hover { background: #333; }
+        .privacy-option.selected {
+            border-color: var(--accent-color);
+            background: rgba(255,0,85,0.1);
+        }
+        .privacy-option input[type="radio"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-color);
+        }
+        .privacy-option-label {
+            flex: 1;
+        }
+        .privacy-option-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: block;
+        }
+        .privacy-option-desc {
+            font-size: 0.75rem;
+            color: #888;
+            display: block;
+            margin-top: 2px;
+        }
+        .privacy-option.badge-dev { opacity: 0.6; }
+        .dev-badge {
+            background: var(--purple);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+
+        /* Access Code Input */
+        #access-code-container {
+            display: none;
+            margin-top: 10px;
+        }
+        #access-code-container.active { display: block; }
+        .code-input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .code-input {
+            flex: 1;
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
 
         /* Printer Animation */
         #printer-overlay {
@@ -240,6 +358,45 @@
         
         .player-wrapper { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 5; }
 
+        /* Ticket Badge - Shows after printing */
+        #ticket-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--gold) 0%, #ffed4e 100%);
+            color: #000;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+            z-index: 90;
+            transform: translateX(150%);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-weight: 600;
+            min-width: 200px;
+        }
+        #ticket-badge.active { transform: translateX(0); }
+        #ticket-badge.hidden-badge { transform: translateX(150%); }
+        .ticket-badge-header {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        .ticket-badge-content {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .ticket-badge-close {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.5;
+        }
+        .ticket-badge-close:hover { opacity: 1; }
+
         /* Modal Rules */
         #rules-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -251,11 +408,49 @@
         .rules-content h2 { margin-top: 0; color: var(--accent-color); }
         .rules-list { padding-left: 20px; line-height: 1.6; font-size: 0.9rem; color: #ccc; }
         .close-rules { margin-top: 20px; width: 100%; }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #333;
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Verify Button */
+        .verify-btn {
+            background: var(--cyan);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .verify-btn:hover { background: #00b8e6; }
+        .verify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
     <div id="toast-container"></div>
+
+    <!-- Ticket Badge -->
+    <div id="ticket-badge">
+        <span class="ticket-badge-close" onclick="hideTicketBadge()">×</span>
+        <div class="ticket-badge-header">Your Ticket</div>
+        <div class="ticket-badge-content">
+            Loket <span id="ticket-loket">-</span> | Pintu <span id="ticket-pintu">-</span>
+        </div>
+    </div>
 
     <!-- View: LOBBY -->
     <div id="lobby-view">
@@ -296,12 +491,66 @@
         
         <div class="form-group">
             <label class="form-label">Link Video YouTube (Film Utama)</label>
-            <input type="text" id="room-video-url" class="form-input" placeholder="https://youtube.com/watch?v=...">
+            <input type="text" id="room-video-url" class="form-input" placeholder="https://youtube.com/watch?v=..." onblur="checkVideoInfo()">
+            <button class="verify-btn" id="verify-btn" onclick="verifyVideo()">
+                Verifikasi Video <span id="verify-spinner" class="spinner hidden"></span>
+            </button>
         </div>
+
+        <!-- Video Info Display -->
+        <div id="video-info-display">
+            <div class="video-preview-container">
+                <img id="video-thumbnail" class="video-thumbnail" src="" alt="Thumbnail">
+                <div class="video-details">
+                    <div class="video-title-display" id="video-title">-</div>
+                    <div class="video-meta-display">Channel: <span id="video-channel">-</span></div>
+                    <div class="video-meta-display">Durasi: <span id="video-duration">-</span></div>
+                    <div class="video-meta-display">ID: <span id="video-id-display">-</span></div>
+                </div>
+            </div>
+        </div>
+
         <div class="form-group">
             <label class="form-label">Waktu Tayang (Jadwal)</label>
             <input type="datetime-local" id="room-time" class="form-input">
         </div>
+
+        <!-- Privacy Options -->
+        <div class="privacy-options">
+            <label class="form-label">Pengaturan Privasi</label>
+            
+            <div class="privacy-option selected" onclick="selectPrivacy('public')">
+                <input type="radio" name="privacy" value="public" checked>
+                <div class="privacy-option-label">
+                    <span class="privacy-option-title">🌐 Public</span>
+                    <span class="privacy-option-desc">Semua orang bisa melihat dan join</span>
+                </div>
+            </div>
+
+            <div class="privacy-option" onclick="selectPrivacy('private')">
+                <input type="radio" name="privacy" value="private">
+                <div class="privacy-option-label">
+                    <span class="privacy-option-title">🔒 Private</span>
+                    <span class="privacy-option-desc">Hanya yang punya kode akses bisa masuk</span>
+                </div>
+            </div>
+
+            <div id="access-code-container">
+                <label class="form-label">Kode Akses (4 digit)</label>
+                <div class="code-input-group">
+                    <input type="text" id="access-code" class="form-input code-input" maxlength="4" placeholder="0000" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,4)">
+                </div>
+            </div>
+
+            <div class="privacy-option badge-dev" onclick="showToast('Fitur ini masih dalam pengembangan')">
+                <input type="radio" name="privacy" value="link_only" disabled>
+                <div class="privacy-option-label">
+                    <span class="privacy-option-title">🔗 Link Only <span class="dev-badge">DEV</span></span>
+                    <span class="privacy-option-desc">Hanya yang punya link bisa masuk (Under Development)</span>
+                </div>
+            </div>
+        </div>
+
         <div class="form-group">
             <label class="form-label">Tipe Akun (Simulasi Tier)</label>
             <select id="room-tier" class="form-select">
@@ -379,8 +628,17 @@
             messagingSenderId: "1041137356432",
             appId: "1:1041137356432:web:96edbe3402937c82f09215"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        
+        // Initialize Firebase with error handling
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            showToast("Error: Gagal terhubung ke database", "error");
+        }
 
         // --- STATE VARIABLES ---
         let currentRoomId = null;
@@ -388,7 +646,11 @@
         let roomData = null;
         let dbRoomRef = null; 
         let myUsername = "User_" + Math.floor(Math.random() * 1000);
-        let currentVideoPhase = null; // Pelacak lokal: 'waiting', 'intro', 'main'
+        let currentVideoPhase = null;
+        let countdownInterval = null;
+        let verifiedVideoData = null;
+        let currentPrivacy = 'public';
+        let currentTicketData = null;
         
         // Konstanta Video
         const INTRO_VIDEO_ID = "9v1atEBmUIc";
@@ -403,44 +665,210 @@
         const hallway = document.getElementById('hallway');
         const cinemaOverlayUi = document.getElementById('cinema-overlay-ui');
         const playerWrapper = document.getElementById('player-wrapper');
+        const ticketBadge = document.getElementById('ticket-badge');
 
         // --- INIT ---
         window.onload = function() {
             generateHallway();
             updateQuotaPreview();
             setupDateTimeInputMin();
+            
+            // Test Firebase connection
+            if (db) {
+                db.ref('.info/connected').on('value', (snap) => {
+                    if (snap.val() === true) {
+                        console.log("Connected to Firebase");
+                    } else {
+                        console.log("Disconnected from Firebase");
+                    }
+                });
+            }
         };
 
         // --- UI FUNCTIONS ---
-        function showToast(msg) {
+        function showToast(msg, type = 'default') {
             const container = document.getElementById('toast-container');
             const el = document.createElement('div');
             el.className = 'toast';
+            if (type === 'success') el.classList.add('success');
+            if (type === 'error') el.classList.add('error');
+            if (type === 'warning') el.classList.add('warning');
             el.innerText = msg;
             container.appendChild(el);
-            setTimeout(() => el.remove(), 3000);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
         }
 
         function toggleRules(show) {
             document.getElementById('rules-modal').classList.toggle('open', show);
         }
 
-        function openCreateRoom() { createRoomView.classList.add('active'); }
-        function closeCreateRoom() { createRoomView.classList.remove('active'); }
+        function openCreateRoom() { 
+            createRoomView.classList.add('active'); 
+        }
+        
+        function closeCreateRoom() { 
+            createRoomView.classList.remove('active'); 
+            // Reset form
+            document.getElementById('room-video-url').value = '';
+            document.getElementById('video-info-display').classList.remove('active');
+            verifiedVideoData = null;
+            selectPrivacy('public');
+        }
 
         function scrollHallway(direction) {
             hallway.scrollBy({ left: hallway.clientWidth * 0.85 * direction, behavior: 'smooth' });
         }
 
+        // --- VIDEO VERIFICATION ---
+        function extractVideoID(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function parseDuration(duration) {
+            // Parse ISO 8601 duration (PT1H2M3S)
+            const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+            if (!match) return "Unknown";
+            const hours = parseInt(match[1] || 0);
+            const minutes = parseInt(match[2] || 0);
+            const seconds = parseInt(match[3] || 0);
+            
+            if (hours > 0) {
+                return `${hours}j ${minutes}m ${seconds}d`;
+            } else if (minutes > 0) {
+                return `${minutes}m ${seconds}d`;
+            } else {
+                return `${seconds}d`;
+            }
+        }
+
+        async function verifyVideo() {
+            const urlInput = document.getElementById('room-video-url').value.trim();
+            const videoId = extractVideoID(urlInput);
+            
+            if (!videoId) {
+                showToast("Format URL YouTube tidak valid!", "error");
+                return;
+            }
+
+            const verifyBtn = document.getElementById('verify-btn');
+            const spinner = document.getElementById('verify-spinner');
+            
+            verifyBtn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                // Using YouTube oEmbed API (no key required)
+                const response = await fetch(`https://youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+                
+                if (!response.ok) throw new Error('Video not found');
+                
+                const data = await response.json();
+                
+                // Get duration using no-key method (iframe API estimation)
+                // For now, we'll use a placeholder or fetch via alternative method
+                // Using YouTube Data API v3 with a demo key approach or alternative
+                
+                // Try to get duration from alternative source
+                let duration = "Unknown";
+                try {
+                    const infoResponse = await fetch(`https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            videoId: videoId,
+                            context: {
+                                client: {
+                                    clientName: "ANDROID",
+                                    clientVersion: "17.10.35"
+                                }
+                            }
+                        })
+                    });
+                    const infoData = await infoResponse.json();
+                    if (infoData.videoDetails && infoData.videoDetails.lengthSeconds) {
+                        const seconds = parseInt(infoData.videoDetails.lengthSeconds);
+                        const mins = Math.floor(seconds / 60);
+                        const secs = seconds % 60;
+                        duration = mins > 0 ? `${mins}m ${secs}d` : `${secs}d`;
+                    }
+                } catch (e) {
+                    console.log("Could not fetch duration, using placeholder");
+                    duration = "N/A (akan terdeteksi saat play)";
+                }
+
+                verifiedVideoData = {
+                    id: videoId,
+                    title: data.title,
+                    channel: data.author_name,
+                    thumbnail: data.thumbnail_url,
+                    duration: duration
+                };
+
+                // Update UI
+                document.getElementById('video-title').textContent = data.title;
+                document.getElementById('video-channel').textContent = data.author_name;
+                document.getElementById('video-duration').textContent = duration;
+                document.getElementById('video-id-display').textContent = videoId;
+                document.getElementById('video-thumbnail').src = data.thumbnail_url;
+                document.getElementById('video-info-display').classList.add('active');
+                
+                showToast("Video berhasil diverifikasi!", "success");
+                
+            } catch (error) {
+                console.error("Verification error:", error);
+                showToast("Gagal verifikasi video. Coba URL lain.", "error");
+                verifiedVideoData = null;
+            } finally {
+                verifyBtn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function checkVideoInfo() {
+            const url = document.getElementById('room-video-url').value.trim();
+            if (url && !verifiedVideoData) {
+                // Auto verify on blur if not already verified
+                // verifyVideo(); // Optional: enable for auto-verify
+            }
+        }
+
+        // --- PRIVACY OPTIONS ---
+        function selectPrivacy(type) {
+            currentPrivacy = type;
+            document.querySelectorAll('.privacy-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.querySelector('input').checked = false;
+            });
+            
+            const selectedOption = document.querySelector(`input[value="${type}"]`).closest('.privacy-option');
+            selectedOption.classList.add('selected');
+            selectedOption.querySelector('input').checked = true;
+            
+            const codeContainer = document.getElementById('access-code-container');
+            if (type === 'private') {
+                codeContainer.classList.add('active');
+            } else {
+                codeContainer.classList.remove('active');
+            }
+        }
+
         // --- HALLWAY & ROOM LOGIC ---
         function generateHallway() {
             let html = '';
-            for (let l = 1; l <= 4; l++) {
+            const totalLoket = 6;
+            const roomsPerLoket = 10;
+            
+            for (let l = 1; l <= totalLoket; l++) {
                 html += `<div class="loket-column">
                             <div class="loket-header">LOKET ${l}</div>
                             <div class="pintu-container">`;
-                let startPintu = ((l-1) * 5) + 1;
-                for (let p = 0; p < 5; p++) {
+                let startPintu = ((l-1) * roomsPerLoket) + 1;
+                for (let p = 0; p < roomsPerLoket; p++) {
                     let pintuNum = startPintu + p;
                     html += `<div class="pintu-item" id="door-${l}-${pintuNum}" onclick="tryJoinRoom(${l}, ${pintuNum})">
                                 <div class="pintu-number">${pintuNum}</div>
@@ -454,7 +882,10 @@
         }
 
         function listenToRooms() {
+            if (!db) return;
+            
             db.ref('rooms').on('value', (snapshot) => {
+                // Reset all doors
                 document.querySelectorAll('.pintu-item').forEach(el => {
                     el.classList.remove('occupied');
                     el.querySelector('.pintu-status').innerText = "KOSONG";
@@ -465,30 +896,55 @@
 
                 Object.keys(rooms).forEach(key => {
                     const room = rooms[key];
-                    const doorId = `door-${room.loket}-${room.pintu}`;
-                    const el = document.getElementById(doorId);
-                    if (el) {
-                        el.classList.add('occupied');
-                        el.querySelector('.pintu-status').innerText = "TERISI";
+                    if (room.loket && room.pintu) {
+                        const doorId = `door-${room.loket}-${room.pintu}`;
+                        const el = document.getElementById(doorId);
+                        if (el) {
+                            el.classList.add('occupied');
+                            el.querySelector('.pintu-status').innerText = "TERISI";
+                        }
                     }
                 });
+            }, (error) => {
+                console.error("Firebase listen error:", error);
+                showToast("Error koneksi ke server", "error");
             });
         }
 
         function tryJoinRoom(loket, pintu) {
+            if (!db) {
+                showToast("Database tidak tersedia", "error");
+                return;
+            }
+            
             showToast(`Mengecek Loket ${loket} Pintu ${pintu}...`);
             
-            db.ref('rooms').orderByChild('loket').equalTo(loket).once('value', snapshot => {
-                let found = false;
-                snapshot.forEach(childSnapshot => {
-                    const room = childSnapshot.val();
-                    if (room.pintu === pintu) {
-                        found = true;
-                        enterCinema(childSnapshot.key, room);
-                    }
+            db.ref('rooms').orderByChild('loket').equalTo(loket).once('value')
+                .then(snapshot => {
+                    let found = false;
+                    snapshot.forEach(childSnapshot => {
+                        const room = childSnapshot.val();
+                        if (room.pintu === pintu) {
+                            found = true;
+                            
+                            // Check privacy
+                            if (room.privacy === 'private') {
+                                const code = prompt("Room ini private. Masukkan kode akses (4 digit):");
+                                if (code !== room.accessCode) {
+                                    showToast("Kode akses salah!", "error");
+                                    return;
+                                }
+                            }
+                            
+                            enterCinema(childSnapshot.key, room);
+                        }
+                    });
+                    if (!found) showToast("Pintu ini kosong / Belum ada room.");
+                })
+                .catch(error => {
+                    console.error("Join room error:", error);
+                    showToast("Gagal memeriksa room", "error");
                 });
-                if (!found) showToast("Pintu ini kosong / Belum ada room.");
-            });
         }
 
         // --- CREATE ROOM LOGIC ---
@@ -513,38 +969,65 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        function extractVideoID(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
-
         function processBooking() {
             const urlInput = document.getElementById('room-video-url').value.trim();
             const timeInput = document.getElementById('room-time').value;
             const tier = document.getElementById('room-tier').value;
 
-            if (!urlInput || !timeInput) return showToast("Mohon lengkapi URL Video dan Waktu Tayang!");
+            if (!urlInput || !timeInput) return showToast("Mohon lengkapi URL Video dan Waktu Tayang!", "error");
             
-            const videoId = extractVideoID(urlInput);
-            if (!videoId) return showToast("Format URL YouTube tidak valid!");
+            // Use verified data if available
+            let videoId, videoTitle;
+            if (verifiedVideoData && verifiedVideoData.id) {
+                videoId = verifiedVideoData.id;
+                videoTitle = verifiedVideoData.title;
+            } else {
+                videoId = extractVideoID(urlInput);
+                if (!videoId) return showToast("Format URL YouTube tidak valid!", "error");
+            }
 
-            const rLoket = Math.floor(Math.random() * 4) + 1;
-            const startP = ((rLoket-1) * 5) + 1;
-            const rPintu = Math.floor(Math.random() * 5) + startP;
+            const rLoket = Math.floor(Math.random() * 6) + 1;
+            const roomsPerLoket = 10;
+            const startP = ((rLoket-1) * roomsPerLoket) + 1;
+            const rPintu = Math.floor(Math.random() * roomsPerLoket) + startP;
             const capacity = getCapacity(tier);
             const scheduleTime = new Date(timeInput).getTime();
+            
+            // Get privacy settings
+            const privacy = currentPrivacy;
+            const accessCode = privacy === 'private' ? document.getElementById('access-code').value : null;
+            
+            if (privacy === 'private' && (!accessCode || accessCode.length !== 4)) {
+                return showToast("Kode akses harus 4 digit!", "error");
+            }
 
             const newRoomRef = db.ref('rooms').push();
             const roomObj = {
-                loket: rLoket, pintu: rPintu, videoId: videoId, capacity: capacity,
-                scheduleTime: scheduleTime, createdAt: firebase.database.ServerValue.TIMESTAMP,
-                status: 'waiting', currentPlayTime: 0, isPlayingIntro: false, phase: 'waiting'
+                loket: rLoket, 
+                pintu: rPintu, 
+                videoId: videoId,
+                videoTitle: videoTitle || "Unknown",
+                capacity: capacity,
+                scheduleTime: scheduleTime, 
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                status: 'waiting', 
+                currentPlayTime: 0, 
+                isPlayingIntro: false, 
+                phase: 'waiting',
+                privacy: privacy,
+                accessCode: accessCode,
+                hostUsername: myUsername
             };
 
-            newRoomRef.set(roomObj).then(() => {
-                startPrintingAnimation(capacity, roomObj);
-            }).catch(err => showToast("Gagal membuat room: " + err.message));
+            newRoomRef.set(roomObj)
+                .then(() => {
+                    currentTicketData = { loket: rLoket, pintu: rPintu, capacity: capacity };
+                    startPrintingAnimation(capacity, roomObj);
+                })
+                .catch(err => {
+                    console.error("Create room error:", err);
+                    showToast("Gagal membuat room: " + err.message, "error");
+                });
         }
 
         // --- ANIMASI TIKET ---
@@ -559,7 +1042,8 @@
                 if (printed >= ticketsToPrint) {
                     setTimeout(() => {
                         printerOverlay.classList.remove('active');
-                        showToast(`Room Siap! Masuk ke Loket ${roomObj.loket} Pintu ${roomObj.pintu}`);
+                        showTicketBadge(roomObj.loket, roomObj.pintu);
+                        showToast(`Room Siap! Masuk ke Loket ${roomObj.loket} Pintu ${roomObj.pintu}`, "success");
                     }, 1000);
                     return;
                 }
@@ -580,13 +1064,29 @@
             printNext();
         }
 
+        // --- TICKET BADGE ---
+        function showTicketBadge(loket, pintu) {
+            document.getElementById('ticket-loket').textContent = loket;
+            document.getElementById('ticket-pintu').textContent = pintu;
+            ticketBadge.classList.add('active');
+            ticketBadge.classList.remove('hidden-badge');
+        }
+
+        function hideTicketBadge() {
+            ticketBadge.classList.remove('active');
+            ticketBadge.classList.add('hidden-badge');
+        }
+
         // --- CINEMA PLAYER & SYNC LOGIC ---
 
         function enterCinema(roomId, room) {
             currentRoomId = roomId;
             roomData = room;
             dbRoomRef = db.ref('rooms/' + roomId);
-            currentVideoPhase = null; // Reset phase lokal
+            currentVideoPhase = null;
+            
+            // Hide ticket badge when entering cinema
+            hideTicketBadge();
             
             document.getElementById('cinema-loket').innerText = room.loket;
             document.getElementById('cinema-pintu').innerText = room.pintu;
@@ -606,14 +1106,40 @@
             addSystemChat("2. Naikan volume HP/PC Anda ke 89% atau lebih.");
             addSystemChat("3. Gunakan koneksi WiFi yang stabil.");
 
-            // Hanya 1 listener value utama untuk menghindari bentrokan update
-            dbRoomRef.on('value', handleDatabaseUpdate);
+            // Hanya 1 listener value utama
+            dbRoomRef.on('value', handleDatabaseUpdate, (error) => {
+                console.error("Cinema DB error:", error);
+                showToast("Koneksi terputus", "error");
+            });
             
             // Listener Chat terpisah
             dbRoomRef.child('chat').orderByChild('timestamp').limitToLast(50).on('child_added', snapshot => {
                 const msg = snapshot.val();
-                addChatMessage(msg.sender, msg.text);
+                if (msg) addChatMessage(msg.sender, msg.text);
+            }, (error) => {
+                console.error("Chat error:", error);
             });
+            
+            // Start countdown interval
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                if (roomData && roomData.scheduleTime && currentVideoPhase === 'waiting') {
+                    updateCountdownDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateCountdownDisplay() {
+            const now = Date.now();
+            const schedule = roomData.scheduleTime;
+            const diff = schedule - now;
+            
+            if (diff > 0) {
+                const m = Math.floor(diff / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                document.getElementById('countdown-timer').innerText = 
+                    `${m}:${s < 10 ? '0'+s : s}`;
+            }
         }
 
         function handleDatabaseUpdate(snapshot) {
@@ -636,10 +1162,7 @@
                     playerWrapper.classList.add('hidden');
                     if (player) { player.destroy(); player = null; }
                 }
-                const diff = schedule - now;
-                const m = Math.floor(diff / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-                document.getElementById('countdown-timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                updateCountdownDisplay();
                 return;
             }
 
@@ -649,7 +1172,7 @@
             if (serverPhase === 'intro') {
                 if (currentVideoPhase !== 'intro') {
                     currentVideoPhase = 'intro';
-                    cinemaView.classList.add('lights-off'); // Matikan lampu pelan-pelan
+                    cinemaView.classList.add('lights-off');
                     cinemaOverlayUi.classList.add('hidden');
                     playerWrapper.classList.remove('hidden');
                     
@@ -663,7 +1186,6 @@
             // FASE 2: FILM UTAMA
             // ------------------------------
             if (serverPhase === 'main') {
-                // Hitung waktu seharusnya berdasarkan real-time clock
                 const expectedTime = Math.max(0, Math.floor((now - schedule - (INTRO_DURATION_SEC * 1000)) / 1000));
 
                 if (currentVideoPhase !== 'main') {
@@ -673,25 +1195,26 @@
                     playerWrapper.classList.remove('hidden');
                     
                     if (player) player.destroy();
-                    // Load film langsung ke posisi yang benar
                     player = createYTPlayerAtTime(data.videoId, expectedTime);
                 } else {
-                    // Jika player sudah ada, lakukan sinkronisasi keras setiap 2 detik
                     if (player && player.getCurrentTime) {
-                        const currTime = Math.floor(player.getCurrentTime());
-                        if (Math.abs(currTime - expectedTime) > 2) {
-                            player.seekTo(expectedTime, true);
-                        }
-                        if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
-                            player.playVideo();
+                        try {
+                            const currTime = Math.floor(player.getCurrentTime());
+                            if (Math.abs(currTime - expectedTime) > 2) {
+                                player.seekTo(expectedTime, true);
+                            }
+                            if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                                player.playVideo();
+                            }
+                        } catch (e) {
+                            console.log("Player sync error:", e);
                         }
                     }
                 }
 
-                // HANYA UPDATE DB JIKA ANDA USER PALING AKTIF YANG MENJALANKAN FILM PERTAMA KALI
-                // (Cegah 50 user saling menimpa waktu dan menyebabkan bug)
                 if (data.currentPlayTime < 1) {
-                    dbRoomRef.update({ currentPlayTime: expectedTime });
+                    dbRoomRef.update({ currentPlayTime: expectedTime })
+                        .catch(err => console.log("Update playtime error:", err));
                 }
             }
         }
@@ -705,7 +1228,8 @@
                 },
                 events: { 
                     'onReady': (e) => e.target.playVideo(),
-                    'onStateChange': onPlayerStateChange
+                    'onStateChange': onPlayerStateChange,
+                    'onError': (e) => console.error("Player error:", e)
                 }
             });
         }
@@ -720,29 +1244,44 @@
                 },
                 events: { 
                     'onReady': (e) => e.target.playVideo(),
-                    'onStateChange': onPlayerStateChange
+                    'onStateChange': onPlayerStateChange,
+                    'onError': (e) => console.error("Player error:", e)
                 }
             });
         }
 
-        // MENCEGAH USER MEMUTAR MUNDIR/MEMPERCEPAT
         function onPlayerStateChange(event) {
             if (!roomData || currentVideoPhase !== 'main') return;
             
-            // Gunakan Realtime clock, BUKAN data.currentPlayTime dari DB untuk menghindari delay
             const now = Date.now();
             const expectedTime = Math.max(0, Math.floor((now - roomData.scheduleTime - (INTRO_DURATION_SEC * 1000)) / 1000));
-            const currentTime = Math.floor(player.getCurrentTime());
-
-            if (Math.abs(currentTime - expectedTime) > 3) {
-                player.seekTo(expectedTime, true);
+            
+            try {
+                const currentTime = Math.floor(player.getCurrentTime());
+                if (Math.abs(currentTime - expectedTime) > 3) {
+                    player.seekTo(expectedTime, true);
+                }
+            } catch (e) {
+                console.log("State change error:", e);
             }
         }
 
         function exitCinema() {
             cinemaView.classList.remove('active', 'lights-off');
             
-            if (player) { player.destroy(); player = null; }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
+            if (player) { 
+                try {
+                    player.destroy(); 
+                } catch (e) {
+                    console.log("Player destroy error:", e);
+                }
+                player = null; 
+            }
             if (dbRoomRef) { 
                 dbRoomRef.off(); 
                 dbRoomRef.child('chat').off();
@@ -750,6 +1289,7 @@
             }
             roomData = null;
             currentVideoPhase = null;
+            currentRoomId = null;
         }
 
         // --- CHAT SYSTEM ---
@@ -762,7 +1302,7 @@
                         sender: myUsername,
                         text: text,
                         timestamp: firebase.database.ServerValue.TIMESTAMP
-                    });
+                    }).catch(err => console.log("Chat send error:", err));
                     input.value = '';
                 }
             }
@@ -786,37 +1326,45 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        // --- SERVER SIDE CRON (MENJALANKAN PHASE SECARA OTOMATIS TANPA HARUS USER PERTAMA ONLINE) ---
-        // Ini memastikan jika user terlambat masuk, database sudah otomatis berpindah phase
+        // --- SERVER SIDE CRON ---
         setInterval(() => {
+            if (!db) return;
+            
             const now = Date.now();
-            db.ref('rooms').once('value', snapshot => {
-                if (!snapshot.val()) return;
-                snapshot.forEach(child => {
-                    const room = child.val();
-                    if (room.phase === 'waiting' && now >= room.scheduleTime) {
-                        // Waktu habis, mulai intro
-                        child.ref.update({ phase: 'intro', isPlayingIntro: true });
-                    } else if (room.phase === 'intro' && (now - room.scheduleTime) >= (INTRO_DURATION_SEC * 1000)) {
-                        // Intro selesai, mulai film utama
-                        const mainTime = Math.floor((now - room.scheduleTime - (INTRO_DURATION_SEC * 1000)) / 1000);
-                        child.ref.update({ phase: 'main', isPlayingIntro: false, currentPlayTime: mainTime });
-                    }
-                });
-            });
-        }, 3000); // Cek setiap 3 detik
+            db.ref('rooms').once('value')
+                .then(snapshot => {
+                    if (!snapshot.val()) return;
+                    snapshot.forEach(child => {
+                        const room = child.val();
+                        if (room.phase === 'waiting' && now >= room.scheduleTime) {
+                            child.ref.update({ phase: 'intro', isPlayingIntro: true })
+                                .catch(err => console.log("Phase update error:", err));
+                        } else if (room.phase === 'intro' && (now - room.scheduleTime) >= (INTRO_DURATION_SEC * 1000)) {
+                            const mainTime = Math.floor((now - room.scheduleTime - (INTRO_DURATION_SEC * 1000)) / 1000);
+                            child.ref.update({ phase: 'main', isPlayingIntro: false, currentPlayTime: mainTime })
+                                .catch(err => console.log("Phase update error:", err));
+                        }
+                    });
+                })
+                .catch(err => console.log("Cron error:", err));
+        }, 3000);
 
         // --- AUTO CLEANUP ---
         function cleanOldRooms() {
+            if (!db) return;
+            
             const now = Date.now();
-            db.ref('rooms').once('value', snapshot => {
-                snapshot.forEach(child => {
-                    const room = child.val();
-                    if (room.createdAt && (now - room.createdAt > 48 * 60 * 60 * 1000)) {
-                        child.ref.remove();
-                    }
-                });
-            });
+            db.ref('rooms').once('value')
+                .then(snapshot => {
+                    snapshot.forEach(child => {
+                        const room = child.val();
+                        if (room.createdAt && (now - room.createdAt > 48 * 60 * 60 * 1000)) {
+                            child.ref.remove()
+                                .catch(err => console.log("Cleanup error:", err));
+                        }
+                    });
+                })
+                .catch(err => console.log("Cleanup fetch error:", err));
         }
         setInterval(cleanOldRooms, 600000); 
         cleanOldRooms();
