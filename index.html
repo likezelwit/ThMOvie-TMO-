@@ -33,7 +33,6 @@
     </nav>
 
     <div class="main-container">
-        <!-- HOME -->
         <div id="home-page" class="page-section active">
             <section class="hero-section">
                 <div class="hero-bg"></div>
@@ -49,16 +48,29 @@
                     </div>
                 </div>
             </section>
+            
             <section class="section" id="movies-section">
                 <div class="section-header">
                     <h2 class="section-title">Sedang Tayang</h2>
                     <button class="btn btn-primary btn-sm" onclick="openCreateRoom()">🎫 Pesan Tiket</button>
                 </div>
-                <div class="movie-grid" id="movie-grid"></div>
+                
+                <div class="movie-grid" id="movie-grid">
+                    
+                    <div class="movie-card" onclick="selectMovie('Jumbo', 'https://drive.google.com/file/d/1ZASz3sSmMUxzz5RAm3dC0Hteot9K3PfQ/preview')">
+                        <div class="movie-poster">
+                            <img src="https://i.ibb.co.com/NdCM9CWw/images.jpg" alt="Poster Jumbo">
+                            <div class="movie-badge">NEW</div>
+                        </div>
+                        <div class="movie-info">
+                            <h3 class="movie-title">Jumbo</h3>
+                            <p class="movie-meta">Animasi • Google Drive</p>
+                        </div>
+                    </div>
+                    </div>
             </section>
         </div>
 
-        <!-- LOKET -->
         <div id="loket-page" class="page-section">
             <div class="loket-hero">
                 <h1 class="loket-title">Pilih Loket Anda</h1>
@@ -72,7 +84,6 @@
             <div class="loket-grid" id="loket-grid"></div>
         </div>
 
-        <!-- CREATE ROOM -->
         <div id="create-page" class="page-section">
             <div class="create-container">
                 <div class="create-header">
@@ -88,8 +99,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Link YouTube <span style="color:var(--accent-gold)">*</span></label>
-                    <input type="text" id="manual-video-url" class="form-input" placeholder="https://youtube.com/watch?v=..." oninput="verifyManualVideo()">
+                    <label class="form-label">Link YouTube / Drive <span style="color:var(--accent-gold)">*</span></label>
+                    <input type="text" id="manual-video-url" class="form-input" placeholder="https://..." oninput="verifyManualVideo()">
                     <p class="form-hint">Wajib diisi jika belum memilih film dari card</p>
                 </div>
 
@@ -104,7 +115,6 @@
                     </div>
                 </div>
 
-                <!-- NEW: Room Visibility -->
                 <div class="form-group">
                     <label class="form-label">Tipe Room</label>
                     <div style="display:flex; gap:20px; align-items:center; font-size:0.9rem; color:var(--text-secondary)">
@@ -163,7 +173,6 @@
         </div>
     </div>
 
-    <!-- CINEMA VIEW -->
     <div class="cinema-view" id="cinema-view">
         <div class="cinema-header">
             <div class="cinema-info">
@@ -184,7 +193,6 @@
                 </div>
                 <div class="lock-indicator" id="lock-indicator" style="display:none">🔒 Realtime Lock</div>
                 
-                <!-- NEW: End Screen Overlay -->
                 <div class="end-screen-overlay" id="end-screen-overlay">
                     <div style="font-size:3rem; margin-bottom:20px">🎬</div>
                     <h2 style="font-size:1.8rem; font-weight:700; color:var(--text-primary)">Film Telah Selesai</h2>
@@ -200,7 +208,8 @@
                     <div class="spinner"></div>
                     <span style="font-size:.85rem;color:var(--text-secondary)">Memuat player...</span>
                 </div>
-                <div class="player-container" id="player-container"></div>
+                <div class="player-container" id="player-container">
+                    </div>
             </div>
             <div class="cinema-sidebar">
                 <div class="chat-header">
@@ -217,14 +226,12 @@
         </div>
     </div>
 
-    <!-- PRINTER -->
     <div class="printer-overlay" id="printer-overlay">
         <div class="printer-device"><div class="printer-slot"></div></div>
         <div id="ticket-animation-container"></div>
         <div class="printer-status">Mencetak tiket Anda...</div>
     </div>
 
-    <!-- RULES MODAL -->
     <div class="modal-overlay" id="rules-modal" onclick="closeRules(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header"><h2 class="modal-title">📋 Rules ThMOvie</h2></div>
@@ -233,11 +240,9 @@
                     <li>Harap sopan di dalam chat room dan hormati penonton lain</li>
                     <li>Room akan otomatis terhapus 24 jam setelah film selesai tayang</li>
                     <li>Dilarang share link atau konten yang melanggar hak cipta</li>
-                    <li>Kapasitas maksimal tergantung tier yang dipilih (Gratis: 30-57 kursi)</li>
-                    <li>Video diputar otomatis sesuai jadwal dan TIDAK BISA dimajukan/mundurkan</li>
-                    <li>Gunakan link YouTube yang valid dan dapat diakses publik</li>
-                    <li>Setiap room memiliki URL unik yang bisa dibagikan ke teman</li>
-                    <li>Admin room bertanggung jawab atas konten yang diputar</li>
+                    <li>Kapasitas maksimal (Gratis: 30-57 kursi)</li>
+                    <li>Video diputar otomatis sesuai jadwal</li>
+                    <li>Gunakan link valid (YouTube/Drive)</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -246,7 +251,6 @@
         </div>
     </div>
 
-    <!-- JOIN MODAL -->
     <div class="modal-overlay" id="join-modal" onclick="closeJoinModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header"><h2 class="modal-title">🎬 Bergabung ke Room</h2></div>
@@ -258,12 +262,11 @@
         </div>
     </div>
 
-    <!-- EXIT CONFIRM MODAL -->
     <div class="modal-overlay" id="exit-modal" onclick="closeExitModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header"><h2 class="modal-title">⚠️ Keluar dari Room?</h2></div>
             <div class="modal-body">
-                <p style="color:var(--text-secondary);font-size:.9rem">Anda akan keluar dari watch party. Film akan tetap berjalan untuk penonton lain.</p>
+                <p style="color:var(--text-secondary);font-size:.9rem">Anda akan keluar dari watch party. Film akan tetap berjalan.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" style="flex:1" onclick="closeExitModal()">Batal</button>
@@ -272,7 +275,6 @@
         </div>
     </div>
 
-    <!-- External Libraries -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
