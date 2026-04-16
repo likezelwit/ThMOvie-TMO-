@@ -19,7 +19,7 @@ const movieDatabase = [
         duration: "1j 50m",
         rating: "8.0",
         poster: "https://i.ibb.co.com/fdYgkJgD/download.jpg",
-        url: "https://drive.google.com/file/d/16oa8r4WC0PyUgFCMAUMg2VBAbX_Rul5a/preview"
+        url: "https://drive.google.com/file/d/16oa8r4WC0PyUgFCMAUMg2VBAbX_Rul5a/view?usp=sharing"
     },
     {
         id: "inside_out_2",
