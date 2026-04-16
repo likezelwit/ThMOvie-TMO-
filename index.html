@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ThMOvie (TMO) | Private Watch Party</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>ThMOvie (TMO) | Premium Watch Party</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" href="data:,">
 
     <!-- Firebase SDK -->
@@ -13,612 +13,1422 @@
 
     <style>
         :root {
-            --bg-color: #050505;
-            --text-color: #ffffff;
-            --card-bg: #1e1e1e;
-            --accent-color: #ff0055;
-            --border-color: #333;
-            --gold: #ffd700;
-            --input-bg: #2a2a2a;
-            --success: #00c851;
-            --yellow: #ffeb3b;
-            --cyan: #00d4ff;
-            --purple: #9d4edd;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: #1c1c1c;
+            --bg-hover: #252525;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --accent-gold: #d4af37;
+            --accent-gold-hover: #e5c158;
+            --accent-red: #e50914;
+            --accent-red-hover: #f40612;
+            --border-color: #2a2a2a;
+            --success: #46d369;
+            --warning: #f5c518;
+            --gradient-dark: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.9) 100%);
+            --gradient-gold: linear-gradient(135deg, #d4af37 0%, #f5c518 50%, #d4af37 100%);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.5);
+            --shadow-gold: 0 4px 20px rgba(212, 175, 55, 0.3);
         }
 
-        * { box-sizing: border-box; user-select: none; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         body {
-            margin: 0; background-color: var(--bg-color); color: var(--text-color);
-            font-family: 'Poppins', sans-serif; overflow: hidden; height: 100vh; width: 100vw;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Jazz Lounge Background Music Indicator */
+        .jazz-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--accent-gold);
+            border-radius: 30px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .jazz-indicator:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: scale(1.05);
+        }
+
+        .jazz-waves {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 15px;
+        }
+
+        .jazz-wave {
+            width: 3px;
+            background: var(--accent-gold);
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .jazz-wave:nth-child(1) { height: 8px; animation-delay: 0s; }
+        .jazz-wave:nth-child(2) { height: 15px; animation-delay: 0.1s; }
+        .jazz-wave:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+        .jazz-wave:nth-child(4) { height: 12px; animation-delay: 0.3s; }
+
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
+            50% { transform: scaleY(1); opacity: 1; }
         }
 
         .hidden { display: none !important; }
-        .btn {
-            padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold;
-            cursor: pointer; font-family: inherit; transition: transform 0.2s, opacity 0.2s; text-align: center;
-        }
-        .btn:active { transform: scale(0.95); }
-        .btn-primary { background: var(--accent-color); color: white; box-shadow: 0 4px 15px rgba(255,0,85,0.4); }
-        .btn-primary:hover { background: #ff1a6a; box-shadow: 0 6px 20px rgba(255,0,85,0.6); }
-        .btn-secondary { background: var(--card-bg); color: white; border: 1px solid var(--border-color); }
-        .btn-secondary:hover { background: #2a2a2a; border-color: var(--accent-color); }
-        .btn-success { background: var(--success); color: white; }
-        .btn-gold { background: var(--gold); color: #000; }
         
-        /* Toast */
-        #toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 9999; width: 90%; max-width: 400px; pointer-events: none;
-        }
-        .toast {
-            background: rgba(30, 30, 30, 0.95); border-left: 4px solid var(--accent-color);
-            color: white; padding: 15px; margin-bottom: 10px; border-radius: 4px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideDown 0.3s ease-out;
-            pointer-events: auto; font-size: 0.9rem;
-        }
-        .toast.success { border-left-color: var(--success); }
-        .toast.error { border-left-color: #ff3333; }
-        .toast.warning { border-left-color: var(--yellow); }
-        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* View: LOBBY */
-        #lobby-view { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-        header {
-            padding: 15px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(5,5,5,0.9); border-bottom: 1px solid var(--border-color); z-index: 10;
-        }
-        .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; }
-        .logo span { color: var(--accent-color); }
-        .rules-btn { font-size: 0.8rem; color: #888; cursor: pointer; text-decoration: underline; }
-
-        .hero-section { padding: 20px; flex-shrink: 0; }
-        .movie-card {
-            background: var(--card-bg); border-radius: 12px; overflow: hidden;
-            display: flex; height: 160px; position: relative; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-        .movie-poster { width: 110px; background-size: cover; background-position: center; }
-        .movie-info { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-        .movie-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 5px; }
-        .movie-meta { font-size: 0.8rem; color: #aaa; }
-        .badge {
-            position: absolute; top: 10px; right: 10px; background: var(--gold); color: #000;
-            font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: bold;
-        }
-
-        .booking-actions { padding: 0 20px 15px 20px; display: flex; gap: 15px; flex-shrink: 0; }
-        .booking-actions .btn { flex: 1; }
-
-        .hallway-label {
-            text-align: center; font-size: 0.9rem; color: #888; margin-bottom: 10px;
-            text-transform: uppercase; letter-spacing: 2px;
-        }
-
-        .hallway-wrapper {
-            position: relative; flex: 1; display: flex; flex-direction: column;
-            overflow: hidden; background: #080808;
-        }
-        .hallway-container {
-            flex: 1; display: flex; overflow-x: auto; overflow-y: hidden;
-            scroll-snap-type: x mandatory; position: relative; scroll-behavior: smooth;
-        }
-        .hallway-container::-webkit-scrollbar { display: none; }
-        .hallway-container { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .nav-arrow {
-            position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px;
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(4px); color: white;
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; cursor: pointer; z-index: 20;
-            font-size: 1.5rem; transition: background 0.3s;
-        }
-        .nav-arrow:hover { background: var(--accent-color); border-color: var(--accent-color); }
-        .nav-arrow.left { left: 10px; }
-        .nav-arrow.right { right: 10px; }
-
-        @media (max-width: 768px) { .nav-arrow { display: none; } }
-
-        .loket-column {
-            min-width: 85vw; height: 100%; border-right: 1px solid #1a1a1a;
-            scroll-snap-align: center; display: flex; flex-direction: column;
-            background: linear-gradient(180deg, #0f0f0f 0%, #050505 100%);
-        }
-        .loket-header {
-            padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold;
-            color: var(--accent-color); border-bottom: 1px dashed #333;
-            background: rgba(255,255,255,0.02); flex-shrink: 0;
-        }
-
-        .pintu-container {
-            flex: 1; overflow-y: auto; padding: 20px;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            grid-auto-rows: 100px; gap: 15px; align-content: start;
-        }
-        .pintu-container::-webkit-scrollbar { width: 4px; }
-        .pintu-container::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-
-        .pintu-item {
-            background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.3s; position: relative;
-        }
-        .pintu-item:active { transform: scale(0.95); }
-        
-        .pintu-item.occupied { 
-            border-color: var(--yellow); 
-            background: rgba(255, 235, 59, 0.15); 
-            box-shadow: 0 0 15px rgba(255, 235, 59, 0.2);
-        }
-        .pintu-number { font-size: 1.2rem; font-weight: bold; }
-        .pintu-status { font-size: 0.6rem; margin-top: 5px; color: #666; }
-        .pintu-item.occupied .pintu-status { color: var(--yellow); font-weight: 600; }
-
-        /* View: CREATE ROOM - ENHANCED */
-        #create-room-view {
-            padding: 20px; height: 100%; overflow-y: auto; background: var(--bg-color);
-            position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
-            transform: translateX(100%); transition: transform 0.3s ease-in-out;
-        }
-        #create-room-view.active { transform: translateX(0); }
-
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: #aaa; }
-        .form-input, .form-select {
-            width: 100%; padding: 14px; background: var(--input-bg); border: 1px solid var(--border-color);
-            border-radius: 8px; color: white; font-family: inherit; outline: none;
-        }
-        .form-input:focus { border-color: var(--accent-color); }
-        .back-btn { background: transparent; color: #fff; padding: 10px; margin-bottom: 10px; font-size: 0.9rem; }
-
-        /* Video Info Display */
-        #video-info-display {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        #video-info-display.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .video-preview-container {
-            display: flex;
-            gap: 15px;
-            align-items: flex-start;
-        }
-        .video-thumbnail {
-            width: 120px;
-            height: 90px;
-            border-radius: 8px;
-            object-fit: cover;
-            background: #333;
-        }
-        .video-details { flex: 1; }
-        .video-title-display {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--accent-color);
-            margin-bottom: 5px;
-            line-height: 1.3;
-        }
-        .video-meta-display {
-            font-size: 0.8rem;
-            color: #888;
-            margin-bottom: 3px;
-        }
-        .video-meta-display span { color: var(--cyan); }
-
-        /* Privacy Options */
-        .privacy-options {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .privacy-option {
+        /* Navigation */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
             display: flex;
             align-items: center;
-            padding: 12px;
-            margin-bottom: 10px;
-            background: var(--input-bg);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-        .privacy-option:hover { background: #333; }
-        .privacy-option.selected {
-            border-color: var(--accent-color);
-            background: rgba(255,0,85,0.1);
-        }
-        .privacy-option input[type="radio"] {
-            margin-right: 12px;
-            width: 18px;
-            height: 18px;
-            accent-color: var(--accent-color);
-        }
-        .privacy-option-label {
-            flex: 1;
-        }
-        .privacy-option-title {
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: block;
-        }
-        .privacy-option-desc {
-            font-size: 0.75rem;
-            color: #888;
-            display: block;
-            margin-top: 2px;
-        }
-        .privacy-option.badge-dev { opacity: 0.6; }
-        .dev-badge {
-            background: var(--purple);
-            color: white;
-            font-size: 0.6rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 8px;
+            justify-content: space-between;
+            padding: 0 4%;
+            z-index: 100;
+            transition: background 0.3s ease;
         }
 
-        /* Access Code Input */
-        #access-code-container {
-            display: none;
-            margin-top: 10px;
+        .nav-header.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
         }
-        #access-code-container.active { display: block; }
-        .code-input-group {
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            font-weight: 600;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding-top: 70px;
+            min-height: 100vh;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            height: 85vh;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            padding: 0 4%;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 50%, #1a1a2e 100%);
+            z-index: -2;
+        }
+
+        .hero-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(229, 9, 20, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .hero-content {
+            max-width: 600px;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--accent-gold);
+            color: #000;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 20px rgba(0,0,0,0.5);
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-gold);
+            color: #000;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-gold-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--accent-red-hover);
+        }
+
+        /* Movie Grid Section */
+        .section {
+            padding: 60px 4%;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--accent-gold);
+            border-radius: 2px;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        @media (min-width: 1200px) {
+            .movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .movie-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        .movie-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            aspect-ratio: 2/3;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .movie-card:hover .movie-poster {
+            transform: scale(1.1);
+        }
+
+        .movie-overlay {
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-dark);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+        }
+
+        .movie-card:hover .movie-overlay {
+            opacity: 1;
+        }
+
+        .movie-info {
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .movie-card:hover .movie-info {
+            transform: translateY(0);
+        }
+
+        .movie-title-card {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .movie-meta-card {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .movie-actions {
             display: flex;
             gap: 10px;
         }
-        .code-input {
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.8rem;
             flex: 1;
+            justify-content: center;
+        }
+
+        .badge-rating {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: var(--accent-gold);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Loket Page */
+        .loket-page {
+            display: none;
+            min-height: 100vh;
+            background: var(--bg-secondary);
+        }
+
+        .loket-page.active {
+            display: block;
+        }
+
+        .loket-hero {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%);
+            padding: 60px 4%;
             text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .loket-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .loket-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .loket-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 40px 4%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 1024px) {
+            .loket-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .loket-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .loket-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .loket-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .loket-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .room-grid-mini {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .room-mini {
+            aspect-ratio: 1;
+            background: var(--bg-hover);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .room-mini.occupied {
+            background: rgba(245, 197, 24, 0.2);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .room-mini:hover:not(.occupied) {
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        /* Create Room Page */
+        .create-page {
+            display: none;
+            min-height: 100vh;
+            background: var(--bg-secondary);
+            padding: 40px 4%;
+        }
+
+        .create-page.active {
+            display: block;
+        }
+
+        .create-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .create-container {
+                padding: 25px;
+                border-radius: 12px;
+            }
+        }
+
+        .create-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .create-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .create-subtitle {
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--bg-hover);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--accent-gold);
+            background: var(--bg-primary);
+        }
+
+        .form-input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* Video Preview */
+        .video-preview {
+            background: var(--bg-hover);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid var(--border-color);
+            display: none;
+        }
+
+        .video-preview.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+            border-color: var(--accent-gold);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .video-preview-content {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        @media (max-width: 600px) {
+            .video-preview-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        .video-thumb {
+            width: 160px;
+            height: 90px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .video-info-preview h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--accent-gold);
+        }
+
+        .video-info-preview p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+        }
+
+        /* Tier Selection */
+        .tier-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .tier-option {
+            background: var(--bg-hover);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tier-option:hover:not(.disabled) {
+            border-color: var(--accent-gold);
+            transform: translateY(-3px);
+        }
+
+        .tier-option.selected {
+            border-color: var(--accent-gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .tier-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+        }
+
+        .dev-badge {
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: var(--accent-red);
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .tier-name {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .tier-price {
+            color: var(--accent-gold);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .tier-capacity {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .quota-display {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%);
+            border: 2px solid var(--accent-gold);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .quota-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            line-height: 1;
+        }
+
+        .quota-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* Cinema View - Redesigned */
+        .cinema-view {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .cinema-view.active {
+            display: flex;
+        }
+
+        .cinema-header {
+            height: 60px;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .cinema-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .cinema-badge {
+            background: var(--accent-gold);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .cinema-movie-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .cinema-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cinema-main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        @media (max-width: 1024px) {
+            .cinema-main {
+                flex-direction: column;
+            }
+        }
+
+        .cinema-player-area {
+            flex: 1;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .player-container {
+            width: 100%;
+            height: 100%;
+            max-width: 1920px;
+        }
+
+        .cinema-sidebar {
+            width: 380px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 1024px) {
+            .cinema-sidebar {
+                width: 100%;
+                height: 300px;
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+            }
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-users {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-message {
+            max-width: 85%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .chat-bubble {
+            background: var(--bg-hover);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border-bottom-left-radius: 4px;
+            word-wrap: break-word;
+        }
+
+        .chat-sender {
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .chat-text {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .chat-message.own {
+            align-self: flex-end;
+        }
+
+        .chat-message.own .chat-bubble {
+            background: var(--accent-gold);
+            color: #000;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.own .chat-sender {
+            color: rgba(0,0,0,0.6);
+        }
+
+        .chat-message.system {
+            align-self: center;
+            max-width: 90%;
+        }
+
+        .chat-message.system .chat-bubble {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            padding: 12px 20px;
+            color: white;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        /* Countdown Overlay */
+        .countdown-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .countdown-timer {
+            font-size: clamp(4rem, 10vw, 8rem);
+            font-weight: 800;
+            color: var(--accent-gold);
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 40px rgba(212, 175, 55, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .countdown-label {
             font-size: 1.2rem;
-            letter-spacing: 2px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-gold);
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .toast.error { border-left-color: var(--accent-red); }
+        .toast.success { border-left-color: var(--success); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .rules-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .rules-list li {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .rules-list li::before {
+            content: '•';
+            color: var(--accent-gold);
+            font-weight: bold;
+            font-size: 1.5rem;
+            line-height: 0.8;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--border-color);
         }
 
         /* Printer Animation */
-        #printer-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 100; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s;
-        }
-        #printer-overlay.active { opacity: 1; pointer-events: auto; }
-
-        .printer-body {
-            width: 280px; height: 40px; background: #333; border-radius: 4px;
-            position: relative; z-index: 2; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        }
-        .printer-slot {
-            width: 240px; height: 10px; background: #000; margin: 0 auto;
-            position: relative; top: 30px; z-index: 1;
-        }
-        .ticket-paper {
-            width: 220px; background: #fff; color: #000; padding: 15px; margin: 0 auto;
-            position: absolute; top: 35px; left: 50%; transform: translateX(-50%);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); font-family: 'Courier New', Courier, monospace;
-            text-align: center; border-top: 2px dashed #ccc; opacity: 0;
-        }
-        @keyframes printTicket {
-            0% { top: 40px; opacity: 1; }
-            100% { top: 400px; opacity: 1; }
-        }
-        .printer-status { margin-top: 450px; color: white; font-size: 0.9rem; text-align: center; }
-
-        /* Cinema View */
-        #cinema-view {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ffffff; 
-            z-index: 80; display: flex; flex-direction: column;
-            opacity: 0; pointer-events: none; transition: background-color 3s ease-in-out, opacity 0.5s;
-        }
-        #cinema-view.active { opacity: 1; pointer-events: auto; }
-        #cinema-view.lights-off { background-color: #000000; } 
-        
-        .cinema-video-container { flex: 3; position: relative; background: #000; display: flex; align-items: center; justify-content: center;}
-        .cinema-chat-container { 
-            flex: 1; background: #f5f5f5; display: flex; flex-direction: column; 
-            border-top: 1px solid #ddd; min-height: 200px; max-height: 40vh; transition: background-color 3s;
-        }
-        #cinema-view.lights-off .cinema-chat-container { background: #111; border-top: 1px solid #333; }
-        
-        .chat-box-cinema { flex: 1; overflow-y: auto; padding: 10px; font-size: 0.85rem; color: #333; transition: color 3s;}
-        #cinema-view.lights-off .chat-box-cinema { color: #fff; }
-        
-        .chat-msg { margin-bottom: 5px; background: #e0e0e0; color: #000; padding: 8px; border-radius: 6px; display: inline-block; max-width: 80%; word-wrap: break-word; transition: background 3s, color 3s;}
-        #cinema-view.lights-off .chat-msg { background: #222; color: #fff; }
-        
-        .chat-msg.system { color: #666; font-style: italic; display: block; font-size: 0.75rem; text-align: center; background: none !important; margin: 10px 0;}
-        #cinema-view.lights-off .chat-msg.system { color: #888; }
-        
-        .chat-input-area { padding: 10px; display: flex; border-top: 1px solid #ddd; background: #fff; transition: background 3s, border 3s;}
-        #cinema-view.lights-off .chat-input-area { background: #0a0a0a; border-top: 1px solid #333; }
-        
-        .chat-input-area input { 
-            flex: 1; background: #f0f0f0; border: 1px solid #ccc; color: #000; 
-            padding: 10px; border-radius: 20px; outline: none; font-family: inherit; transition: background 3s, color 3s, border 3s;
-        }
-        #cinema-view.lights-off .chat-input-area input { background: #222; border: 1px solid #444; color: #fff; }
-        
-        .cinema-info-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10; pointer-events: none; text-align: center;
-        }
-        .cinema-badge { 
-            position: absolute; background: rgba(0,0,0,0.6); color: #fff; padding: 5px 10px; 
-            border-radius: 4px; font-size: 0.8rem; backdrop-filter: blur(4px); pointer-events: auto; z-index: 20;
-        }
-        .badge-top-left { top: 10px; left: 10px; }
-        .badge-top-right { top: 10px; right: 10px; cursor: pointer; background: rgba(255,0,0,0.6); }
-        
-        .timer-display { color: var(--accent-color); font-weight: bold; font-size: 4rem; margin-bottom: 10px;}
-        .waiting-text { color: #555; font-weight: 600; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px;}
-        
-        .player-wrapper { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 5; }
-
-        /* Ticket Badge - Shows after printing */
-        #ticket-badge {
+        .printer-overlay {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, var(--gold) 0%, #ffed4e 100%);
-            color: #000;
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
-            z-index: 90;
-            transform: translateX(150%);
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            font-weight: 600;
-            min-width: 200px;
+            inset: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 2500;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        #ticket-badge.active { transform: translateX(0); }
-        #ticket-badge.hidden-badge { transform: translateX(150%); }
-        .ticket-badge-header {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.7;
-            margin-bottom: 5px;
+
+        .printer-overlay.active {
+            display: flex;
         }
-        .ticket-badge-content {
-            font-size: 1.1rem;
-            font-weight: 700;
+
+        .printer-device {
+            width: 300px;
+            height: 50px;
+            background: linear-gradient(180deg, #333 0%, #222 100%);
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
         }
-        .ticket-badge-close {
+
+        .printer-slot {
             position: absolute;
-            top: 5px;
-            right: 8px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            opacity: 0.5;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 260px;
+            height: 8px;
+            background: #111;
+            border-radius: 4px;
         }
-        .ticket-badge-close:hover { opacity: 1; }
 
-        /* Modal Rules */
-        #rules-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 200; display: flex;
-            align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        .ticket-printing {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 240px;
+            background: linear-gradient(135deg, #f5c518 0%, #d4af37 100%);
+            color: #000;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+            animation: printSlide 2s ease-out forwards;
         }
-        #rules-modal.open { opacity: 1; pointer-events: auto; }
-        .rules-content { background: var(--card-bg); width: 90%; max-width: 400px; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .rules-content h2 { margin-top: 0; color: var(--accent-color); }
-        .rules-list { padding-left: 20px; line-height: 1.6; font-size: 0.9rem; color: #ccc; }
-        .close-rules { margin-top: 20px; width: 100%; }
 
-        /* Loading Spinner */
+        @keyframes printSlide {
+            0% { transform: translateX(-50%) translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateX(-50%) translateY(300px); opacity: 1; }
+        }
+
+        .printer-status {
+            margin-top: 350px;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero-section { height: auto; padding: 100px 4% 60px; }
+            .section { padding: 40px 4%; }
+            .loket-grid { grid-template-columns: 1fr; }
+            .cinema-header { padding: 0 15px; }
+            .cinema-movie-title { display: none; }
+            .toast-container { left: 20px; right: 20px; max-width: none; }
+        }
+
+        /* Loading */
         .spinner {
             width: 20px;
             height: 20px;
-            border: 2px solid #333;
-            border-top-color: var(--accent-color);
+            border: 2px solid var(--border-color);
+            border-top-color: var(--accent-gold);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             display: inline-block;
-            margin-left: 10px;
         }
+
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Verify Button */
-        .verify-btn {
-            background: var(--cyan);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-top: 10px;
-            width: 100%;
-            transition: all 0.2s;
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        .verify-btn:hover { background: #00b8e6; }
-        .verify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
     </style>
 </head>
 <body>
 
-    <div id="toast-container"></div>
-
-    <!-- Ticket Badge -->
-    <div id="ticket-badge">
-        <span class="ticket-badge-close" onclick="hideTicketBadge()">×</span>
-        <div class="ticket-badge-header">Your Ticket</div>
-        <div class="ticket-badge-content">
-            Loket <span id="ticket-loket">-</span> | Pintu <span id="ticket-pintu">-</span>
+    <!-- Jazz Music Indicator -->
+    <div class="jazz-indicator" id="jazz-indicator">
+        <div class="jazz-waves">
+            <div class="jazz-wave"></div>
+            <div class="jazz-wave"></div>
+            <div class="jazz-wave"></div>
+            <div class="jazz-wave"></div>
         </div>
+        <span>Jazz Lounge Playing</span>
     </div>
 
-    <!-- View: LOBBY -->
-    <div id="lobby-view">
-        <header>
-            <div class="logo">Th<span>MOvie</span></div>
-            <div class="rules-btn" onclick="toggleRules(true)">Rules</div>
-        </header>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
 
-        <div class="hero-section">
-            <div class="movie-card">
-                <div class="movie-poster" style="background-image: url('https://picsum.photos/seed/movie1/200/300');"></div>
-                <div class="movie-info">
-                    <div class="badge">REKOMENDASI</div>
-                    <div class="movie-title">The Midnight Cinema</div>
-                    <div class="movie-meta">Horror • Mystery • 1j 45m</div>
+    <!-- Navigation -->
+    <nav class="nav-header" id="nav-header">
+        <div class="logo" onclick="showPage('home')">ThMOvie</div>
+        <div class="nav-links">
+            <a class="nav-link active" onclick="showPage('home')" data-page="home">Beranda</a>
+            <a class="nav-link" onclick="showPage('loket')" data-page="loket">Loket</a>
+            <a class="nav-link" onclick="showRules()">Rules</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+
+        <!-- HOME PAGE: Movie Cards -->
+        <div id="home-page" class="page-section">
+            <!-- Hero -->
+            <section class="hero-section">
+                <div class="hero-bg"></div>
+                <div class="hero-pattern"></div>
+                <div class="hero-content">
+                    <span class="hero-badge">Premium Watch Party</span>
+                    <h1 class="hero-title">Rasakan Pengalaman Bioskop Premium di Rumah</h1>
+                    <p class="hero-description">
+                        Tonton film favorit bersama teman-teman dengan kualitas streaming HD. 
+                        Nikmati suasana lounge yang elegan dan chat realtime.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="scrollToMovies()">
+                            <span>🎬</span> Jelajahi Film
+                        </button>
+                        <button class="btn btn-secondary" onclick="showPage('loket')">
+                            <span>🎫</span> Cari Loket
+                        </button>
+                    </div>
                 </div>
+            </section>
+
+            <!-- Now Playing -->
+            <section class="section" id="movies-section">
+                <div class="section-header">
+                    <h2 class="section-title">Sedang Tayang</h2>
+                </div>
+                <div class="movie-grid" id="movie-grid">
+                    <!-- Movies injected by JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- LOKET PAGE -->
+        <div id="loket-page" class="loket-page">
+            <div class="loket-hero">
+                <h1 class="loket-title">Pilih Loket Anda</h1>
+                <p class="loket-subtitle">Setiap loket memiliki 30 room dengan pengalaman menonton yang berbeda. Pilih loket yang tersedia untuk melihat room kosong.</p>
+            </div>
+            <div class="loket-grid" id="loket-grid">
+                <!-- Loket cards injected by JS -->
             </div>
         </div>
 
-        <div class="booking-actions">
-            <button class="btn btn-primary" onclick="openCreateRoom()">BUAT ROOM</button>
-            <button class="btn btn-secondary" onclick="showToast('Silakan pilih Pintu di bawah untuk Join Room!')">JOIN ROOM</button>
+        <!-- CREATE ROOM PAGE -->
+        <div id="create-page" class="create-page">
+            <div class="create-container">
+                <div class="create-header">
+                    <h1 class="create-title">🎫 Pesan Tiket</h1>
+                    <p class="create-subtitle">Buat room nonton bareng dengan pengaturan sesuai kebutuhan Anda</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Film yang Dipilih</label>
+                    <input type="text" id="selected-movie-display" class="form-input" disabled placeholder="Belum memilih film">
+                    <input type="hidden" id="room-video-url">
+                    <p class="form-hint">Film akan terisi otomatis jika dipilih dari halaman utama, atau Anda bisa memilih film lain</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Link YouTube Manual (Opsional)</label>
+                    <input type="text" id="manual-video-url" class="form-input" placeholder="https://youtube.com/watch?v=..." onblur="verifyManualVideo()">
+                    <p class="form-hint">Kosongkan jika sudah memilih dari card film</p>
+                </div>
+
+                <!-- Video Preview -->
+                <div class="video-preview" id="video-preview">
+                    <div class="video-preview-content">
+                        <img id="preview-thumb" class="video-thumb" src="" alt="">
+                        <div class="video-info-preview">
+                            <h4 id="preview-title">-</h4>
+                            <p id="preview-channel">-</p>
+                            <p id="preview-duration">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Jadwal Tayang</label>
+                    <input type="datetime-local" id="room-time" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Pilih Tier</label>
+                    <div class="tier-options" id="tier-options">
+                        <div class="tier-option selected" onclick="selectTier('free')" data-tier="free">
+                            <div class="tier-name">Gratis</div>
+                            <div class="tier-price">Rp 0</div>
+                            <div class="tier-capacity">30-57 Kursi</div>
+                        </div>
+                        <div class="tier-option disabled" onclick="showToast('Fitur ini dalam pengembangan')">
+                            <span class="dev-badge">SOON</span>
+                            <div class="tier-name">Premium</div>
+                            <div class="tier-price">Rp 10.000/bln</div>
+                            <div class="tier-capacity">100-160 Kursi</div>
+                        </div>
+                        <div class="tier-option disabled" onclick="showToast('Fitur ini dalam pengembangan')">
+                            <span class="dev-badge">SOON</span>
+                            <div class="tier-name">VIP</div>
+                            <div class="tier-price">Rp 30.000/bln</div>
+                            <div class="tier-capacity">200-300 Kursi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quota-display">
+                    <div class="quota-number" id="quota-display">45</div>
+                    <div class="quota-label">Kursi Tersedia (Acak 30-57)</div>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%;" onclick="processBooking()">
+                    Konfirmasi Pemesanan
+                </button>
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="showPage('home')">
+                    Batal
+                </button>
+            </div>
         </div>
 
-        <div class="hallway-label">← Geser untuk cari Loket & Pintu →</div>
-
-        <div class="hallway-wrapper">
-            <div class="nav-arrow left" onclick="scrollHallway(-1)">&#10094;</div>
-            <div class="hallway-container" id="hallway"></div>
-            <div class="nav-arrow right" onclick="scrollHallway(1)">&#10095;</div>
-        </div>
     </div>
 
-    <!-- View: CREATE ROOM -->
-    <div id="create-room-view">
-        <button class="btn back-btn" onclick="closeCreateRoom()">← Kembali</button>
-        <h2 style="color: var(--accent-color); margin-top: 0;">Buat Ruang Nonton</h2>
+    <!-- CINEMA VIEW -->
+    <div class="cinema-view" id="cinema-view">
+        <div class="cinema-header">
+            <div class="cinema-info">
+                <span class="cinema-badge" id="cinema-badge">LOKET 1 | ROOM 5</span>
+                <span class="cinema-movie-title" id="cinema-movie-title">The Midnight Cinema</span>
+            </div>
+            <div class="cinema-actions">
+                <button class="btn btn-secondary btn-small" onclick="toggleFullscreen()">⛶</button>
+                <button class="btn btn-danger btn-small" onclick="exitCinema()">Keluar</button>
+            </div>
+        </div>
         
-        <div class="form-group">
-            <label class="form-label">Link Video YouTube (Film Utama)</label>
-            <input type="text" id="room-video-url" class="form-input" placeholder="https://youtube.com/watch?v=..." onblur="checkVideoInfo()">
-            <button class="verify-btn" id="verify-btn" onclick="verifyVideo()">
-                Verifikasi Video <span id="verify-spinner" class="spinner hidden"></span>
-            </button>
-        </div>
-
-        <!-- Video Info Display -->
-        <div id="video-info-display">
-            <div class="video-preview-container">
-                <img id="video-thumbnail" class="video-thumbnail" src="" alt="Thumbnail">
-                <div class="video-details">
-                    <div class="video-title-display" id="video-title">-</div>
-                    <div class="video-meta-display">Channel: <span id="video-channel">-</span></div>
-                    <div class="video-meta-display">Durasi: <span id="video-duration">-</span></div>
-                    <div class="video-meta-display">ID: <span id="video-id-display">-</span></div>
+        <div class="cinema-main">
+            <div class="cinema-player-area">
+                <div class="countdown-overlay" id="countdown-overlay">
+                    <div class="countdown-timer" id="countdown-timer">05:00</div>
+                    <div class="countdown-label">Menunggu Waktu Tayang</div>
                 </div>
+                <div class="player-container" id="player-container"></div>
             </div>
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Waktu Tayang (Jadwal)</label>
-            <input type="datetime-local" id="room-time" class="form-input">
-        </div>
-
-        <!-- Privacy Options -->
-        <div class="privacy-options">
-            <label class="form-label">Pengaturan Privasi</label>
             
-            <div class="privacy-option selected" onclick="selectPrivacy('public')">
-                <input type="radio" name="privacy" value="public" checked>
-                <div class="privacy-option-label">
-                    <span class="privacy-option-title">🌐 Public</span>
-                    <span class="privacy-option-desc">Semua orang bisa melihat dan join</span>
+            <div class="cinema-sidebar">
+                <div class="chat-header">
+                    <span>💬 Chat Room</span>
+                    <span class="chat-users" id="chat-users">0 online</span>
                 </div>
-            </div>
-
-            <div class="privacy-option" onclick="selectPrivacy('private')">
-                <input type="radio" name="privacy" value="private">
-                <div class="privacy-option-label">
-                    <span class="privacy-option-title">🔒 Private</span>
-                    <span class="privacy-option-desc">Hanya yang punya kode akses bisa masuk</span>
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Ketik pesan..." onkeypress="handleChatKey(event)">
+                    <button class="btn btn-primary btn-icon" onclick="sendChat()">➤</button>
                 </div>
-            </div>
-
-            <div id="access-code-container">
-                <label class="form-label">Kode Akses (4 digit)</label>
-                <div class="code-input-group">
-                    <input type="text" id="access-code" class="form-input code-input" maxlength="4" placeholder="0000" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,4)">
-                </div>
-            </div>
-
-            <div class="privacy-option badge-dev" onclick="showToast('Fitur ini masih dalam pengembangan')">
-                <input type="radio" name="privacy" value="link_only" disabled>
-                <div class="privacy-option-label">
-                    <span class="privacy-option-title">🔗 Link Only <span class="dev-badge">DEV</span></span>
-                    <span class="privacy-option-desc">Hanya yang punya link bisa masuk (Under Development)</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Tipe Akun (Simulasi Tier)</label>
-            <select id="room-tier" class="form-select">
-                <option value="free">Gratis (Max 57)</option>
-                <option value="year_10k">Berlangganan 10rb/Thn (100-142)</option>
-                <option value="month_10k">Berlangganan 10rb/Bln (100-160)</option>
-                <option value="year_20k">Berlangganan 20rb/Thn (166-198)</option>
-                <option value="month_20k">Berlangganan 20rb/Bln (166-200)</option>
-                <option value="month_30k">VIP 30rb/Bln (200-300)</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Estimasi Kuota: <span id="quota-preview" style="color: var(--accent-color);">0</span> Kursi</label>
-        </div>
-        <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="processBooking()">BOOKING SEKARANG</button>
-    </div>
-
-    <!-- Overlay: Printer -->
-    <div id="printer-overlay">
-        <div class="printer-body"></div>
-        <div class="printer-slot"></div>
-        <div id="ticket-stack"></div>
-        <div class="printer-status">Mencetak Tiket...</div>
-    </div>
-
-    <!-- View: CINEMA -->
-    <div id="cinema-view">
-        <div class="cinema-badge badge-top-left">Loket <span id="cinema-loket">?</span> | Pintu <span id="cinema-pintu">?</span></div>
-        <div class="cinema-badge badge-top-right" onclick="exitCinema()">KELUAR</div>
-        
-        <div class="cinema-video-container">
-            <div class="cinema-info-overlay" id="cinema-overlay-ui">
-                <div class="timer-display" id="countdown-timer">--:--</div>
-                <div class="waiting-text">Menunggu Waktu Tayang</div>
-            </div>
-            <div class="player-wrapper hidden" id="player-wrapper">
-                <div id="player"></div>
-            </div>
-        </div>
-
-        <div class="cinema-chat-container">
-            <div class="chat-box-cinema" id="chat-box"></div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-msg" placeholder="Ketik pesan..." onkeypress="handleChat(event)">
             </div>
         </div>
     </div>
 
-    <!-- Modal: Rules -->
-    <div id="rules-modal">
-        <div class="rules-content">
-            <h2>Rules ThMOvie</h2>
-            <ul class="rules-list">
-                <li>Harap sopan di dalam chat room.</li>
-                <li>Room akan otomatis terhapus 24 jam setelah film selesai.</li>
-                <li>Jangan share link sensitif.</li>
-                <li>Max kapasitas tergantung Tier User.</li>
-                <li>Video akan play otomatis sesuai jadwal yang ditentukan Admin Room.</li>
-                <li>Gunakan YouTube Link yang valid.</li>
-            </ul>
-            <button class="btn btn-primary close-rules" onclick="toggleRules(false)">Saya Mengerti</button>
+    <!-- PRINTER OVERLAY -->
+    <div class="printer-overlay" id="printer-overlay">
+        <div class="printer-device">
+            <div class="printer-slot"></div>
+        </div>
+        <div id="ticket-animation-container"></div>
+        <div class="printer-status">Mencetak tiket Anda...</div>
+    </div>
+
+    <!-- RULES MODAL -->
+    <div class="modal-overlay" id="rules-modal" onclick="closeRules(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">📋 Rules ThMOvie</h2>
+            </div>
+            <div class="modal-body">
+                <ul class="rules-list">
+                    <li>Harap sopan di dalam chat room dan hormati penonton lain</li>
+                    <li>Room akan otomatis terhapus 24 jam setelah film selesai tayang</li>
+                    <li>Dilarang share link atau konten yang melanggar hak cipta</li>
+                    <li>Kapasitas maksimal tergantung pada tier yang dipilih (Gratis: 30-57 kursi)</li>
+                    <li>Video akan diputar otomatis sesuai jadwal yang telah ditentukan</li>
+                    <li>Gunakan link YouTube yang valid dan dapat diakses publik</li>
+                    <li>Admin room bertanggung jawab atas konten yang diputar</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" style="width: 100%;" onclick="closeRules()">Saya Mengerti</button>
+            </div>
         </div>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
-
     <script>
-        // --- KONFIGURASI FIREBASE ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
             authDomain: "thmovie-3646f.firebaseapp.com",
@@ -628,747 +1438,579 @@
             messagingSenderId: "1041137356432",
             appId: "1:1041137356432:web:96edbe3402937c82f09215"
         };
-        
-        // Initialize Firebase with error handling
+
         let db;
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
-            console.log("Firebase initialized successfully");
         } catch (error) {
-            console.error("Firebase initialization error:", error);
-            showToast("Error: Gagal terhubung ke database", "error");
+            console.error("Firebase error:", error);
         }
 
-        // --- STATE VARIABLES ---
+        // --- STATE ---
+        let currentPage = 'home';
+        let selectedMovie = null;
+        let currentTier = 'free';
         let currentRoomId = null;
         let player = null;
         let roomData = null;
-        let dbRoomRef = null; 
-        let myUsername = "User_" + Math.floor(Math.random() * 1000);
-        let currentVideoPhase = null;
+        let dbRoomRef = null;
+        let myUsername = "User_" + Math.floor(Math.random() * 10000);
         let countdownInterval = null;
         let verifiedVideoData = null;
-        let currentPrivacy = 'public';
-        let currentTicketData = null;
-        
-        // Konstanta Video
-        const INTRO_VIDEO_ID = "9v1atEBmUIc";
-        const INTRO_DURATION_SEC = 15; 
+        let jazzAudio = null;
 
-        // --- DOM ELEMENTS ---
-        const createRoomView = document.getElementById('create-room-view');
-        const printerOverlay = document.getElementById('printer-overlay');
-        const ticketStack = document.getElementById('ticket-stack');
-        const cinemaView = document.getElementById('cinema-view');
-        const quotaPreview = document.getElementById('quota-preview');
-        const hallway = document.getElementById('hallway');
-        const cinemaOverlayUi = document.getElementById('cinema-overlay-ui');
-        const playerWrapper = document.getElementById('player-wrapper');
-        const ticketBadge = document.getElementById('ticket-badge');
+        const INTRO_VIDEO_ID = "9v1atEBmUIc";
+        const INTRO_DURATION_SEC = 15;
+
+        // --- SAMPLE MOVIES ---
+        const sampleMovies = [
+            {
+                id: "9v1atEBmUIc",
+                title: "The Midnight Cinema",
+                genre: "Horror • Mystery",
+                duration: "1j 45m",
+                rating: "8.5",
+                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=60",
+                description: "Sebuah pengalaman menonton yang mencekam di tengah malam."
+            },
+            {
+                id: "dQw4w9WgXcQ",
+                title: "Golden Hour Jazz",
+                genre: "Music • Documentary",
+                duration: "2j 10m",
+                rating: "9.0",
+                poster: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=500&auto=format&fit=crop&q=60",
+                description: "Dokumenter perjalanan musik jazz klasik."
+            },
+            {
+                id: "M7lc1UVf-VE",
+                title: "Cyber Dreams",
+                genre: "Sci-Fi • Action",
+                duration: "2j 15m",
+                rating: "8.8",
+                poster: "https://images.unsplash.com/photo-1535016120720-40c6874c3b1c?w=500&auto=format&fit=crop&q=60",
+                description: "Petualangan di dunia maya yang penuh aksi."
+            },
+            {
+                id: "tgbNymZ7vqY",
+                title: "Ocean Waves",
+                genre: "Drama • Romance",
+                duration: "1j 55m",
+                rating: "8.2",
+                poster: "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=500&auto=format&fit=crop&q=60",
+                description: "Kisah cinta yang terjalin di tepi pantai."
+            },
+            {
+                id: "aqz-KE-bpKQ",
+                title: "Big Buck Bunny",
+                genre: "Animation • Comedy",
+                duration: "10m",
+                rating: "7.5",
+                poster: "https://images.unsplash.com/photo-1560167016-022b78a0258e?w=500&auto=format&fit=crop&q=60",
+                description: "Petualangan lucu seekor kelinci besar."
+            },
+            {
+                id: "LXb3EKWsInQ",
+                title: "Nature's Beauty",
+                genre: "Documentary",
+                duration: "1j 30m",
+                rating: "9.2",
+                poster: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&auto=format&fit=crop&q=60",
+                description: "Keindahan alam yang menakjubkan."
+            }
+        ];
 
         // --- INIT ---
         window.onload = function() {
-            generateHallway();
-            updateQuotaPreview();
-            setupDateTimeInputMin();
+            renderMovies();
+            renderLoket();
+            setupDateTimeMin();
+            initJazzMusic();
             
-            // Test Firebase connection
-            if (db) {
-                db.ref('.info/connected').on('value', (snap) => {
-                    if (snap.val() === true) {
-                        console.log("Connected to Firebase");
-                    } else {
-                        console.log("Disconnected from Firebase");
-                    }
-                });
-            }
+            // Scroll effect for nav
+            window.addEventListener('scroll', () => {
+                const nav = document.getElementById('nav-header');
+                if (window.scrollY > 50) {
+                    nav.classList.add('scrolled');
+                } else {
+                    nav.classList.remove('scrolled');
+                }
+            });
         };
 
-        // --- UI FUNCTIONS ---
-        function showToast(msg, type = 'default') {
-            const container = document.getElementById('toast-container');
-            const el = document.createElement('div');
-            el.className = 'toast';
-            if (type === 'success') el.classList.add('success');
-            if (type === 'error') el.classList.add('error');
-            if (type === 'warning') el.classList.add('warning');
-            el.innerText = msg;
-            container.appendChild(el);
-            setTimeout(() => {
-                el.style.opacity = '0';
-                setTimeout(() => el.remove(), 300);
-            }, 3000);
+        // --- JAZZ MUSIC ---
+        function initJazzMusic() {
+            // Simulasi indikator musik jazz (tanpa audio autoplay untuk UX yang baik)
+            // Di production, bisa menggunakan audio element yang di-trigger setelah interaksi user
+            const indicator = document.getElementById('jazz-indicator');
+            
+            // Toggle musik (simulasi visual)
+            indicator.addEventListener('click', () => {
+                indicator.style.opacity = indicator.style.opacity === '0.5' ? '1' : '0.5';
+                showToast(indicator.style.opacity === '0.5' ? 'Jazz Lounge Paused' : 'Jazz Lounge Playing');
+            });
         }
 
-        function toggleRules(show) {
-            document.getElementById('rules-modal').classList.toggle('open', show);
+        // --- NAVIGATION ---
+        function showPage(page) {
+            // Hide all pages
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('loket-page').classList.remove('active');
+            document.getElementById('create-page').classList.remove('active');
+            document.getElementById('cinema-view').classList.remove('active');
+            
+            // Update nav
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.page === page) link.classList.add('active');
+            });
+            
+            // Show selected page
+            if (page === 'home') {
+                document.getElementById('home-page').style.display = 'block';
+                window.scrollTo(0, 0);
+            } else if (page === 'loket') {
+                document.getElementById('loket-page').classList.add('active');
+            } else if (page === 'create') {
+                document.getElementById('create-page').classList.add('active');
+            }
+            
+            currentPage = page;
         }
 
-        function openCreateRoom() { 
-            createRoomView.classList.add('active'); 
-        }
-        
-        function closeCreateRoom() { 
-            createRoomView.classList.remove('active'); 
-            // Reset form
-            document.getElementById('room-video-url').value = '';
-            document.getElementById('video-info-display').classList.remove('active');
-            verifiedVideoData = null;
-            selectPrivacy('public');
+        function scrollToMovies() {
+            document.getElementById('movies-section').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function scrollHallway(direction) {
-            hallway.scrollBy({ left: hallway.clientWidth * 0.85 * direction, behavior: 'smooth' });
+        // --- MOVIE CARDS ---
+        function renderMovies() {
+            const grid = document.getElementById('movie-grid');
+            grid.innerHTML = sampleMovies.map(movie => `
+                <div class="movie-card" onclick="selectMovie('${movie.id}')">
+                    <img class="movie-poster" src="${movie.poster}" alt="${movie.title}">
+                    <span class="badge-rating">★ ${movie.rating}</span>
+                    <div class="movie-overlay">
+                        <div class="movie-info">
+                            <h3 class="movie-title-card">${movie.title}</h3>
+                            <p class="movie-meta-card">${movie.genre} • ${movie.duration}</p>
+                            <div class="movie-actions">
+                                <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); createRoomFromMovie('${movie.id}')">
+                                    Tonton Sekarang
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // --- VIDEO VERIFICATION ---
+        function selectMovie(id) {
+            const movie = sampleMovies.find(m => m.id === id);
+            if (movie) {
+                selectedMovie = movie;
+                showToast(`Dipilih: ${movie.title}`, 'success');
+            }
+        }
+
+        function createRoomFromMovie(id) {
+            const movie = sampleMovies.find(m => m.id === id);
+            if (!movie) return;
+            
+            selectedMovie = movie;
+            
+            // Pre-fill form
+            document.getElementById('selected-movie-display').value = movie.title;
+            document.getElementById('room-video-url').value = `https://youtube.com/watch?v=${movie.id}`;
+            
+            // Show preview
+            document.getElementById('video-preview').classList.add('active');
+            document.getElementById('preview-thumb').src = movie.poster;
+            document.getElementById('preview-title').textContent = movie.title;
+            document.getElementById('preview-channel').textContent = 'ThMOvie Collection';
+            document.getElementById('preview-duration').textContent = movie.duration;
+            
+            verifiedVideoData = {
+                id: movie.id,
+                title: movie.title,
+                channel: 'ThMOvie Collection',
+                duration: movie.duration
+            };
+            
+            showPage('create');
+        }
+
+        // --- LOKET PAGE ---
+        function renderLoket() {
+            const grid = document.getElementById('loket-grid');
+            let html = '';
+            
+            for (let l = 1; l <= 6; l++) {
+                html += `
+                    <div class="loket-card" onclick="openLoket(${l})">
+                        <div class="loket-number">LOKET ${l}</div>
+                        <div class="loket-status">
+                            <span class="status-dot"></span>
+                            <span>30 Room Tersedia</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">
+                            Klik untuk melihat room kosong
+                        </p>
+                        <div class="room-grid-mini" id="loket-${l}-preview">
+                            ${generateRoomPreview(l)}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = html;
+        }
+
+        function generateRoomPreview(loketNum) {
+            let html = '';
+            const roomsPerLoket = 30;
+            const startRoom = ((loketNum - 1) * roomsPerLoket) + 1;
+            
+            for (let i = 0; i < 10; i++) {
+                html += `<div class="room-mini">${startRoom + i}</div>`;
+            }
+            return html;
+        }
+
+        function openLoket(loketNum) {
+            showToast(`Membuka Loket ${loketNum}...`);
+            // Di sini bisa expand untuk show 30 room
+            // Untuk sekarang, langsung ke create room dengan loket random
+            const randomRoom = Math.floor(Math.random() * 30) + ((loketNum - 1) * 30) + 1;
+            showToast(`Room ${randomRoom} tersedia!`, 'success');
+        }
+
+        // --- CREATE ROOM ---
+        function setupDateTimeMin() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('room-time').min = now.toISOString().slice(0, 16);
+        }
+
+        function verifyManualVideo() {
+            const url = document.getElementById('manual-video-url').value.trim();
+            if (!url) return;
+            
+            const videoId = extractVideoID(url);
+            if (!videoId) {
+                showToast('URL YouTube tidak valid', 'error');
+                return;
+            }
+            
+            // Preview manual
+            document.getElementById('video-preview').classList.add('active');
+            document.getElementById('preview-thumb').src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+            document.getElementById('preview-title').textContent = 'Video Manual';
+            document.getElementById('preview-channel').textContent = 'YouTube';
+            document.getElementById('preview-duration').textContent = 'Durasi akan terdeteksi otomatis';
+            
+            verifiedVideoData = {
+                id: videoId,
+                title: 'Video Manual',
+                channel: 'YouTube',
+                duration: 'N/A'
+            };
+            
+            document.getElementById('room-video-url').value = url;
+        }
+
+        function selectTier(tier) {
+            if (tier !== 'free') return; // Only free is available
+            
+            document.querySelectorAll('.tier-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`[data-tier="${tier}"]`).classList.add('selected');
+            currentTier = tier;
+            updateQuota();
+        }
+
+        function updateQuota() {
+            const min = 30, max = 57;
+            const quota = Math.floor(Math.random() * (max - min + 1)) + min;
+            document.getElementById('quota-display').textContent = quota;
+            return quota;
+        }
+
         function extractVideoID(url) {
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
             const match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : null;
         }
 
-        function parseDuration(duration) {
-            // Parse ISO 8601 duration (PT1H2M3S)
-            const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-            if (!match) return "Unknown";
-            const hours = parseInt(match[1] || 0);
-            const minutes = parseInt(match[2] || 0);
-            const seconds = parseInt(match[3] || 0);
-            
-            if (hours > 0) {
-                return `${hours}j ${minutes}m ${seconds}d`;
-            } else if (minutes > 0) {
-                return `${minutes}m ${seconds}d`;
-            } else {
-                return `${seconds}d`;
-            }
-        }
-
-        async function verifyVideo() {
-            const urlInput = document.getElementById('room-video-url').value.trim();
-            const videoId = extractVideoID(urlInput);
-            
-            if (!videoId) {
-                showToast("Format URL YouTube tidak valid!", "error");
-                return;
-            }
-
-            const verifyBtn = document.getElementById('verify-btn');
-            const spinner = document.getElementById('verify-spinner');
-            
-            verifyBtn.disabled = true;
-            spinner.classList.remove('hidden');
-
-            try {
-                // Using YouTube oEmbed API (no key required)
-                const response = await fetch(`https://youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
-                
-                if (!response.ok) throw new Error('Video not found');
-                
-                const data = await response.json();
-                
-                // Get duration using no-key method (iframe API estimation)
-                // For now, we'll use a placeholder or fetch via alternative method
-                // Using YouTube Data API v3 with a demo key approach or alternative
-                
-                // Try to get duration from alternative source
-                let duration = "Unknown";
-                try {
-                    const infoResponse = await fetch(`https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            videoId: videoId,
-                            context: {
-                                client: {
-                                    clientName: "ANDROID",
-                                    clientVersion: "17.10.35"
-                                }
-                            }
-                        })
-                    });
-                    const infoData = await infoResponse.json();
-                    if (infoData.videoDetails && infoData.videoDetails.lengthSeconds) {
-                        const seconds = parseInt(infoData.videoDetails.lengthSeconds);
-                        const mins = Math.floor(seconds / 60);
-                        const secs = seconds % 60;
-                        duration = mins > 0 ? `${mins}m ${secs}d` : `${secs}d`;
-                    }
-                } catch (e) {
-                    console.log("Could not fetch duration, using placeholder");
-                    duration = "N/A (akan terdeteksi saat play)";
-                }
-
-                verifiedVideoData = {
-                    id: videoId,
-                    title: data.title,
-                    channel: data.author_name,
-                    thumbnail: data.thumbnail_url,
-                    duration: duration
-                };
-
-                // Update UI
-                document.getElementById('video-title').textContent = data.title;
-                document.getElementById('video-channel').textContent = data.author_name;
-                document.getElementById('video-duration').textContent = duration;
-                document.getElementById('video-id-display').textContent = videoId;
-                document.getElementById('video-thumbnail').src = data.thumbnail_url;
-                document.getElementById('video-info-display').classList.add('active');
-                
-                showToast("Video berhasil diverifikasi!", "success");
-                
-            } catch (error) {
-                console.error("Verification error:", error);
-                showToast("Gagal verifikasi video. Coba URL lain.", "error");
-                verifiedVideoData = null;
-            } finally {
-                verifyBtn.disabled = false;
-                spinner.classList.add('hidden');
-            }
-        }
-
-        function checkVideoInfo() {
-            const url = document.getElementById('room-video-url').value.trim();
-            if (url && !verifiedVideoData) {
-                // Auto verify on blur if not already verified
-                // verifyVideo(); // Optional: enable for auto-verify
-            }
-        }
-
-        // --- PRIVACY OPTIONS ---
-        function selectPrivacy(type) {
-            currentPrivacy = type;
-            document.querySelectorAll('.privacy-option').forEach(opt => {
-                opt.classList.remove('selected');
-                opt.querySelector('input').checked = false;
-            });
-            
-            const selectedOption = document.querySelector(`input[value="${type}"]`).closest('.privacy-option');
-            selectedOption.classList.add('selected');
-            selectedOption.querySelector('input').checked = true;
-            
-            const codeContainer = document.getElementById('access-code-container');
-            if (type === 'private') {
-                codeContainer.classList.add('active');
-            } else {
-                codeContainer.classList.remove('active');
-            }
-        }
-
-        // --- HALLWAY & ROOM LOGIC ---
-        function generateHallway() {
-            let html = '';
-            const totalLoket = 6;
-            const roomsPerLoket = 10;
-            
-            for (let l = 1; l <= totalLoket; l++) {
-                html += `<div class="loket-column">
-                            <div class="loket-header">LOKET ${l}</div>
-                            <div class="pintu-container">`;
-                let startPintu = ((l-1) * roomsPerLoket) + 1;
-                for (let p = 0; p < roomsPerLoket; p++) {
-                    let pintuNum = startPintu + p;
-                    html += `<div class="pintu-item" id="door-${l}-${pintuNum}" onclick="tryJoinRoom(${l}, ${pintuNum})">
-                                <div class="pintu-number">${pintuNum}</div>
-                                <div class="pintu-status">KOSONG</div>
-                             </div>`;
-                }
-                html += `   </div></div>`;
-            }
-            hallway.innerHTML = html;
-            listenToRooms();
-        }
-
-        function listenToRooms() {
-            if (!db) return;
-            
-            db.ref('rooms').on('value', (snapshot) => {
-                // Reset all doors
-                document.querySelectorAll('.pintu-item').forEach(el => {
-                    el.classList.remove('occupied');
-                    el.querySelector('.pintu-status').innerText = "KOSONG";
-                });
-
-                const rooms = snapshot.val();
-                if (!rooms) return;
-
-                Object.keys(rooms).forEach(key => {
-                    const room = rooms[key];
-                    if (room.loket && room.pintu) {
-                        const doorId = `door-${room.loket}-${room.pintu}`;
-                        const el = document.getElementById(doorId);
-                        if (el) {
-                            el.classList.add('occupied');
-                            el.querySelector('.pintu-status').innerText = "TERISI";
-                        }
-                    }
-                });
-            }, (error) => {
-                console.error("Firebase listen error:", error);
-                showToast("Error koneksi ke server", "error");
-            });
-        }
-
-        function tryJoinRoom(loket, pintu) {
-            if (!db) {
-                showToast("Database tidak tersedia", "error");
-                return;
-            }
-            
-            showToast(`Mengecek Loket ${loket} Pintu ${pintu}...`);
-            
-            db.ref('rooms').orderByChild('loket').equalTo(loket).once('value')
-                .then(snapshot => {
-                    let found = false;
-                    snapshot.forEach(childSnapshot => {
-                        const room = childSnapshot.val();
-                        if (room.pintu === pintu) {
-                            found = true;
-                            
-                            // Check privacy
-                            if (room.privacy === 'private') {
-                                const code = prompt("Room ini private. Masukkan kode akses (4 digit):");
-                                if (code !== room.accessCode) {
-                                    showToast("Kode akses salah!", "error");
-                                    return;
-                                }
-                            }
-                            
-                            enterCinema(childSnapshot.key, room);
-                        }
-                    });
-                    if (!found) showToast("Pintu ini kosong / Belum ada room.");
-                })
-                .catch(error => {
-                    console.error("Join room error:", error);
-                    showToast("Gagal memeriksa room", "error");
-                });
-        }
-
-        // --- CREATE ROOM LOGIC ---
-        document.getElementById('room-tier').addEventListener('change', updateQuotaPreview);
-
-        function updateQuotaPreview() {
-            quotaPreview.innerText = getCapacity(document.getElementById('room-tier').value);
-        }
-
-        function setupDateTimeInputMin() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('room-time').min = now.toISOString().slice(0,16);
-        }
-
-        function getCapacity(tier) {
-            const ranges = {
-                'free': [1, 57], 'year_10k': [100, 142], 'month_10k': [100, 160],
-                'year_20k': [166, 198], 'month_20k': [166, 200], 'month_30k': [200, 300]
-            };
-            const [min, max] = ranges[tier] || [1, 57];
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
         function processBooking() {
-            const urlInput = document.getElementById('room-video-url').value.trim();
             const timeInput = document.getElementById('room-time').value;
-            const tier = document.getElementById('room-tier').value;
-
-            if (!urlInput || !timeInput) return showToast("Mohon lengkapi URL Video dan Waktu Tayang!", "error");
+            const videoUrl = document.getElementById('room-video-url').value;
             
-            // Use verified data if available
-            let videoId, videoTitle;
-            if (verifiedVideoData && verifiedVideoData.id) {
-                videoId = verifiedVideoData.id;
-                videoTitle = verifiedVideoData.title;
-            } else {
-                videoId = extractVideoID(urlInput);
-                if (!videoId) return showToast("Format URL YouTube tidak valid!", "error");
+            if (!timeInput) {
+                showToast('Pilih jadwal tayang terlebih dahulu!', 'error');
+                return;
             }
-
-            const rLoket = Math.floor(Math.random() * 6) + 1;
-            const roomsPerLoket = 10;
-            const startP = ((rLoket-1) * roomsPerLoket) + 1;
-            const rPintu = Math.floor(Math.random() * roomsPerLoket) + startP;
-            const capacity = getCapacity(tier);
+            
+            if (!videoUrl && !verifiedVideoData) {
+                showToast('Pilih film atau masukkan link YouTube!', 'error');
+                return;
+            }
+            
+            const quota = updateQuota();
             const scheduleTime = new Date(timeInput).getTime();
+            const videoId = verifiedVideoData ? verifiedVideoData.id : extractVideoID(videoUrl);
             
-            // Get privacy settings
-            const privacy = currentPrivacy;
-            const accessCode = privacy === 'private' ? document.getElementById('access-code').value : null;
+            // Random loket 1-6, room 1-30 per loket
+            const loket = Math.floor(Math.random() * 6) + 1;
+            const room = ((loket - 1) * 30) + Math.floor(Math.random() * 30) + 1;
             
-            if (privacy === 'private' && (!accessCode || accessCode.length !== 4)) {
-                return showToast("Kode akses harus 4 digit!", "error");
-            }
-
-            const newRoomRef = db.ref('rooms').push();
             const roomObj = {
-                loket: rLoket, 
-                pintu: rPintu, 
+                loket: loket,
+                room: room,
                 videoId: videoId,
-                videoTitle: videoTitle || "Unknown",
-                capacity: capacity,
-                scheduleTime: scheduleTime, 
+                videoTitle: verifiedVideoData ? verifiedVideoData.title : 'Unknown',
+                capacity: quota,
+                scheduleTime: scheduleTime,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
-                status: 'waiting', 
-                currentPlayTime: 0, 
-                isPlayingIntro: false, 
+                status: 'waiting',
                 phase: 'waiting',
-                privacy: privacy,
-                accessCode: accessCode,
+                tier: currentTier,
                 hostUsername: myUsername
             };
-
+            
+            const newRoomRef = db.ref('rooms').push();
             newRoomRef.set(roomObj)
                 .then(() => {
-                    currentTicketData = { loket: rLoket, pintu: rPintu, capacity: capacity };
-                    startPrintingAnimation(capacity, roomObj);
+                    showPrinterAnimation(loket, room, quota, newRoomRef.key);
                 })
                 .catch(err => {
-                    console.error("Create room error:", err);
-                    showToast("Gagal membuat room: " + err.message, "error");
+                    showToast('Gagal membuat room: ' + err.message, 'error');
                 });
         }
 
-        // --- ANIMASI TIKET ---
-        function startPrintingAnimation(capacity, roomObj) {
-            closeCreateRoom();
-            printerOverlay.classList.add('active');
-            ticketStack.innerHTML = '';
-            let ticketsToPrint = capacity <= 50 ? capacity : capacity <= 100 ? 4 : capacity <= 200 ? 8 : 12;
-            let printed = 0;
-
-            function printNext() {
-                if (printed >= ticketsToPrint) {
-                    setTimeout(() => {
-                        printerOverlay.classList.remove('active');
-                        showTicketBadge(roomObj.loket, roomObj.pintu);
-                        showToast(`Room Siap! Masuk ke Loket ${roomObj.loket} Pintu ${roomObj.pintu}`, "success");
-                    }, 1000);
-                    return;
-                }
-                const ticket = document.createElement('div');
-                ticket.className = 'ticket-paper';
-                ticket.innerHTML = `
-                    <h3 style="margin:0">TMO CINEMA</h3>
-                    <div style="font-size:0.8rem; margin:5px 0;">ACCESS TICKET</div>
-                    <div style="font-weight:bold; font-size:1.1rem;">LOKET ${roomObj.loket} - PINTU ${roomObj.pintu}</div>
-                    <div style="border-top:1px dashed #999; margin-top:8px; padding-top:5px; font-size:0.6rem;">
-                        Kapasitas: ${capacity} Org<br>Enjoy Movie!
-                    </div>`;
-                ticket.style.animation = `printTicket 2s linear forwards`;
-                ticketStack.appendChild(ticket);
-                printed++;
-                setTimeout(printNext, 400);
-            }
-            printNext();
+        function showPrinterAnimation(loket, room, quota, roomId) {
+            document.getElementById('printer-overlay').classList.add('active');
+            const container = document.getElementById('ticket-animation-container');
+            
+            container.innerHTML = `
+                <div class="ticket-printing">
+                    <div style="font-size: 0.8rem; margin-bottom: 8px;">ThMOvie CINEMA</div>
+                    <div style="font-size: 1.5rem; margin-bottom: 5px;">LOKET ${loket}</div>
+                    <div style="font-size: 1.2rem;">ROOM ${room}</div>
+                    <div style="font-size: 0.7rem; margin-top: 10px; border-top: 1px dashed rgba(0,0,0,0.3); padding-top: 8px;">
+                        Kapasitas: ${quota} Kursi<br>
+                        Enjoy Your Movie!
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                document.getElementById('printer-overlay').classList.remove('active');
+                enterCinema(roomId, { ...roomObj, loket, room, capacity: quota });
+            }, 2500);
         }
 
-        // --- TICKET BADGE ---
-        function showTicketBadge(loket, pintu) {
-            document.getElementById('ticket-loket').textContent = loket;
-            document.getElementById('ticket-pintu').textContent = pintu;
-            ticketBadge.classList.add('active');
-            ticketBadge.classList.remove('hidden-badge');
-        }
-
-        function hideTicketBadge() {
-            ticketBadge.classList.remove('active');
-            ticketBadge.classList.add('hidden-badge');
-        }
-
-        // --- CINEMA PLAYER & SYNC LOGIC ---
-
+        // --- CINEMA VIEW ---
         function enterCinema(roomId, room) {
             currentRoomId = roomId;
             roomData = room;
             dbRoomRef = db.ref('rooms/' + roomId);
-            currentVideoPhase = null;
             
-            // Hide ticket badge when entering cinema
-            hideTicketBadge();
+            document.getElementById('cinema-badge').textContent = `LOKET ${room.loket} | ROOM ${room.room}`;
+            document.getElementById('cinema-movie-title').textContent = room.videoTitle || 'Unknown Movie';
             
-            document.getElementById('cinema-loket').innerText = room.loket;
-            document.getElementById('cinema-pintu').innerText = room.pintu;
+            document.getElementById('cinema-view').classList.add('active');
             
-            // SET TAMPILAN AWAL (LAMPU NYALA - PUTIH)
-            cinemaView.classList.remove('lights-off');
-            cinemaOverlayUi.classList.remove('hidden');
-            playerWrapper.classList.add('hidden');
-            document.getElementById('chat-box').innerHTML = '';
+            // Setup chat
+            setupChat();
+            
+            // Listen to room changes
+            dbRoomRef.on('value', handleRoomUpdate);
+            
+            // Start countdown
+            startCountdown();
+        }
 
-            cinemaView.classList.add('active');
-
-            // Tampilkan Rekomendasi UX di Chat
-            addSystemChat("🎬 Selamat datang di ThMOvie Private Watch Party!");
-            addSystemChat("💡 REKOMENDASI UX:");
-            addSystemChat("1. Gunakan HEADSET untuk pengalaman suara terbaik.");
-            addSystemChat("2. Naikan volume HP/PC Anda ke 89% atau lebih.");
-            addSystemChat("3. Gunakan koneksi WiFi yang stabil.");
-
-            // Hanya 1 listener value utama
-            dbRoomRef.on('value', handleDatabaseUpdate, (error) => {
-                console.error("Cinema DB error:", error);
-                showToast("Koneksi terputus", "error");
-            });
+        function setupChat() {
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML = '';
             
-            // Listener Chat terpisah
+            // Add system messages
+            addChatMessage('system', '🎬 Selamat datang di ThMOvie Private Watch Party!');
+            addChatMessage('system', '💡 Tips: Gunakan headset untuk pengalaman terbaik');
+            
+            // Listen for new messages
             dbRoomRef.child('chat').orderByChild('timestamp').limitToLast(50).on('child_added', snapshot => {
                 const msg = snapshot.val();
-                if (msg) addChatMessage(msg.sender, msg.text);
-            }, (error) => {
-                console.error("Chat error:", error);
+                if (msg && msg.sender !== myUsername) {
+                    addChatMessage('other', msg.text, msg.sender);
+                }
+            });
+        }
+
+        function addChatMessage(type, text, sender = '') {
+            const chatBox = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `chat-message ${type}`;
+            
+            if (type === 'system') {
+                div.innerHTML = `<div class="chat-bubble">${text}</div>`;
+            } else if (type === 'own') {
+                div.innerHTML = `
+                    <div class="chat-sender">${sender}</div>
+                    <div class="chat-bubble">${text}</div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="chat-sender">${sender}</div>
+                    <div class="chat-bubble">${text}</div>
+                `;
+            }
+            
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleChatKey(e) {
+            if (e.key === 'Enter') sendChat();
+        }
+
+        function sendChat() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !dbRoomRef) return;
+            
+            dbRoomRef.child('chat').push({
+                sender: myUsername,
+                text: text,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
             });
             
-            // Start countdown interval
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                if (roomData && roomData.scheduleTime && currentVideoPhase === 'waiting') {
-                    updateCountdownDisplay();
-                }
-            }, 1000);
+            addChatMessage('own', text, myUsername);
+            input.value = '';
         }
 
-        function updateCountdownDisplay() {
-            const now = Date.now();
-            const schedule = roomData.scheduleTime;
-            const diff = schedule - now;
+        function startCountdown() {
+            const timerEl = document.getElementById('countdown-timer');
+            const overlay = document.getElementById('countdown-overlay');
             
-            if (diff > 0) {
-                const m = Math.floor(diff / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-                document.getElementById('countdown-timer').innerText = 
-                    `${m}:${s < 10 ? '0'+s : s}`;
+            function update() {
+                const now = Date.now();
+                const diff = roomData.scheduleTime - now;
+                
+                if (diff <= 0) {
+                    clearInterval(countdownInterval);
+                    overlay.style.display = 'none';
+                    startMovie();
+                    return;
+                }
+                
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             }
+            
+            update();
+            countdownInterval = setInterval(update, 1000);
         }
 
-        function handleDatabaseUpdate(snapshot) {
+        function startMovie() {
+            if (player) player.destroy();
+            
+            player = new YT.Player('player-container', {
+                height: '100%',
+                width: '100%',
+                videoId: roomData.videoId,
+                playerVars: {
+                    autoplay: 1,
+                    controls: 1,
+                    rel: 0,
+                    modestbranding: 1,
+                    iv_load_policy: 3
+                },
+                events: {
+                    onReady: (e) => e.target.playVideo()
+                }
+            });
+        }
+
+        function handleRoomUpdate(snapshot) {
             const data = snapshot.val();
-            if (!data) return exitCinema();
-            
+            if (!data) return;
             roomData = data;
-            const now = Date.now();
-            const schedule = data.scheduleTime;
-            const serverPhase = data.phase || 'waiting';
-
-            // ------------------------------
-            // FASE 0: HITUNG MUNDUR (WAITING)
-            // ------------------------------
-            if (now < schedule) {
-                if (currentVideoPhase !== 'waiting') {
-                    currentVideoPhase = 'waiting';
-                    cinemaView.classList.remove('lights-off');
-                    cinemaOverlayUi.classList.remove('hidden');
-                    playerWrapper.classList.add('hidden');
-                    if (player) { player.destroy(); player = null; }
-                }
-                updateCountdownDisplay();
-                return;
-            }
-
-            // ------------------------------
-            // FASE 1: INTRO
-            // ------------------------------
-            if (serverPhase === 'intro') {
-                if (currentVideoPhase !== 'intro') {
-                    currentVideoPhase = 'intro';
-                    cinemaView.classList.add('lights-off');
-                    cinemaOverlayUi.classList.add('hidden');
-                    playerWrapper.classList.remove('hidden');
-                    
-                    if (player) player.destroy();
-                    player = createYTPlayer(INTRO_VIDEO_ID);
-                }
-                return;
-            }
-
-            // ------------------------------
-            // FASE 2: FILM UTAMA
-            // ------------------------------
-            if (serverPhase === 'main') {
-                const expectedTime = Math.max(0, Math.floor((now - schedule - (INTRO_DURATION_SEC * 1000)) / 1000));
-
-                if (currentVideoPhase !== 'main') {
-                    currentVideoPhase = 'main';
-                    cinemaView.classList.add('lights-off');
-                    cinemaOverlayUi.classList.add('hidden');
-                    playerWrapper.classList.remove('hidden');
-                    
-                    if (player) player.destroy();
-                    player = createYTPlayerAtTime(data.videoId, expectedTime);
-                } else {
-                    if (player && player.getCurrentTime) {
-                        try {
-                            const currTime = Math.floor(player.getCurrentTime());
-                            if (Math.abs(currTime - expectedTime) > 2) {
-                                player.seekTo(expectedTime, true);
-                            }
-                            if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
-                                player.playVideo();
-                            }
-                        } catch (e) {
-                            console.log("Player sync error:", e);
-                        }
-                    }
-                }
-
-                if (data.currentPlayTime < 1) {
-                    dbRoomRef.update({ currentPlayTime: expectedTime })
-                        .catch(err => console.log("Update playtime error:", err));
-                }
-            }
-        }
-
-        function createYTPlayer(videoId) {
-            return new YT.Player('player', {
-                height: '100%', width: '100%', videoId: videoId,
-                playerVars: { 
-                    'autoplay': 1, 'controls': 1, 'rel': 0, 
-                    'disablekb': 1, 'modestbranding': 1, 'iv_load_policy': 3 
-                },
-                events: { 
-                    'onReady': (e) => e.target.playVideo(),
-                    'onStateChange': onPlayerStateChange,
-                    'onError': (e) => console.error("Player error:", e)
-                }
-            });
-        }
-
-        function createYTPlayerAtTime(videoId, startTime) {
-            return new YT.Player('player', {
-                height: '100%', width: '100%', videoId: videoId,
-                playerVars: { 
-                    'autoplay': 1, 'controls': 1, 'rel': 0, 
-                    'disablekb': 1, 'modestbranding': 1, 'iv_load_policy': 3,
-                    'start': startTime 
-                },
-                events: { 
-                    'onReady': (e) => e.target.playVideo(),
-                    'onStateChange': onPlayerStateChange,
-                    'onError': (e) => console.error("Player error:", e)
-                }
-            });
-        }
-
-        function onPlayerStateChange(event) {
-            if (!roomData || currentVideoPhase !== 'main') return;
-            
-            const now = Date.now();
-            const expectedTime = Math.max(0, Math.floor((now - roomData.scheduleTime - (INTRO_DURATION_SEC * 1000)) / 1000));
-            
-            try {
-                const currentTime = Math.floor(player.getCurrentTime());
-                if (Math.abs(currentTime - expectedTime) > 3) {
-                    player.seekTo(expectedTime, true);
-                }
-            } catch (e) {
-                console.log("State change error:", e);
-            }
         }
 
         function exitCinema() {
-            cinemaView.classList.remove('active', 'lights-off');
+            if (countdownInterval) clearInterval(countdownInterval);
+            if (player) player.destroy();
+            if (dbRoomRef) dbRoomRef.off();
             
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-                countdownInterval = null;
+            document.getElementById('cinema-view').classList.remove('active');
+            document.getElementById('countdown-overlay').style.display = 'flex';
+            showPage('home');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
             }
+        }
+
+        // --- UTILS ---
+        function showToast(message, type = 'default') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
             
-            if (player) { 
-                try {
-                    player.destroy(); 
-                } catch (e) {
-                    console.log("Player destroy error:", e);
-                }
-                player = null; 
-            }
-            if (dbRoomRef) { 
-                dbRoomRef.off(); 
-                dbRoomRef.child('chat').off();
-                dbRoomRef = null; 
-            }
-            roomData = null;
-            currentVideoPhase = null;
-            currentRoomId = null;
+            let icon = 'ℹ️';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '❌';
+            
+            toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
-        // --- CHAT SYSTEM ---
-        function handleChat(e) {
-            if (e.key === 'Enter') {
-                const input = document.getElementById('chat-msg');
-                const text = input.value.trim();
-                if (text && dbRoomRef) {
-                    dbRoomRef.child('chat').push({
-                        sender: myUsername,
-                        text: text,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    }).catch(err => console.log("Chat send error:", err));
-                    input.value = '';
-                }
+        function showRules() {
+            document.getElementById('rules-modal').classList.add('active');
+        }
+
+        function closeRules(e) {
+            if (!e || e.target.id === 'rules-modal' || e.target.tagName === 'BUTTON') {
+                document.getElementById('rules-modal').classList.remove('active');
             }
         }
 
-        function addChatMessage(sender, text) {
-            const box = document.getElementById('chat-box');
-            const div = document.createElement('div');
-            div.className = 'chat-msg';
-            div.innerHTML = `<strong>${sender}:</strong> ${text}`;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function addSystemChat(text) {
-            const box = document.getElementById('chat-box');
-            const div = document.createElement('div');
-            div.className = 'chat-msg system';
-            div.innerText = text;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        }
-
-        // --- SERVER SIDE CRON ---
+        // --- CRON JOB ---
         setInterval(() => {
             if (!db) return;
             
             const now = Date.now();
-            db.ref('rooms').once('value')
-                .then(snapshot => {
-                    if (!snapshot.val()) return;
-                    snapshot.forEach(child => {
-                        const room = child.val();
-                        if (room.phase === 'waiting' && now >= room.scheduleTime) {
-                            child.ref.update({ phase: 'intro', isPlayingIntro: true })
-                                .catch(err => console.log("Phase update error:", err));
-                        } else if (room.phase === 'intro' && (now - room.scheduleTime) >= (INTRO_DURATION_SEC * 1000)) {
-                            const mainTime = Math.floor((now - room.scheduleTime - (INTRO_DURATION_SEC * 1000)) / 1000);
-                            child.ref.update({ phase: 'main', isPlayingIntro: false, currentPlayTime: mainTime })
-                                .catch(err => console.log("Phase update error:", err));
-                        }
-                    });
-                })
-                .catch(err => console.log("Cron error:", err));
-        }, 3000);
-
-        // --- AUTO CLEANUP ---
-        function cleanOldRooms() {
-            if (!db) return;
-            
-            const now = Date.now();
-            db.ref('rooms').once('value')
-                .then(snapshot => {
-                    snapshot.forEach(child => {
-                        const room = child.val();
-                        if (room.createdAt && (now - room.createdAt > 48 * 60 * 60 * 1000)) {
-                            child.ref.remove()
-                                .catch(err => console.log("Cleanup error:", err));
-                        }
-                    });
-                })
-                .catch(err => console.log("Cleanup fetch error:", err));
-        }
-        setInterval(cleanOldRooms, 600000); 
-        cleanOldRooms();
-
+            db.ref('rooms').once('value').then(snapshot => {
+                snapshot.forEach(child => {
+                    const room = child.val();
+                    if (!room) return;
+                    
+                    // Update phase
+                    if (room.phase === 'waiting' && now >= room.scheduleTime) {
+                        child.ref.update({ phase: 'playing', status: 'playing' });
+                    }
+                    
+                    // Cleanup old rooms (24h after schedule + 3h buffer)
+                    if (room.scheduleTime && (now - room.scheduleTime > 27 * 60 * 60 * 1000)) {
+                        child.ref.remove();
+                    }
+                });
+            });
+        }, 5000);
     </script>
 </body>
 </html>
