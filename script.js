@@ -24,13 +24,17 @@ const TOTAL_ROOMS = TOTAL_LOKET * ROOMS_PER_LOKET;
 const SYNC_INTERVAL = 2000;
 const MAX_SYNC_DRIFT = 2; 
 
+// ADDED: ID Video Pre-roll (Iklan / Pembuka)
+const PRE_ROLL_VIDEO_ID = "9v1atEBmUIc";
+const PRE_ROLL_DURATION_SEC = 10; // Durasi iklan 10 detik
+
 // ========== STATE ==========
 let currentPage = 'home';
 let selectedMovie = null;
 let currentTier = 'free';
 let currentRoomId = null;
-let player = null; // Bisa YT Player atau Iframe Drive
-let playerType = 'youtube'; // 'youtube' atau 'drive'
+let player = null; 
+let playerType = 'youtube'; // 'youtube', 'drive', atau 'ads'
 let playerReady = false;
 let roomData = null;
 let dbRoomRef = null;
@@ -47,9 +51,9 @@ let lastSyncState = -1;
 let lastSyncTime = -1;
 let presenceCleanup = null;
 let occupiedRooms = {}; 
+let isPreRollPlaying = false; // Flag apakah sedang main iklan
 
 // ========== SAMPLE MOVIES ==========
-// UPDATE: Menambahkan Jumbo dengan ID unik (kita pakai URL sebagai ID unik untuk Drive)
 const sampleMovies = [
     { id:"9v1atEBmUIc", title:"The Midnight Cinema", genre:"Horror • Mystery", duration:"1j 45m", rating:"8.5", poster:"https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=60" },
     { id:"dQw4w9WgXcQ", title:"Golden Hour Jazz", genre:"Music • Documentary", duration:"2j 10m", rating:"9.0", poster:"https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=500&auto=format&fit=crop&q=60" },
@@ -72,16 +76,13 @@ function globalToLoketRoom(globalNum) {
     return { loket, room };
 }
 
-// Helper: Cek apakah link ini YouTube atau Drive
 function getVideoSource(url) {
     if (!url) return null;
-    // Cek YouTube
     const ytRegex = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const ytMatch = url.match(ytRegex);
     if (ytMatch && ytMatch[2].length === 11) {
         return { type: 'youtube', id: ytMatch[2] };
     }
-    // Cek Google Drive (Sederhana: cek string 'drive.google.com')
     if (url.includes('drive.google.com')) {
         return { type: 'drive', url: url };
     }
@@ -204,21 +205,17 @@ function createRoomFromMovie(id) {
     if (!movie) return;
     selectedMovie = movie;
     
-    // Logic Beda untuk Drive dan YouTube
     let videoUrl = '';
     if (movie.url) {
-        // Ini Link Drive / Lainnya langsung
         videoUrl = movie.url;
     } else if (movie.id) {
-        // Ini YouTube
         videoUrl = 'https://youtube.com/watch?v=' + movie.id;
     }
 
     document.getElementById('selected-movie-display').value = movie.title;
-    document.getElementById('room-video-url').value = videoUrl; // Simpan full URL
+    document.getElementById('room-video-url').value = videoUrl;
     document.getElementById('manual-video-url').value = '';
     
-    // Preview Logic
     const source = getVideoSource(videoUrl);
     document.getElementById('video-preview').classList.add('active');
     document.getElementById('preview-thumb').src = movie.poster;
@@ -364,7 +361,6 @@ function verifyManualVideo() {
         document.getElementById('preview-channel').textContent = 'YouTube';
         verifiedVideoData = { id: source.id, title: 'Video YouTube', type: 'youtube' };
     } else {
-        // Generic thumb for drive
         document.getElementById('preview-thumb').src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Google_Drive_icon_%282020%29.svg/1200px-Google_Drive_icon_%282020%29.svg.png';
         document.getElementById('preview-channel').textContent = 'Google Drive';
         verifiedVideoData = { id: null, title: 'Video Drive', url: url, type: 'drive' };
@@ -376,7 +372,7 @@ function verifyManualVideo() {
 function selectTier(tier) {
     if (tier !== 'free') return;
     document.querySelectorAll('.tier-option').forEach(o => o.classList.remove('selected'));
-    document.querySelector('[data-tier="free"]').add('selected');
+    document.querySelector('[data-tier="free"]').classList.add('selected'); // Fixed: addClass instead of add()
     currentTier = 'free';
     updateQuota();
 }
@@ -396,7 +392,6 @@ function processBooking() {
     let finalUrl = manualUrl || savedUrl;
     let videoTitle = 'Unknown';
 
-    // Deteksi Sumber Video
     const source = getVideoSource(finalUrl);
 
     if (!source) { showToast('Link video tidak valid (Hanya YouTube / Drive)!', 'error'); return; }
@@ -446,10 +441,10 @@ function processBooking() {
         loket: loket,
         room: room,
         globalRoomNum: globalNum,
-        videoSource: source.type, // 'youtube' atau 'drive'
+        videoSource: source.type, 
         videoId: source.type === 'youtube' ? source.id : null,
         videoUrl: source.type === 'drive' ? source.url : null,
-        videoTitle: verifiedVideoData ? verifiedVideoData.title : videoTitle,
+        videoTitle: verifiedData ? verifiedData.title : videoTitle,
         capacity: quota,
         scheduleTime: scheduleTime,
         createdAt: firebase.database.ServerValue.TIMESTAMP,
@@ -610,7 +605,6 @@ function enterCinema(roomId, room, isHost) {
     document.getElementById('cinema-loading').style.display = 'flex';
     document.getElementById('sync-indicator').style.display = 'none';
     
-    // Hide lock indicator for Drive (since we can't lock Drive iframe controls easily)
     if (room.videoSource === 'youtube') {
         document.getElementById('lock-indicator').style.display = 'flex';
     } else {
@@ -638,7 +632,7 @@ function enterCinema(roomId, room, isHost) {
         startCountdown();
     } else if (room.phase === 'playing') {
         document.getElementById('countdown-overlay').style.display = 'none';
-        initPlayer(room, 0);
+        startPreRoll(room); // Mulai dari Pre-roll
     }
 }
 
@@ -647,7 +641,6 @@ function cleanupCinema() {
     if (syncInterval) { clearInterval(syncInterval); syncInterval = null; }
     if (presenceCleanup) { clearTimeout(presenceCleanup); presenceCleanup = null; }
     
-    // Cleanup YouTube Player
     if (playerType === 'youtube' && player) {
         try { player.destroy(); } catch(e){}
     }
@@ -661,6 +654,7 @@ function cleanupCinema() {
     isSyncing = false;
     lastSyncState = -1;
     lastSyncTime = -1;
+    isPreRollPlaying = false;
 
     document.getElementById('cinema-view').classList.remove('active');
     document.getElementById('countdown-overlay').style.display = 'flex';
@@ -670,7 +664,7 @@ function cleanupCinema() {
     document.getElementById('end-screen-overlay').classList.remove('active');
     document.getElementById('chat-messages').innerHTML = '';
     document.getElementById('online-users-bar').innerHTML = '';
-    document.getElementById('player-container').innerHTML = ''; // Clear iframe or player
+    document.getElementById('player-container').innerHTML = '';
 }
 
 // ========== CHAT ==========
@@ -679,10 +673,9 @@ function setupChat() {
     box.innerHTML = '';
     addChatMessage('system', '🎬 Selamat datang di ThMOvie Watch Party!');
     addChatMessage('system', '💡 Bagikan URL room ke teman agar bisa bergabung');
+    // Hapus pesan Drive Preview sesuai request
     if (roomData && roomData.videoSource === 'youtube') {
         addChatMessage('system', '🔒 Video dikunci — tidak bisa dimajukan/mundurkan');
-    } else {
-        addChatMessage('system', '💿 Menampilkan Google Drive Preview.');
     }
 
     dbChatRef.orderByChild('timestamp').limitToLast(80).on('child_added', snap => {
@@ -771,69 +764,118 @@ function startCountdown() {
     countdownInterval = setInterval(tick, 500);
 }
 
-// ========== PLAYER ==========
-function initPlayer(room, startSeconds) {
+// ========== PRE-ROLL ADS SYSTEM ==========
+function startPreRoll(room) {
+    isPreRollPlaying = true;
+    showToast('Memutar iklan pembuka...', 'success');
+    addChatMessage('system', '📺 Memutar iklan pembuka selama ' + PRE_ROLL_DURATION_SEC + ' detik...');
+
+    // Setup Player YouTube untuk iklan
+    initYoutubePlayer(PRE_ROLL_VIDEO_ID);
+    
+    // Timer untuk berpindah ke video utama setelah N detik
+    setTimeout(() => {
+        if (!isPreRollPlaying) return; // Sudah keluar room
+        isPreRollPlaying = false;
+        addChatMessage('system', '✅ Iklan selesai. Memutar film utama...');
+        initMainPlayer(room);
+    }, PRE_ROLL_DURATION_SEC * 1000);
+}
+
+// ========== MAIN PLAYER INIT ==========
+function initMainPlayer(room) {
+    if (room.videoSource === 'drive') {
+        initDrivePlayer(room.videoUrl);
+    } else {
+        initYoutubePlayer(room.videoId);
+    }
+}
+
+// ========== YOUTUBE PLAYER ==========
+function initYoutubePlayer(videoId) {
     document.getElementById('cinema-loading').style.display = 'flex';
     document.getElementById('player-container').innerHTML = '';
     playerReady = false;
 
-    // Cleanup previous
+    // Cleanup
     if (playerType === 'youtube' && player) { 
         try { player.destroy(); } catch(e){} 
     }
     player = null;
 
-    const safeStart = Math.max(0, Math.floor(startSeconds || 0));
-
-    // LOGIC INTI: DETEKSI SOURCE
-    if (room.videoSource === 'drive') {
-        // Gunakan IFRAME untuk Drive
-        playerType = 'drive';
-        const driveUrl = room.videoUrl;
-        document.getElementById('player-container').innerHTML = `
-            <div class="drive-player-container">
-                <iframe src="${driveUrl}" allow="autoplay"></iframe>
-            </div>
-        `;
-        playerReady = true;
-        document.getElementById('cinema-loading').style.display = 'none';
-        document.getElementById('sync-indicator').style.display = 'flex'; // Tetap show sync status (visual saja)
-        
-    } else {
-        // Gunakan YouTube API
-        playerType = 'youtube';
-        player = new YT.Player('player-container', {
-            height: '100%',
-            width: '100%',
-            videoId: room.videoId,
-            playerVars: {
-                autoplay: 1,
-                controls: 0,        
-                disablekb: 1,       
-                fs: 0,              
-                modestbranding: 1,
-                rel: 0, 
-                iv_load_policy: 3,
-                playsinline: 1,
-                start: safeStart,
-                enablejsapi: 1,
-                widget_referrer: window.location.origin
-            },
-            events: {
-                onReady: onPlayerReady,
-                onStateChange: onPlayerStateChange,
-                onError: onPlayerError
-            }
-        });
-    }
+    playerType = 'youtube';
+    player = new YT.Player('player-container', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+            autoplay: 1,
+            controls: 0,        
+            disablekb: 1,       
+            fs: 0,              
+            modestbranding: 1,
+            rel: 0, 
+            iv_load_policy: 3,
+            playsinline: 1,
+            enablejsapi: 1,
+            widget_referrer: window.location.origin
+        },
+        events: {
+            onReady: onPlayerReady,
+            onStateChange: onPlayerStateChange,
+            onError: onPlayerError
+        }
+    });
 }
 
+// ========== DRIVE PLAYER (NEW: OVERLAY SYNC) ==========
+function initDrivePlayer(url) {
+    document.getElementById('cinema-loading').style.display = 'flex';
+    document.getElementById('player-container').innerHTML = '';
+    playerReady = false;
+
+    // Cleanup
+    if (playerType === 'youtube' && player) { 
+        try { player.destroy(); } catch(e){} 
+    }
+    player = null;
+
+    playerType = 'drive';
+    
+    // Buat struktur HTML untuk Drive + Overlay Sync
+    document.getElementById('player-container').innerHTML = `
+        <div class="drive-player-container" style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;">
+            <!-- IFRAME DRIVE -->
+            <iframe src="${url}" allow="autoplay" style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;"></iframe>
+            
+            <!-- OVERLAY PALSU: Mencegah klik user ke control bar Drive -->
+            <div class="drive-sync-overlay" style="
+                position: absolute; 
+                inset: 0; 
+                z-index: 10; 
+                background: transparent;
+                cursor: default;
+            "></div>
+        </div>
+    `;
+    
+    playerReady = true;
+    document.getElementById('cinema-loading').style.display = 'none';
+    document.getElementById('sync-indicator').style.display = 'flex';
+    startSyncLoop();
+}
+
+// ========== PLAYER EVENTS ==========
 function onPlayerReady(e) {
     playerReady = true;
     document.getElementById('cinema-loading').style.display = 'none';
     document.getElementById('sync-indicator').style.display = 'flex';
     e.target.playVideo();
-    startSyncLoop();
+    
+    // Jika main player (bukan pre-roll), baru jalankan sync loop
+    if (!isPreRollPlaying) {
+        startSyncLoop();
+    }
 }
 
 function onPlayerStateChange(e) {
@@ -842,6 +884,10 @@ function onPlayerStateChange(e) {
     const ytState = e.data; 
 
     if (ytState === YT.PlayerState.ENDED) {
+        // Jika ini iklan (pre-roll), jangan lakukan apapun (biarkan timeout yang handle)
+        if (isPreRollPlaying) return;
+
+        // Jika ini video utama
         document.getElementById('end-screen-overlay').classList.add('active');
         if (dbRoomRef) {
             dbRoomRef.update({ phase: 'ended', playState: 0, lastSync: firebase.database.ServerValue.TIMESTAMP });
@@ -849,6 +895,7 @@ function onPlayerStateChange(e) {
         addChatMessage('system', '🎬 Film telah selesai. Terima kasih telah menonton!');
     }
 
+    // Force play jika user pause (hanya untuk YouTube, tidak berlaku untuk Drive karena ditutup overlay)
     if (ytState === YT.PlayerState.PAUSED && roomData && roomData.phase === 'playing') {
         setTimeout(() => {
             if (player && playerReady && roomData && roomData.phase === 'playing') {
@@ -875,7 +922,7 @@ function startSyncLoop() {
     if (syncInterval) clearInterval(syncInterval);
 
     syncInterval = setInterval(() => {
-        // Hanya sync jika YouTube, karena Drive tidak bisa dikontrol via JS API
+        // Hanya sync YouTube. Drive disimulasikan "locked" oleh overlay CSS
         if (!playerReady || playerType !== 'youtube' || !player || !roomData) return;
         if (roomData.phase !== 'playing') return;
 
@@ -907,14 +954,14 @@ function handleRoomUpdate(snapshot) {
 
     if (prevPhase === 'waiting' && data.phase === 'playing') {
         document.getElementById('countdown-overlay').style.display = 'none';
-        initPlayer(data, 0); // Pass seluruh object room
+        startPreRoll(data); // Mulai pre-roll saat jadwal tiba
     }
 
     if (data.phase === 'ended' && prevPhase !== 'ended') {
         addChatMessage('system', '🎬 Room ini telah berakhir. Terima kasih!');
     }
 
-    // Hanya handle sync untuk YouTube
+    // Sync hanya untuk YouTube
     if (playerReady && playerType === 'youtube' && data.phase === 'playing') {
         try {
             const myPos = player.getCurrentTime();
@@ -1012,7 +1059,6 @@ setInterval(() => {
                 updates[key + '/lastSync'] = firebase.database.ServerValue.TIMESTAMP;
             }
 
-            // Untuk Drive, kita tidak bisa auto-end karena ga ada event listener, jadi pakai timeout manual 5 jam
             if (room.phase === 'playing' && room.scheduleTime && (now - room.scheduleTime > 5 * 60 * 60 * 1000)) {
                 updates[key + '/phase'] = 'ended';
                 updates[key + '/playState'] = 0;
