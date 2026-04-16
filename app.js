@@ -502,7 +502,6 @@ function enterCinema(roomId, room, isHost) {
     } else if (room.phase === 'playing') {
         const countdownOverlay = document.getElementById('countdown-overlay');
         if(countdownOverlay) countdownOverlay.style.display = 'none';
-        // PERBAIKAN UTAMA 1: Langsung ke player utama, lewat pre-roll
         initMainPlayer(room); 
     }
 }
@@ -757,6 +756,7 @@ function onPlayerStateChange(e) {
         addChatMessage('system', '🎬 Film telah selesai. Terima kasih telah menonton!');
     }
 
+    // Force play
     if (ytState === YT.PlayerState.PAUSED && roomData && roomData.phase === 'playing') {
         setTimeout(() => {
             if (player && playerReady && roomData && roomData.phase === 'playing') {
@@ -799,24 +799,28 @@ function initDrivePlayer(url) {
     playerType = 'drive';
     
     let finalUrl = url;
+    // Pastikan format /preview
     if (url.includes('/view') || url.includes('/edit')) {
         finalUrl = url.replace(/\/view|\/edit/, '/preview');
     }
     
+    // Gunakan Google Drive Viewer untuk bypass CSP error (lebih aman untuk embed)
+    const viewerUrl = `https://drive.google.com/viewer?src=${encodeURIComponent(finalUrl)}&embedded=true`;
+    
     if(container) {
         container.innerHTML = `
             <div class="drive-player-container" style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;">
-                <iframe src="${finalUrl}" allow="autoplay" style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;"></iframe>
+                <iframe src="${viewerUrl}" allow="autoplay" style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;"></iframe>
                 <div class="drive-sync-overlay" style="position:absolute; inset:0; z-index:10; background:transparent; cursor:default;"></div>
             </div>
         `;
     }
     
     playerReady = true;
-    // PERBAIKAN 2: Tambah delay untuk iframe drive agar tidak hitam
+    // Delay loading agar Drive sempat load
     setTimeout(() => {
         if(loading) loading.style.display = 'none';
-    }, 1500); 
+    }, 2000); 
     
     const syncInd = document.getElementById('sync-indicator');
     if(syncInd) syncInd.style.display = 'flex';
@@ -860,7 +864,6 @@ function handleRoomUpdate(snapshot) {
     if (prevPhase === 'waiting' && data.phase === 'playing') {
         const overlay = document.getElementById('countdown-overlay');
         if(overlay) overlay.style.display = 'none';
-        // PERBAIKAN UTAMA 2: Langsung ke player utama, lewat pre-roll
         initMainPlayer(data); 
     }
 
