@@ -111,9 +111,6 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:'Poppins
 .room-mini.available:hover:not(.occupied){background:var(--accent-gold);color:#000;cursor:pointer;transform:scale(1.08)}
 .loket-footer{margin-top:16px;display:flex;justify-content:space-between;align-items:center}
 .loket-available-count{font-size:.8rem;color:var(--success);font-weight:600}
-.loket-join-btn{padding:6px 16px;background:var(--accent-gold);color:#000;border:none;border-radius:6px;font-weight:600;font-size:.75rem;cursor:pointer;font-family:inherit;transition:all .2s}
-.loket-join-btn:hover{background:var(--accent-gold-hover);transform:scale(1.05)}
-.loket-join-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 
 /* Create Page */
 .create-container{max-width:750px;margin:40px auto;background:var(--bg-card);border-radius:16px;padding:35px;border:1px solid var(--border-color)}
@@ -148,6 +145,29 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:'Poppins
 .quota-number{font-size:2.8rem;font-weight:800;color:var(--accent-gold);line-height:1}
 .quota-label{font-size:.8rem;color:var(--text-secondary);margin-top:4px}
 
+/* Quick Time Buttons */
+.quick-time-options {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+.btn-quick-time {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-quick-time:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-primary);
+    border-color: var(--accent-gold);
+}
+
 /* Cinema View */
 .cinema-view{display:none;position:fixed;inset:0;background:#000;z-index:1000;flex-direction:column}
 .cinema-view.active{display:flex}
@@ -180,7 +200,7 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:'Poppins
 .chat-input{flex:1;background:var(--bg-hover);border:1px solid var(--border-color);border-radius:25px;padding:10px 18px;color:white;font-family:inherit;font-size:.85rem;outline:none;transition:border-color .3s}
 .chat-input:focus{border-color:var(--accent-gold)}
 
-/* NEW: End Screen Overlay */
+/* End Screen */
 .end-screen-overlay {
     position: absolute; inset: 0;
     background: rgba(0,0,0,0.98);
@@ -291,5 +311,5 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:'Poppins
 /* Pastikan overlay status (sync, lock) tetap muncul di atas Drive Player */
 .drive-player-container ~ .sync-indicator,
 .drive-player-container ~ .lock-indicator {
-    z-index: 50; /* Pastikan z-index lebih tinggi dari iframe */
+    z-index: 50;
 }
