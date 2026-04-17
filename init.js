@@ -20,12 +20,10 @@ try {
 // ========== CONSTANTS ==========
 const TOTAL_LOKET = 6;
 const ROOMS_PER_LOKET = 30;
-const TOTAL_ROOMS = TOTAL_LOKET * ROOMS_PER_LOKET;
 const SYNC_INTERVAL = 2000;
 const MAX_SYNC_DRIFT = 2; 
-const PRE_ROLL_VIDEO_ID = "9v1atEBmUIc"; 
-// PERBAIKAN: Ubah dari 10 menjadi 0 untuk mematikan iklan
-const PRE_ROLL_DURATION_SEC = 0; 
+const PRE_ROLL_VIDEO_ID = "9v1atEBmUIc";
+const PRE_ROLL_DURATION_SEC = 0; // Set 0 to disable pre-roll ads
 
 // ========== GLOBAL STATE ==========
 let currentPage = 'home';
@@ -48,7 +46,7 @@ let pendingJoinRoomId = null;
 let isSyncing = false;
 let lastSyncState = -1; 
 let lastSyncTime = -1;
-let presenceCleanup = null;
+let presenceCleanup = null; 
 let occupiedRooms = {}; 
 let isPreRollPlaying = false; 
 
@@ -64,13 +62,35 @@ function globalToLoketRoom(globalNum) {
 
 function getVideoSource(url) {
     if (!url) return null;
+    
+    // YouTube Parsing (Robust)
     const ytRegex = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const ytMatch = url.match(ytRegex);
     if (ytMatch && ytMatch[2].length === 11) {
         return { type: 'youtube', id: ytMatch[2] };
     }
+    
+    // Google Drive Parsing (Fixed & Robust)
+    // Mendukung format: /view, /preview, /edit, dan format pendek /d/ID
     if (url.includes('drive.google.com')) {
-        return { type: 'drive', url: url };
+        let id = null;
+        // Pattern 1: /file/d/ID/...
+        const pattern1 = /\/file\/d\/([a-zA-Z0-9_-]+)/;
+        const match1 = url.match(pattern1);
+        if (match1 && match1[1]) {
+            id = match1[1];
+        }
+        
+        // Pattern 2: /open?id=ID
+        if (!id) {
+            const pattern2 = /[?&]id=([a-zA-Z0-9_-]+)/;
+            const match2 = url.match(pattern2);
+            if (match2 && match2[1]) id = match2[1];
+        }
+
+        if (id) {
+            return { type: 'drive', id: id, url: url };
+        }
     }
     return null;
 }
