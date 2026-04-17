@@ -1,4 +1,4 @@
-// ========== APP LOGIC (FIXED & OPTIMIZED) ==========
+// ========== APP LOGIC (GLOBAL SYNC HOST AUTHORITY) ==========
 
 // --- RENDER FUNCTIONS ---
 function renderMovies() {
@@ -191,7 +191,7 @@ function checkJoinLogic(room, roomId) {
     } else {
         myUsername = "User_" + Math.floor(Math.random() * 9000 + 1000);
         enterCinema(roomId, room, false);
-        showToast('Berhasil bergabung!', 'success');
+        showToast('Berhasil bergabung! Menunggu Host memulai...', 'success');
     }
 }
 
@@ -520,7 +520,11 @@ function setupChat() {
     if(!box) return;
     box.innerHTML = '';
     addChatMessage('system', 'Selamat datang! Sinkronisasi aktif.');
-    if(isHost) addChatMessage('system', 'Anda adalah HOST. Gunakan tombol di bawah player untuk mengontrol.');
+    if(isHost) {
+        addChatMessage('system', 'Anda adalah HOST. Anda mengontrol semua player.');
+    } else {
+        addChatMessage('system', 'Menunggu HOST memulai film...');
+    }
 
     dbChatRef.orderByChild('timestamp').limitToLast(50).on('child_added', snap => {
         const msg = snap.val();
@@ -635,35 +639,33 @@ function forceStartPlayback() {
         currentTime: 0,
         lastSync: firebase.database.ServerValue.TIMESTAMP
     });
-    showToast('Memulai film untuk semua...', 'success');
+    showToast('Memulai film untuk semua (Host Control)...', 'success');
 }
 
 function togglePauseAll() {
     if (!isHost || !playerReady) return;
     
-    // FIX: Hanya YouTube yang bisa dikontrol Pause/Play via API
-    // Seekstream menggunakan iframe biasa, tidak bisa diakses JS eksternalnya
-    if (playerType !== 'youtube') {
-        showToast('Kontrol Pause hanya tersedia untuk video YouTube.', 'error');
-        return;
+    // Hanya Host yang punya hak Pause/Play
+    if (playerType === 'youtube') {
+        const state = player.getPlayerState();
+        const isPlaying = (state === YT.PlayerState.PLAYING);
+        
+        // Toggle
+        const newState = isPlaying ? 0 : 1;
+        const currentTime = player.getCurrentTime();
+        
+        dbRoomRef.update({
+            playState: newState,
+            currentTime: currentTime,
+            lastSync: firebase.database.ServerValue.TIMESTAMP
+        });
+    } else {
+        // Untuk Seekstream, Host hanya bisa pause/reload via fitur manual
+        showToast('Pause otomatis hanya tersedia untuk YouTube.', 'error');
     }
-
-    // Get current state from player
-    const state = player.getPlayerState();
-    const isPlaying = (state === YT.PlayerState.PLAYING);
-    
-    // Toggle
-    const newState = isPlaying ? 0 : 1;
-    const currentTime = player.getCurrentTime();
-    
-    dbRoomRef.update({
-        playState: newState,
-        currentTime: currentTime,
-        lastSync: firebase.database.ServerValue.TIMESTAMP
-    });
 }
 
-// --- YOUTUBE PLAYER WRAPPER (FIXED SYNC) ---
+// --- YOUTUBE PLAYER WRAPPER (HOST AUTHORITY SYNC) ---
 function initYoutubePlayer(videoId) {
     const loading = document.getElementById('cinema-loading');
     if(loading) loading.style.display = 'flex';
@@ -685,9 +687,9 @@ function initYoutubePlayer(videoId) {
             width: '100%',
             videoId: videoId,
             playerVars: {
-                autoplay: 1,       // Autoplay ON
+                autoplay: 1,       
                 controls: 1,       
-                disablekb: 0,      // Enable keyboard control for host
+                disablekb: 0,      
                 fs: 1,
                 modestbranding: 1,
                 rel: 0,
@@ -714,7 +716,7 @@ function onPlayerReady(e) {
     
     // SINKRONISASI AWAL
     if (roomData && roomData.phase === 'playing') {
-        // Jika film sedang berjalan saat kita masuk
+        // Jika film sedang berjalan saat kita masuk, ikut Host
         if (roomData.currentTime > 0) {
             player.seekTo(roomData.currentTime, true);
         }
@@ -725,7 +727,7 @@ function onPlayerReady(e) {
         }
     }
     
-    startSyncLoop(1000); // Sync every 1 second
+    startSyncLoop(1000); 
 }
 
 function onPlayerStateChange(e) {
@@ -733,10 +735,11 @@ function onPlayerStateChange(e) {
     
     // Jika video selesai
     if (e.data === YT.PlayerState.ENDED) {
-        if (dbRoomRef) {
+        if (isHost && dbRoomRef) {
+            // Hanya host yang berhak mengakhiri sesi resmi
             dbRoomRef.update({ phase: 'ended', playState: 0 });
         }
-        addChatMessage('system', 'Film telah selesai.');
+        addChatMessage('system', 'Film selesai (di perangkat Anda).');
     }
 }
 
@@ -745,7 +748,7 @@ function onPlayerError(e) {
     showToast('Error memuat video', 'error');
 }
 
-// --- SEEKSTREAM PLAYER WRAPPER (FIXED) ---
+// --- SEEKSTREAM PLAYER WRAPPER (MUTED AUTOPLAY) ---
 function initSeekPlayer(url) {
     const loading = document.getElementById('cinema-loading');
     if(loading) loading.style.display = 'flex';
@@ -758,15 +761,13 @@ function initSeekPlayer(url) {
 
     if (!url) return;
 
-    // Wrapper
     const wrapper = document.createElement('div');
     wrapper.style.position = 'relative';
     wrapper.style.width = '100%';
     wrapper.style.height = '100%';
 
-    // Iframe
     const iframe = document.createElement('iframe');
-    iframe.id = 'seekstream-iframe'; // ID buat referensi
+    iframe.id = 'seekstream-iframe'; 
     iframe.src = url;
     iframe.style.width = '100%';
     iframe.style.height = '100%';
@@ -775,9 +776,7 @@ function initSeekPlayer(url) {
     iframe.style.top = '0';
     iframe.style.left = '0';
     iframe.style.zIndex = '10';
-    
-    // FIX: Hapus allowfullscreen, gunakan allow attribute saja (modern standard)
-    iframe.setAttribute('allow', 'autoplay; fullscreen'); 
+    iframe.setAttribute('allow', 'autoplay; fullscreen');
     
     wrapper.appendChild(iframe);
     container.appendChild(wrapper);
@@ -788,11 +787,12 @@ function initSeekPlayer(url) {
     }, 2000); 
 }
 
-// --- SYNC LOOP ---
+// --- GLOBAL SYNC LOOP (HOST UPDATES, LISTENERS FOLLOW) ---
 function startSyncLoop(intervalMs = 1000) {
     if (syncInterval) clearInterval(syncInterval);
 
     syncInterval = setInterval(() => {
+        // Jalanin ini cuma kalau YouTube. Seekstream gak bisa sync real-time posisinya.
         if (!playerReady || playerType !== 'youtube' || !player || !roomData) return;
         if (roomData.phase !== 'playing') return;
 
@@ -801,7 +801,7 @@ function startSyncLoop(intervalMs = 1000) {
             const playerState = player.getPlayerState();
             const isPlaying = (playerState === YT.PlayerState.PLAYING);
 
-            // Host updates database continuously
+            // HOST UPDATE: Hanya Host yang mengirim waktu ke server
             if (isHost) {
                 dbRoomRef.update({
                     currentTime: currentPos,
@@ -809,11 +809,13 @@ function startSyncLoop(intervalMs = 1000) {
                     lastSync: firebase.database.ServerValue.TIMESTAMP
                 });
             }
+            // LISTENER UPDATE: Penonton biasa TIDAK mengirim update apa-apa
+            
         } catch(e) {}
     }, intervalMs);
 }
 
-// --- HANDLE ROOM UPDATE (UPDATED SEEKSTREAM AUTOPLAY) ---
+// --- HANDLE ROOM UPDATE (GLOBAL SYNC LOGIC) ---
 function handleRoomUpdate(snapshot) {
     const data = snapshot.val();
     if (!data) {
@@ -826,39 +828,33 @@ function handleRoomUpdate(snapshot) {
     const prevPhase = roomData ? roomData.phase : null;
     roomData = data;
 
-    // 1. Transisi Waiting -> Playing (Host triggers this)
+    // 1. Transisi Waiting -> Playing
     if (prevPhase === 'waiting' && data.phase === 'playing') {
         const overlay = document.getElementById('countdown-overlay');
         if(overlay) overlay.style.display = 'none';
         
-        // LOGIKA UTAMA: YOUTUBE VS SEEKSTREAM
+        // HOST TRIGGER: Jika host memulai, kita ikut
         if (playerType === 'youtube' && player) {
-            // YOUTUBE: Paksa play via API
             player.seekTo(0);
             player.playVideo();
         } 
         else if (playerType === 'seekstream') {
-            // SEEKSTREAM: TRICK AUTOPLAY MELALUI RELOAD
+            // TRICK AUTOPLAY UNTUK SEMUA ORANG
             const iframe = document.querySelector('#player-container iframe');
             if (iframe) {
                 let src = data.videoUrl;
-                
-                // Cek pemisah parameter
                 let separator = src.includes('?') ? '&' : '?';
                 let autoplayParams = separator + 'autoplay=1&muted=1';
                 
-                // Handle Hash Fragment (Contoh: embedseek.com/#id)
-                // Parameter harus ditaruh SEBELUM #
                 if (src.includes('#')) {
                     let parts = src.split('#');
                     src = parts[0] + autoplayParams + '#' + parts[1];
                 } else {
                     src = src + autoplayParams;
                 }
-
-                // Reload iframe agar video jalan otomatis (muted)
                 iframe.src = src; 
-                showToast('Video dimulai (Muted)', 'success');
+                if (!isHost) showToast('Host memulai film...', 'success');
+                else showToast('Film dimulai (Muted)', 'success');
             }
         }
         else if (!player) {
@@ -866,23 +862,27 @@ function handleRoomUpdate(snapshot) {
         }
     }
 
-    // 2. Sync Play/Pause & Time (Real-time) - HANYA UNTUK YOUTUBE
+    // 2. GLOBAL SYNC LOGIC (REAL-TIME)
+    // Ini jalan terus menerus, mengikuti apapun yang ada di database (Waktu Host)
     if (playerReady && playerType === 'youtube' && data.phase === 'playing') {
         try {
-            const myPos = player.getCurrentTime();
+            // Ambil posisi server (posisi Host)
             const serverPos = data.currentTime || 0;
             const shouldPlay = (data.playState === 1);
+            
+            // Ambil posisi kita (Local)
+            const myPos = player.getCurrentTime();
             const myState = player.getPlayerState();
             const amPlaying = (myState === YT.PlayerState.PLAYING);
 
-            // Check Drift
+            // DRIFT CHECK: Jika beda waktu > 2 detik, paksa seek ke posisi Host
             let drift = Math.abs(myPos - serverPos);
-            if (drift > 3.0) {
+            if (drift > 2.0) {
                 console.log("Resyncing... Drift:", drift);
                 player.seekTo(serverPos, true);
             }
 
-            // Jika status play/pause beda dengan server, sesuaikan
+            // STATE CHECK: Jika status play/pause beda, paksa ikut Host
             if (shouldPlay && !amPlaying) {
                 player.playVideo();
             } else if (!shouldPlay && amPlaying) {
