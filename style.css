@@ -826,6 +826,19 @@ body {
     height: 100% !important;
 }
 
+/* SeekStream Lock Overlay (NEW) */
+.seekstream-lock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20; /* Di atas iframe */
+    background: transparent;
+    cursor: default;
+    pointer-events: auto; /* Memastikan klik tertangkap, diteruskan ke elemen bawah */
+}
+
 .cinema-sidebar {
     width: 380px;
     background: var(--bg-secondary);
@@ -993,12 +1006,13 @@ body {
     margin-bottom: 16px;
 }
 
-.countdown-label {
+.countdown-label { /* NEW STYLE */
     font-size: 1rem;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 3px;
     font-weight: 600;
+    margin-top: 5px;
 }
 
 .countdown-room-info {
