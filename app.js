@@ -1,4 +1,4 @@
-// ========== APP LOGIC (UPDATED) ==========
+// ========== APP LOGIC (FIXED & OPTIMIZED) ==========
 
 // --- RENDER FUNCTIONS ---
 function renderMovies() {
@@ -738,6 +738,47 @@ function onPlayerError(e) {
     showToast('Error memuat video', 'error');
 }
 
+// --- SEEKSTREAM PLAYER WRAPPER (FIXED) ---
+function initSeekPlayer(url) {
+    const loading = document.getElementById('cinema-loading');
+    if(loading) loading.style.display = 'flex';
+    
+    const container = document.getElementById('player-container');
+    if(container) container.innerHTML = '';
+    
+    playerReady = true;
+    playerType = 'seekstream';
+
+    if (!url) return;
+
+    // Wrapper
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.style.width = '100%';
+    wrapper.style.height = '100%';
+
+    // Iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.zIndex = '10';
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute('allow', 'autoplay; fullscreen'); // MENDUKUNG AUTOPLAY
+    
+    wrapper.appendChild(iframe);
+    container.appendChild(wrapper);
+    
+    setTimeout(() => {
+        if(loading) loading.style.display = 'none';
+        showToast('Player Siap', 'success');
+    }, 2000); 
+}
+
 // --- SYNC LOOP ---
 function startSyncLoop(intervalMs = 1000) {
     if (syncInterval) clearInterval(syncInterval);
@@ -790,7 +831,7 @@ function handleRoomUpdate(snapshot) {
         }
     }
 
-    // 2. Sync Play/Pause & Time (Real-time)
+    // 2. Sync Play/Pause & Time (Real-time) - HANYA UNTUK YOUTUBE
     if (playerReady && playerType === 'youtube' && data.phase === 'playing') {
         try {
             const myPos = player.getCurrentTime();
