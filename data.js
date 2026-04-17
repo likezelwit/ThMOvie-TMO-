@@ -1,4 +1,3 @@
-// ========== DATABASE FILM ==========
 const movieDatabase = [
     {
         id: "inside_out_1",
@@ -7,12 +6,11 @@ const movieDatabase = [
         duration: "1j 35m",
         rating: "8.1",
         poster: "https://i.ibb.co.com/YFjZHxkW/Inside-Out-2015-film-poster.jpg",
-        // URL bersih (tanpa /preview agar parsing lebih konsisten)
         url: "https://drive.google.com/file/d/1tqBTAqkhx0oPFHknnCAa5AxfMK-RvJh2/view"
     },
     {
         id: "spy_family_code_white",
-        title: "SPY x FAMILY CODE: White (Indo Dub)",
+        title: "SPY x FAMILY CODE: White",
         genre: "Animation • Action • 2023",
         duration: "1j 50m",
         rating: "8.0",
@@ -25,7 +23,7 @@ const movieDatabase = [
         genre: "Animation • 2024",
         duration: "1j 36m",
         rating: "NEW",
-        poster: "https://i.ibb.co.com/YFjZHxkW/Inside-Out-2015-film-poster.jpg", 
+        poster: "https://i.ibb.co.com/YFjZHxkW/Inside-Out-2015-film-poster.jpg",
         url: "https://drive.google.com/file/d/1O1qYpL86eV-DaIGlHxQr9cem7Jk4A7FR/view"
     },
     {
@@ -55,7 +53,6 @@ const movieDatabase = [
         poster: "https://i.ibb.co.com/G307T8x4/download.jpg",
         url: "https://drive.google.com/file/d/1WR23FO9kL6gq3FyHp_e2_1qTODr-xFrW/view"
     },
-    // Contoh Film Lama (Sample)
-    { id: "9v1atEBmUIc", title: "The Midnight Cinema", genre: "Horror • Mystery", duration: "1j 45m", rating: "8.5", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=60", url: "https://youtube.com/watch?v=9v1atEBmUIc" },
-    { id: "aqz-KE-bpKQ", title: "Big Buck Bunny", genre: "Animation • Comedy", duration: "10m", rating: "7.5", poster: "https://images.unsplash.com/photo-1560167016-022b78a0258e?w=500&auto=format&fit=crop&q=60", url: "https://youtube.com/watch?v=aqz-KE-bpKQ" }
+    { id: "9v1atEBmUIc", title: "The Midnight Cinema", genre: "Horror • Mystery", duration: "1j 45m", rating: "8.5", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500", url: "https://youtube.com/watch?v=9v1atEBmUIc" },
+    { id: "aqz-KE-bpKQ", title: "Big Buck Bunny", genre: "Animation • Comedy", duration: "10m", rating: "7.5", poster: "https://images.unsplash.com/photo-1560167016-022b78a0258e?w=500", url: "https://youtube.com/watch?v=aqz-KE-bpKQ" }
 ];
