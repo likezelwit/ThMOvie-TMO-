@@ -42,7 +42,7 @@
                     <span class="hero-badge">Premium Watch Party</span>
                     <h1 class="hero-title">Rasakan Pengalaman Bioskop Premium di Rumah</h1>
                     <p class="hero-description">Tonton film favorit bersama teman-teman dengan kualitas streaming HD. Nikmati suasana lounge yang elegan dan chat realtime.</p>
-                    <div class="hero-actions" style="display:flex;gap:12px;flex-wrap:wrap">
+                    <div class="hero-actions">
                         <button class="btn btn-primary" onclick="scrollToMovies()">🎬 Jelajahi Film</button>
                         <button class="btn btn-secondary" onclick="showPage('loket')">🎫 Cari Loket</button>
                         <button class="btn btn-primary" onclick="openCreateRoom()">🎟️ Pesan Tiket</button>
@@ -55,10 +55,7 @@
                     <h2 class="section-title">Sedang Tayang</h2>
                     <button class="btn btn-primary btn-sm" onclick="openCreateRoom()">🎫 Pesan Tiket</button>
                 </div>
-                
-                <div class="movie-grid" id="movie-grid">
-                    <!-- Film akan di-render lewat JS (app.js) -->
-                </div>
+                <div class="movie-grid" id="movie-grid"></div>
             </section>
         </div>
 
@@ -110,12 +107,12 @@
 
                 <div class="form-group">
                     <label class="form-label">Tipe Room</label>
-                    <div style="display:flex; gap:20px; align-items:center; font-size:0.9rem; color:var(--text-secondary)">
-                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
-                            <input type="radio" name="roomVisibility" value="public" checked onchange="togglePasswordInput()"> Public (Siapa saja bisa join)
+                    <div class="visibility-options">
+                        <label class="radio-label">
+                            <input type="radio" name="roomVisibility" value="public" checked onchange="togglePasswordInput()"> Public
                         </label>
-                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
-                            <input type="radio" name="roomVisibility" value="private" onchange="togglePasswordInput()"> Private (Butuh Password)
+                        <label class="radio-label">
+                            <input type="radio" name="roomVisibility" value="private" onchange="togglePasswordInput()"> Private
                         </label>
                     </div>
                 </div>
@@ -123,25 +120,22 @@
                 <div class="form-group hidden" id="password-group">
                     <label class="form-label">Password Room</label>
                     <input type="text" id="room-password" class="form-input" placeholder="Buat password rahasia...">
-                    <p class="form-hint">Bagikan password ini hanya kepada teman Anda.</p>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Jadwal Tayang <span style="color:var(--accent-gold)">*</span></label>
                     <input type="datetime-local" id="room-time" class="form-input">
-                    <!-- Tombol Akses Cepat -->
                     <div class="quick-time-options">
                         <button type="button" class="btn-quick-time" onclick="setQuickTime(1)">+1 Menit</button>
                         <button type="button" class="btn-quick-time" onclick="setQuickTime(5)">+5 Menit</button>
                         <button type="button" class="btn-quick-time" onclick="setQuickTime(10)">+10 Menit</button>
                         <button type="button" class="btn-quick-time" onclick="setQuickTime(60)">+1 Jam</button>
                     </div>
-                    <p class="form-hint">Minimal 1 menit dari sekarang</p>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Pilih Tier</label>
-                    <div class="tier-options" id="tier-options">
+                    <div class="tier-options">
                         <div class="tier-option selected" onclick="selectTier('free')" data-tier="free">
                             <div class="tier-name">Gratis</div>
                             <div class="tier-price">Rp 0</div>
@@ -151,20 +145,13 @@
                             <span class="dev-badge">SOON</span>
                             <div class="tier-name">Premium</div>
                             <div class="tier-price">Rp 10.000/bln</div>
-                            <div class="tier-capacity">100-160 Kursi</div>
-                        </div>
-                        <div class="tier-option disabled">
-                            <span class="dev-badge">SOON</span>
-                            <div class="tier-name">VIP</div>
-                            <div class="tier-price">Rp 30.000/bln</div>
-                            <div class="tier-capacity">200-300 Kursi</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="quota-display">
                     <div class="quota-number" id="quota-display">45</div>
-                    <div class="quota-label">Kursi Tersedia (Acak 30-57)</div>
+                    <div class="quota-label">Kursi Tersedia</div>
                 </div>
 
                 <button class="btn btn-primary" style="width:100%" onclick="processBooking()">Konfirmasi Pemesanan</button>
@@ -179,37 +166,34 @@
             <div class="cinema-info">
                 <span class="cinema-badge" id="cinema-badge">LOKET 1 | ROOM 5</span>
                 <span class="cinema-movie-title" id="cinema-movie-title">-</span>
-                <span class="cinema-url-badge" id="cinema-url-badge" title="Klik untuk salin URL room" onclick="copyRoomUrl()">🔗 Bagikan</span>
+                <span class="cinema-url-badge" onclick="copyRoomUrl()">🔗 Bagikan</span>
             </div>
             <div class="cinema-actions">
-                <button class="btn btn-secondary btn-sm btn-icon" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+                <button class="btn-icon" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
                 <button class="btn btn-danger btn-sm" onclick="confirmExit()">Keluar</button>
             </div>
         </div>
         <div class="cinema-main">
-            <div class="cinema-player-area" id="cinema-player-area">
-                <div class="sync-indicator" id="sync-indicator" style="display:none">
-                    <span class="sync-dot"></span>
-                    <span>Synced</span>
-                </div>
-                <div class="lock-indicator" id="lock-indicator" style="display:none">🔒 Realtime Lock</div>
+            <div class="cinema-player-area">
+                <div class="sync-indicator" id="sync-indicator">Synced</div>
+                <div class="lock-indicator" id="lock-indicator">🔒 Locked</div>
                 
                 <div class="end-screen-overlay" id="end-screen-overlay">
-                    <div style="font-size:3rem; margin-bottom:20px">🎬</div>
-                    <h2 style="font-size:1.8rem; font-weight:700; color:var(--text-primary)">Film Telah Selesai</h2>
-                    <p style="color:var(--text-secondary); margin-top:10px">Terima kasih telah menonton bersama ThMOvie.</p>
+                    <h2>Film Telah Selesai</h2>
+                    <p>Terima kasih telah menonton bersama ThMOvie.</p>
                 </div>
 
                 <div class="countdown-overlay" id="countdown-overlay">
                     <div class="countdown-timer" id="countdown-timer">--:--</div>
-                    <div class="countdown-label">Menunggu Waktu Tayang</div>
                     <div class="countdown-room-info" id="countdown-room-info"></div>
                 </div>
-                <div class="cinema-loading" id="cinema-loading" style="display:none">
+                
+                <div class="cinema-loading" id="cinema-loading">
                     <div class="spinner"></div>
-                    <span style="font-size:.85rem;color:var(--text-secondary)">Memuat player...</span>
+                    <span>Memuat player...</span>
                 </div>
-                <div class="player-container" id="player-container"></div>
+                
+                <div id="player-container"></div>
             </div>
             <div class="cinema-sidebar">
                 <div class="chat-header">
@@ -219,7 +203,7 @@
                 <div class="online-users-bar" id="online-users-bar"></div>
                 <div class="chat-messages" id="chat-messages"></div>
                 <div class="chat-input-area">
-                    <input type="text" class="chat-input" id="chat-input" placeholder="Ketik pesan..." maxlength="500" onkeypress="if(event.key==='Enter')sendChat()">
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Ketik pesan..." onkeypress="if(event.key==='Enter')sendChat()">
                     <button class="btn btn-primary btn-icon" onclick="sendChat()">➤</button>
                 </div>
             </div>
@@ -236,43 +220,37 @@
     <!-- MODALS -->
     <div class="modal-overlay" id="rules-modal" onclick="closeRules(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header"><h2 class="modal-title">📋 Rules ThMOvie</h2></div>
+            <div class="modal-header"><h2>📋 Rules ThMOvie</h2></div>
             <div class="modal-body">
                 <ul class="rules-list">
-                    <li>Harap sopan di dalam chat room dan hormati penonton lain</li>
-                    <li>Room akan otomatis terhapus 24 jam setelah film selesai tayang</li>
-                    <li>Dilarang share link atau konten yang melanggar hak cipta</li>
-                    <li>Kapasitas maksimal (Gratis: 30-57 kursi)</li>
+                    <li>Harap sopan di dalam chat room</li>
+                    <li>Room otomatis terhapus 24 jam setelah film selesai</li>
                     <li>Video diputar otomatis sesuai jadwal</li>
-                    <li>Gunakan link valid (YouTube/Drive)</li>
+                    <li>Gunakan link valid (YouTube/Drive Publik)</li>
                 </ul>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" style="width:100%" onclick="closeRules()">Saya Mengerti</button>
-            </div>
+            <div class="modal-footer"><button class="btn btn-primary" onclick="closeRules()">Mengerti</button></div>
         </div>
     </div>
 
     <div class="modal-overlay" id="join-modal" onclick="closeJoinModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header"><h2 class="modal-title">🎬 Bergabung ke Room</h2></div>
+            <div class="modal-header"><h2>🎬 Bergabung ke Room</h2></div>
             <div class="modal-body" id="join-modal-body"></div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" style="flex:1" onclick="closeJoinModal()">Batal</button>
-                <button class="btn btn-primary" style="flex:1" id="join-confirm-btn" onclick="confirmJoinRoom()">Gabung</button>
+                <button class="btn btn-secondary" onclick="closeJoinModal()">Batal</button>
+                <button class="btn btn-primary" id="join-confirm-btn" onclick="confirmJoinRoom()">Gabung</button>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="exit-modal" onclick="closeExitModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header"><h2 class="modal-title">⚠️ Keluar dari Room?</h2></div>
-            <div class="modal-body">
-                <p style="color:var(--text-secondary);font-size:.9rem">Anda akan keluar dari watch party. Film akan tetap berjalan.</p>
-            </div>
+            <div class="modal-header"><h2>⚠️ Keluar dari Room?</h2></div>
+            <div class="modal-body"><p>Anda akan keluar dari watch party.</p></div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" style="flex:1" onclick="closeExitModal()">Batal</button>
-                <button class="btn btn-danger" style="flex:1" onclick="doExit()">Keluar</button>
+                <button class="btn btn-secondary" onclick="closeExitModal()">Batal</button>
+                <button class="btn btn-danger" onclick="doExit()">Keluar</button>
             </div>
         </div>
     </div>
@@ -282,9 +260,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     
-    <!-- PENTING: Urutan load JS harus seperti ini -->
-    <script src="data.js"></script>  <!-- 1. Database Film -->
-    <script src="init.js"></script>  <!-- 2. Config & Variable -->
-    <script src="app.js"></script>    <!-- 3. Logic Aplikasi -->
+    <script src="data.js"></script>
+    <script src="init.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
