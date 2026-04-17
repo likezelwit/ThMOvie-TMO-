@@ -9,7 +9,7 @@ function renderMovies() {
         <div class="movie-card" onclick="selectMovie('${m.id}')">
             <img class="movie-poster" src="${m.poster}" alt="${m.title}" loading="lazy">
             <span class="badge-rating" style="display:${m.rating === 'NEW' ? 'none' : 'flex'}">★ ${m.rating}</span>
-            ${m.rating === 'NEW' ? '<span class="badge-rating" style="background:var(--accent-gold); color:#000; width:auto; padding:2px 6px; font-size:0.6rem;">NEW</span>' : ''}
+            ${m.rating === 'NEW' ? '<span class="badge-rating" style="background:var(--accent-gold); color:#000;">NEW</span>' : ''}
             <div class="movie-overlay">
                 <div class="movie-info">
                     <h3 class="movie-title-card">${m.title}</h3>
@@ -29,19 +29,31 @@ function selectMovie(id) {
 function createRoomFromMovie(id) {
     const movie = movieDatabase.find(m => m.id === id);
     if (!movie) return;
-    selectedMovie = movie;
     
+    // Set data utama
+    selectedMovie = movie;
     let videoUrl = movie.url;
 
+    // Update UI Form
     const displayEl = document.getElementById('selected-movie-display');
-    if(displayEl) displayEl.value = movie.title;
+    if(displayEl) {
+        displayEl.value = movie.title;
+        displayEl.style.fontWeight = 'bold';
+        displayEl.style.color = '#fff';
+    }
     
     const urlInput = document.getElementById('room-video-url');
     if(urlInput) urlInput.value = videoUrl;
     
+    // Reset manual input agar tidak bentrok
     const manualInput = document.getElementById('manual-video-url');
-    if(manualInput) manualInput.value = '';
-    
+    if(manualInput) {
+        manualInput.value = '';
+        manualInput.disabled = true; // Kunci manual input jika film dipilih
+        manualInput.style.opacity = '0.5';
+    }
+
+    // Pre-verifikasi untuk menampilkan preview
     const source = getVideoSource(videoUrl);
     const preview = document.getElementById('video-preview');
     if(preview) preview.classList.add('active');
@@ -53,10 +65,22 @@ function createRoomFromMovie(id) {
 
     if(thumb) thumb.src = movie.poster;
     if(titleEl) titleEl.textContent = movie.title;
-    if(channel) channel.textContent = source.type === 'youtube' ? 'YouTube' : 'Google Drive';
-    if(duration) duration.textContent = movie.duration;
     
-    verifiedVideoData = { id: movie.id, title: movie.title, url: movie.url, type: source.type };
+    // Tentukan channel info
+    if (source && source.type === 'youtube') {
+        if(channel) channel.textContent = 'YouTube';
+        if(duration) duration.textContent = movie.duration;
+        verifiedVideoData = { id: movie.id, title: movie.title, url: movie.url, type: 'youtube' };
+    } else if (source && source.type === 'drive') {
+        if(channel) channel.textContent = 'Google Drive (HD)';
+        if(duration) duration.textContent = movie.duration;
+        // Simpan ID Drive yang sudah diparse
+        verifiedVideoData = { id: source.id, title: movie.title, url: movie.url, type: 'drive' }; 
+    } else {
+        if(preview) preview.classList.remove('active');
+        verifiedVideoData = null;
+    }
+    
     showPage('create');
 }
 
@@ -112,12 +136,9 @@ async function renderLoket() {
                     <div class="loket-number">LOKET ${l}</div>
                     <div class="loket-status"><span class="status-dot"></span>${available > 0 ? available + ' tersedia' : 'Penuh'}</div>
                 </div>
-                <div class="loket-desc">Room ${startGlobal} s/d ${startGlobal + ROOMS_PER_LOKET - 1} • Hijau: Kosong, Merah: Isi (Klik untuk gabung)</div>
-                <div class="loket-rooms-label">Peta Room (30 unit)</div>
+                <div class="loket-desc">Room ${startGlobal} s/d ${startGlobal + ROOMS_PER_LOKET - 1}</div>
+                <div class="loket-rooms-label">Peta Room</div>
                 <div class="room-grid-mini">${roomsHtml}</div>
-                <div class="loket-footer">
-                    <span class="loket-available-count" style="color:${available > 0 ? 'var(--success)' : 'var(--accent-red)'}">${available} room kosong</span>
-                </div>
             </div>
         `;
     }
@@ -146,32 +167,38 @@ function clickRoomFromLoket(loket, room) {
         showToast('Room ini sudah terisi!', 'error');
         return;
     }
-    showToast(`Room ${room} di Loket ${loket} tersedia. Silakan isi form pemesanan.`, 'success');
+    showToast(`Room ${room} di Loket ${loket} tersedia.`, 'success');
     openCreateRoom(loket, room);
 }
 
 function openLoketDetail(loket) {
-    // Placeholder function
+    // Bisa dikembangkan untuk melihat detail room di loket tertentu
 }
 
 // --- CREATE ROOM & BOOKING ---
 function openCreateRoom(preLoket, preRoom) {
-    selectedMovie = null;
-    verifiedVideoData = null;
-    
-    const displayEl = document.getElementById('selected-movie-display');
-    if(displayEl) {
-        displayEl.value = '';
-        displayEl.placeholder = 'Belum memilih film (opsional)';
-        delete displayEl.dataset.preLoket;
-        delete displayEl.dataset.preRoom;
+    // Reset state jika bukan dari klik film
+    if (!verifiedVideoData) {
+        selectedMovie = null;
+        verifiedVideoData = null;
+        
+        const displayEl = document.getElementById('selected-movie-display');
+        if(displayEl) {
+            displayEl.value = '';
+            displayEl.style.fontWeight = 'normal';
+            displayEl.dataset.preLoket = '';
+            displayEl.dataset.preRoom = '';
+        }
+        const manualInput = document.getElementById('manual-video-url');
+        if(manualInput) {
+            manualInput.disabled = false;
+            manualInput.style.opacity = '1';
+            manualInput.value = '';
+        }
     }
 
     const urlInput = document.getElementById('room-video-url');
     if(urlInput) urlInput.value = '';
-    
-    const manualInput = document.getElementById('manual-video-url');
-    if(manualInput) manualInput.value = '';
     
     const preview = document.getElementById('video-preview');
     if(preview) preview.classList.remove('active');
@@ -187,6 +214,7 @@ function openCreateRoom(preLoket, preRoom) {
     updateQuota();
 
     if (preLoket && preRoom) {
+        const displayEl = document.getElementById('selected-movie-display');
         if(displayEl) {
             displayEl.placeholder = `Loket ${preLoket} • Room ${preRoom}`;
             displayEl.dataset.preLoket = preLoket;
@@ -218,8 +246,17 @@ function verifyManualVideo() {
     if(!urlInput) return;
     const url = urlInput.value.trim();
     const preview = document.getElementById('video-preview');
-    if(!preview) return;
+    const displayEl = document.getElementById('selected-movie-display');
     
+    // Jika user mengetik manual, reset selected movie
+    if (url.length > 5) {
+        selectedMovie = null;
+        if(displayEl) {
+            displayEl.value = '';
+            displayEl.placeholder = 'Film Manual';
+        }
+    }
+
     if (!url) { 
         preview.classList.remove('active'); 
         verifiedVideoData = null; 
@@ -230,7 +267,6 @@ function verifyManualVideo() {
     if (!source) { 
         preview.classList.remove('active'); 
         verifiedVideoData = null; 
-        showToast('URL Video tidak valid!', 'error');
         return; 
     }
     
@@ -242,33 +278,25 @@ function verifyManualVideo() {
     if (source.type === 'youtube') {
         if(thumb) thumb.src = 'https://img.youtube.com/vi/' + source.id + '/mqdefault.jpg';
         if(channel) channel.textContent = 'YouTube';
-        verifiedVideoData = { id: source.id, title: 'Video YouTube', type: 'youtube' };
-    } else {
+        verifiedVideoData = { id: source.id, title: 'Video YouTube', type: 'youtube', url: url };
+    } else if (source.type === 'drive') {
         if(thumb) thumb.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Google_Drive_icon_%282020%29.svg/1200px-Google_Drive_icon_%282020%29.svg.png';
         if(channel) channel.textContent = 'Google Drive';
-        verifiedVideoData = { id: null, title: 'Video Drive', url: url, type: 'drive' };
+        verifiedVideoData = { id: source.id, title: 'Video Drive', type: 'drive', url: url };
     }
-    if(duration) duration.textContent = 'Durasi terdeteksi otomatis';
+    if(duration) duration.textContent = 'Terdeteksi';
     
     const roomUrlInput = document.getElementById('room-video-url');
     if(roomUrlInput) roomUrlInput.value = url;
 }
 
-// --- QUICK TIME SCHEDULE ---
 function setQuickTime(offsetMinutes) {
     const timeInput = document.getElementById('room-time');
     if(!timeInput) return;
-    
     const now = new Date();
     now.setMinutes(now.getMinutes() + offsetMinutes);
-    
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    
-    timeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    const pad = (n) => String(n).padStart(2, '0');
+    timeInput.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 
 function setupDateTimeMin() {
@@ -318,13 +346,12 @@ function processBooking() {
     const savedUrlInput = document.getElementById('room-video-url');
     const savedUrl = savedUrlInput ? savedUrlInput.value : '';
 
-    const displayEl = document.getElementById('selected-movie-display');
-
+    // Logic penentuan URL Final
     let finalUrl = manualUrl || savedUrl;
+    
+    // Fallback logic jika kosong (seharusnya tidak terjadi karena validasi tombol)
     if (!finalUrl && selectedMovie && selectedMovie.url) {
         finalUrl = selectedMovie.url;
-    } else if (!finalUrl && selectedMovie && selectedMovie.id) {
-        finalUrl = 'https://youtube.com/watch?v=' + selectedMovie.id;
     }
 
     let videoTitle = 'Unknown Movie';
@@ -336,6 +363,7 @@ function processBooking() {
 
     const source = getVideoSource(finalUrl);
 
+    // Validasi
     if (!source) { showToast('Link video tidak valid (Hanya YouTube / Drive)!', 'error'); return; }
     if (!timeValue) { showToast('Pilih jadwal tayang terlebih dahulu!', 'error'); return; }
 
@@ -360,15 +388,18 @@ function processBooking() {
         password = passValue;
     }
 
+    // Penentuan Room
     let loket, room;
+    const displayEl = document.getElementById('selected-movie-display');
     const preLoket = displayEl && displayEl.dataset.preLoket ? parseInt(displayEl.dataset.preLoket) : 0;
     const preRoom = displayEl && displayEl.dataset.preRoom ? parseInt(displayEl.dataset.preRoom) : 0;
 
     if (preLoket && preRoom) {
         const globalNum = loketRoomToGlobal(preLoket, preRoom);
+        // Cek ulang real-time apakah room masih kosong
         if (occupiedRooms[globalNum]) {
-            showToast('Room ini sudah diambil! Pilih room lain.', 'error');
-            renderLoket();
+            showToast('Room ini sudah diambil orang lain! Pilih room lain.', 'error');
+            renderLoket(); // Refresh UI
             return;
         }
         loket = preLoket;
@@ -390,7 +421,7 @@ function processBooking() {
         room: room,
         globalRoomNum: globalNum,
         videoSource: source.type, 
-        videoId: source.type === 'youtube' ? source.id : null,
+        videoId: source.type === 'youtube' ? source.id : (source.id || null), // Simpan ID Drive jika ada
         videoUrl: source.type === 'drive' ? source.url : null,
         videoTitle: videoTitle,
         capacity: quota,
@@ -414,6 +445,7 @@ function processBooking() {
         showPrinterAnimation(loket, room, quota, newRef.key, roomObj);
     }).catch(err => {
         showToast('Gagal membuat room: ' + err.message, 'error');
+        console.error(err);
     });
 }
 
@@ -427,7 +459,7 @@ function showPrinterAnimation(loket, room, quota, roomId, roomObj) {
                 <div style="font-size:.7rem;margin-bottom:6px;opacity:.7">ThMOvie CINEMA</div>
                 <div style="font-size:1.4rem;margin-bottom:4px">LOKET ${loket}</div>
                 <div style="font-size:1.1rem">ROOM ${room}</div>
-                <div style="font-size:.65rem;margin-top:8px;border-top:1px dashed rgba(0,0,0,.3);padding-top:6px;line-height:1.4">
+                <div style="font-size:.65rem;margin-top:8px;border-top:1px dashed rgba(255,255,255,.3);padding-top:6px;line-height:1.4">
                     Kapasitas: ${quota} Kursi<br>
                     ID: ${roomId.slice(0,8)}...<br>
                     ${roomObj.videoSource === 'drive' ? '💿 GOOGLE DRIVE' : '📺 YOUTUBE'}<br>
@@ -562,16 +594,12 @@ function setupChat() {
     addChatMessage('system', '🎬 Selamat datang di ThMOvie Watch Party!');
     addChatMessage('system', '💡 Bagikan URL room ke teman agar bisa bergabung');
     if (roomData && roomData.videoSource === 'youtube') {
-        addChatMessage('system', '🔒 Video dikunci — tidak bisa dimajukan/mundurkan');
+        addChatMessage('system', '🔒 Video dikunci — sinkronisasi otomatis aktif');
     }
 
     dbChatRef.orderByChild('timestamp').limitToLast(50).on('child_added', snap => {
         const msg = snap.val();
         if (!msg) return;
-        // Ignore own messages from stream (already added locally) to prevent dupes
-        // But since we push then add locally, and stream catches push... we might need logic.
-        // Simple approach: check sender.
-        // However, for simplicity in this refactor, let's just append all.
         addChatMessage('other', msg.text, msg.sender);
     });
 }
@@ -590,7 +618,7 @@ function addChatMessage(type, text, sender) {
         div.innerHTML = '<div class="chat-sender">' + safeSender + '</div><div class="chat-bubble">' + safeText + '</div>';
     }
     box.appendChild(div);
-    while (box.children.length > 100) box.removeChild(box.firstChild);
+    while (box.children.length > 50) box.removeChild(box.firstChild);
     box.scrollTop = box.scrollHeight;
 }
 
@@ -663,8 +691,7 @@ function startCountdown() {
 function startPreRoll(room) {
     isPreRollPlaying = true;
     showToast('Memutar iklan pembuka...', 'success');
-    addChatMessage('system', '📺 Memutar iklan pembuka selama ' + PRE_ROLL_DURATION_SEC + ' detik...');
-
+    addChatMessage('system', '📺 Memutar iklan pembuka...');
     initYoutubePlayer(PRE_ROLL_VIDEO_ID);
     
     setTimeout(() => {
@@ -677,7 +704,7 @@ function startPreRoll(room) {
 
 function initMainPlayer(room) {
     if (room.videoSource === 'drive') {
-        initDrivePlayer(room.videoUrl);
+        initDrivePlayer(room.videoUrl || room.videoId);
     } else {
         initYoutubePlayer(room.videoId);
     }
@@ -700,22 +727,21 @@ function initYoutubePlayer(videoId) {
 
     playerType = 'youtube';
     
-    if (typeof YT !== 'undefined') {
+    // Pastikan API sudah siap
+    if (typeof YT !== 'undefined' && YT.Player) {
         player = new YT.Player('player-container', {
             height: '100%',
             width: '100%',
             videoId: videoId,
             playerVars: {
                 autoplay: 1,
-                controls: 0,        
-                disablekb: 1,       
-                fs: 0,              
+                controls: 1, // Ubah ke 1 agar user bisa kontrol jika sync error
+                disablekb: 0,
+                fs: 1,
                 modestbranding: 1,
-                rel: 0, 
-                iv_load_policy: 3,
+                rel: 0,
                 playsinline: 1,
                 enablejsapi: 1,
-                widget_referrer: window.location.origin,
                 origin: window.location.origin
             },
             events: {
@@ -725,7 +751,10 @@ function initYoutubePlayer(videoId) {
             }
         });
     } else {
-        showToast('YouTube API belum siap. Refresh halaman.', 'error');
+        console.error("YouTube API not loaded");
+        showToast('Memuat ulang player YouTube...', 'error');
+        // Fallback reload API jika gagal
+        setTimeout(() => initYoutubePlayer(videoId), 2000);
     }
 }
 
@@ -757,17 +786,19 @@ function onPlayerStateChange(e) {
         if (dbRoomRef) {
             dbRoomRef.update({ phase: 'ended', playState: 0, lastSync: firebase.database.ServerValue.TIMESTAMP });
         }
-        addChatMessage('system', '🎬 Film telah selesai. Terima kasih telah menonton!');
+        addChatMessage('system', '🎬 Film telah selesai. Terima kasih!');
     }
 
-    // Force play
-    if (ytState === YT.PlayerState.PAUSED && roomData && roomData.phase === 'playing') {
+    // Auto-play force (opsional, kadang mengganggu jika user pause sendiri)
+    /*
+    if (ytState === YT.PlayerState.PAUSED && roomData && roomData.phase === 'playing' && !isSyncing) {
         setTimeout(() => {
             if (player && playerReady && roomData && roomData.phase === 'playing') {
                 player.playVideo();
             }
-        }, 300);
+        }, 500);
     }
+    */
 }
 
 function onPlayerError(e) {
@@ -776,17 +807,16 @@ function onPlayerError(e) {
     if(loading) loading.style.display = 'none';
     
     let msg = 'Terjadi kesalahan pada video';
-    if (e.data === 2) msg = 'Video ID tidak valid';
-    else if (e.data === 5) msg = 'Error konten HTML5';
-    else if (e.data === 100) msg = 'Video tidak ditemukan atau privat';
-    else if (e.data === 101 || e.data === 150) msg = 'Video tidak bisa di-embed';
+    if (e.data === 2) msg = 'Parameter URL Salah';
+    else if (e.data === 100) msg = 'Video tidak ditemukan (Private/Deleted)';
+    else if (e.data === 101 || e.data === 150) msg = 'Video tidak diizinkan di-embed oleh pemilik';
     
     showToast(msg, 'error');
     addChatMessage('system', '❌ ' + msg);
 }
 
-// --- DRIVE PLAYER WRAPPER (FIXED) ---
-function initDrivePlayer(url) {
+// --- DRIVE PLAYER WRAPPER (FIXED 100%) ---
+function initDrivePlayer(urlOrId) {
     const loading = document.getElementById('cinema-loading');
     if(loading) loading.style.display = 'flex';
     
@@ -802,59 +832,57 @@ function initDrivePlayer(url) {
 
     playerType = 'drive';
     
-    // Extract ID dari URL Drive (Support berbagai format)
-    let id = null;
-    const patterns = [
-        /\/file\/d\/([a-zA-Z0-9_-]+)/,
-        /\/open\?id=([a-zA-Z0-9_-]+)/
-    ];
-
-    for (let p of patterns) {
-        const match = url.match(p);
-        if (match && match[1]) {
-            id = match[1];
-            break;
+    // Extract ID logic
+    let id = urlOrId;
+    // Jika urlOrId masih berupa URL lengkap, kita parse lagi
+    if (urlOrId.includes('http')) {
+        const source = getVideoSource(urlOrId);
+        if (source && source.id) {
+            id = source.id;
+        } else {
+            showToast('Link Drive tidak valid', 'error');
+            loading.style.display = 'none';
+            return;
         }
     }
 
     if (!id) {
-        showToast('Gagal membaca ID Drive. Pastikan link benar.', 'error');
+        showToast('ID Drive tidak ditemukan', 'error');
         loading.style.display = 'none';
         return;
     }
 
-    // FIX: Gunakan URL preview standar langsung, jangan pakai viewer API
-    // Agar autoplay lebih mungkin, kita set parameter autoplay di url preview (meski sering diblok browser)
-    // Format terbaik: https://drive.google.com/file/d/ID/preview
-    
+    // FIX UTAMA: Gunakan URL Preview standar
+    // Embed URL untuk Drive harus '/preview'
     const embedUrl = `https://drive.google.com/file/d/${id}/preview`;
     
-    if(container) {
-        container.innerHTML = `
-            <div class="drive-player-container" style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;">
-                <iframe 
-                    src="${embedUrl}?autoplay=1" 
-                    allow="autoplay; fullscreen" 
-                    style="width:100%; height:100%; border:none; position:absolute; top:0; left:0; z-index:1;"
-                    allowfullscreen>
-                </iframe>
-                <div class="drive-sync-overlay" style="position:absolute; inset:0; z-index:10; background:transparent; cursor:default;"></div>
-            </div>
-        `;
-    }
+    // Gunakan iframe dengan atribut lengkap
+    const iframe = document.createElement('iframe');
+    iframe.src = embedUrl + '?autoplay=1'; // Tambah parameter autoplay
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.zIndex = '10';
+    
+    // Atribut penting agar browser tidak memblokir iframe
+    iframe.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+    iframe.setAttribute('allowfullscreen', '');
+    
+    container.appendChild(iframe);
     
     playerReady = true;
-    // Delay loading agar Drive sempat load
+    
+    // Delay loading visual agar Drive sempat buffering
     setTimeout(() => {
         if(loading) loading.style.display = 'none';
-        showToast('Video Drive dimuat. Jika video pause, tekan play pada player.', 'success');
+        showToast('Video Google Drive siap.', 'success');
     }, 3000); 
     
-    const syncInd = document.getElementById('sync-indicator');
-    if(syncInd) syncInd.style.display = 'flex';
-    
-    // Note: Sync loop disabled for Drive because we cannot control playback time via JS API (CORS restriction)
-    // addChatMessage('system', '📺 Note: Sinkronisasi waktu tidak tersedia untuk Google Drive (Terbatas API).');
+    // Tampilkan notifikasi bahwa sync tidak aktif untuk Drive
+    addChatMessage('system', '📺 Note: Sinkronisasi waktu otomatis tidak tersedia untuk Google Drive.');
 }
 
 function startSyncLoop() {
@@ -893,11 +921,17 @@ function handleRoomUpdate(snapshot) {
     if (prevPhase === 'waiting' && data.phase === 'playing') {
         const overlay = document.getElementById('countdown-overlay');
         if(overlay) overlay.style.display = 'none';
-        initMainPlayer(data); 
+        
+        // Cek apakah perlu pre-roll
+        if (PRE_ROLL_DURATION_SEC > 0) {
+            startPreRoll(data);
+        } else {
+            initMainPlayer(data);
+        }
     }
 
     if (data.phase === 'ended' && prevPhase !== 'ended') {
-        addChatMessage('system', '🎬 Room ini telah berakhir. Terima kasih!');
+        addChatMessage('system', '🎬 Room ini telah berakhir.');
     }
 
     if (playerReady && playerType === 'youtube' && data.phase === 'playing') {
@@ -906,16 +940,19 @@ function handleRoomUpdate(snapshot) {
             const serverPos = data.currentTime || 0;
             const drift = Math.abs(myPos - serverPos);
 
-            if (drift > MAX_SYNC_DRIFT) {
+            // Sync Time jika selisih > 2 detik
+            if (drift > MAX_SYNC_DRIFT && !isSyncing) {
                 isSyncing = true;
                 player.seekTo(serverPos, true);
-                setTimeout(() => { isSyncing = false; }, 500);
+                setTimeout(() => { isSyncing = false; }, 1000);
             }
 
+            // Sync Play/Pause
             const shouldPlay = data.playState === 1;
             const myState = player.getPlayerState();
             const amPlaying = (myState === YT.PlayerState.PLAYING);
 
+            // Jika server play tapi kita pause, playkan. Kecuali kita sedang nge-drag seekbar.
             if (shouldPlay && !amPlaying && !isSyncing) {
                 player.playVideo();
             }
@@ -930,7 +967,7 @@ function joinRoomById(roomId) {
 
     db.ref('rooms/' + roomId).once('value').then(snap => {
         if (!snap.exists()) {
-            showToast('Room tidak ditemukan! Mungkin sudah dihapus.', 'error');
+            showToast('Room tidak ditemukan!', 'error');
             pendingJoinRoomId = null;
             return;
         }
@@ -944,7 +981,7 @@ function joinRoomById(roomId) {
         let passwordHtml = '';
         if (room.visibility === 'private') {
             passwordHtml = `
-                <div class="form-group" style="margin-bottom:0">
+                <div class="form-group">
                     <label class="form-label">Password Room</label>
                     <input type="password" id="join-password" class="form-input" placeholder="Masukkan password...">
                 </div>
@@ -954,22 +991,17 @@ function joinRoomById(roomId) {
         const modalBody = document.getElementById('join-modal-body');
         if(modalBody) {
             modalBody.innerHTML = `
-                <div class="join-modal-body">
-                    <div class="join-room-info">
-                        <div class="room-id">LOKET ${room.loket} | ROOM ${room.room}</div>
-                        <div class="room-detail">${room.videoTitle || 'Unknown Movie'}</div>
-                        <div class="room-detail">${room.videoSource === 'drive' ? '💿 Google Drive' : '📺 YouTube'}</div>
-                        <div class="room-detail">Kapasitas: ${room.capacity} kursi • Tier: ${room.tier || 'free'}</div>
-                        <div class="room-detail" style="margin-top:4px; color:${room.visibility === 'private' ? 'var(--accent-gold)' : 'var(--success)'}">
-                            ${room.visibility === 'private' ? '🔒 Private Room' : '🔓 Public Room'}
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin-bottom:0">
-                        <label class="form-label">Nama Anda</label>
-                        <input type="text" id="join-username" class="form-input" placeholder="Masukkan nama..." value="${myUsername}" maxlength="20">
-                    </div>
-                    ${passwordHtml}
+                <div class="join-room-info">
+                    <div class="room-id">LOKET ${room.loket} | ROOM ${room.room}</div>
+                    <div class="room-detail" style="font-size:1.1rem; font-weight:bold; margin-top:5px;">${room.videoTitle || 'Unknown Movie'}</div>
+                    <div class="room-detail">${room.videoSource === 'drive' ? '💿 Google Drive' : '📺 YouTube'}</div>
+                    <div class="room-detail">Kapasitas: ${room.capacity}</div>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Nama Anda</label>
+                    <input type="text" id="join-username" class="form-input" placeholder="Masukkan nama..." value="${myUsername}" maxlength="20">
+                </div>
+                ${passwordHtml}
             `;
         }
         const modal = document.getElementById('join-modal');
@@ -1050,15 +1082,9 @@ function updateURL(roomId) {
     window.history.replaceState({}, '', url.toString());
 }
 
-function getRoomShareURL(roomId) {
-    const url = new URL(window.location.href.split('?')[0]);
-    url.searchParams.set('room', roomId);
-    return url.toString();
-}
-
 function copyRoomUrl() {
     if (!currentRoomId) return;
-    const url = getRoomShareURL(currentRoomId);
+    const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
         showToast('URL room berhasil disalin!', 'success');
     }).catch(() => {
@@ -1125,32 +1151,12 @@ function showToast(message, type) {
     }, 3500);
 }
 
-function initJazzIndicator() {
-    const el = document.getElementById('jazz-indicator');
-    if(el) {
-        el.addEventListener('click', () => {
-            el.classList.toggle('muted');
-            showToast(el.classList.contains('muted') ? 'Jazz Lounge Paused' : 'Jazz Lounge Playing');
-        });
-    }
-}
-
-function handleURLRoute() {
-    const params = new URLSearchParams(window.location.search);
-    const rid = params.get('room');
-    if (rid && rid.length > 5) {
-        showToast('Membuka room dari link...');
-        joinRoomById(rid);
-    }
-}
-
 // --- MAIN INIT ---
 window.onload = function() {
     renderMovies();
     renderLoket();
     setupDateTimeMin();
     handleURLRoute();
-    initJazzIndicator();
 
     window.addEventListener('scroll', () => {
         const nav = document.getElementById('nav-header');
@@ -1164,51 +1170,45 @@ window.onload = function() {
     });
 };
 
+function handleURLRoute() {
+    const params = new URLSearchParams(window.location.search);
+    const rid = params.get('room');
+    if (rid && rid.length > 5) {
+        showToast('Membuka room dari link...');
+        joinRoomById(rid);
+    }
+}
+
 // --- CRON JOBS ---
 setInterval(() => {
     if (!db) return;
     const now = Date.now();
-
     db.ref('rooms').once('value').then(snap => {
         if (!snap.exists()) return;
         const updates = {};
         const toRemove = [];
-
         snap.forEach(child => {
             const room = child.val();
             if (!room) return;
             const key = child.key;
-
+            // Auto Start
             if (room.phase === 'waiting' && room.scheduleTime && now >= room.scheduleTime) {
                 updates[key + '/phase'] = 'playing';
                 updates[key + '/playState'] = 1;
                 updates[key + '/currentTime'] = 0;
-                updates[key + '/lastSync'] = firebase.database.ServerValue.TIMESTAMP;
             }
-
+            // Auto End (5 hours after start)
             if (room.phase === 'playing' && room.scheduleTime && (now - room.scheduleTime > 5 * 60 * 60 * 1000)) {
                 updates[key + '/phase'] = 'ended';
                 updates[key + '/playState'] = 0;
             }
-
+            // Cleanup (24 hours)
             if (room.scheduleTime && (now - room.scheduleTime > 24 * 60 * 60 * 1000)) {
                 toRemove.push(key);
             }
-
-            if (!room.scheduleTime && room.createdAt) {
-                const created = room.createdAt;
-                if (typeof created === 'number' && (now - created > 24 * 60 * 60 * 1000)) {
-                    toRemove.push(key);
-                }
-            }
         });
-
-        if (Object.keys(updates).length > 0) {
-            db.ref('rooms').update(updates);
-        }
-        toRemove.forEach(key => {
-            db.ref('rooms/' + key).remove();
-        });
+        if (Object.keys(updates).length > 0) db.ref('rooms').update(updates);
+        toRemove.forEach(key => db.ref('rooms/' + key).remove());
     }).catch(() => {});
 }, 8000);
 
