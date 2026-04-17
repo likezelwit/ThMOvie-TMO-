@@ -2,534 +2,228 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ThMOvie (TMO) | Premium Watch Party</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" href="data:,">
-    
-    <style>
-        /* =========================================
-           CSS VARIABLES & RESET
-           ========================================= */
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #111111;
-            --bg-card: #1a1a1a;
-            --bg-hover: #222222;
-            --bg-glass: rgba(20, 20, 20, 0.95);
-            
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --text-muted: #666666;
-            
-            --accent-gold: #d4af37;
-            --accent-gold-hover: #f5c518;
-            --accent-gold-dim: rgba(212, 175, 55, 0.15);
-            
-            --accent-red: #e50914;
-            --accent-green: #46d369;
-            
-            --border-color: #333333;
-            
-            --gradient-gold: linear-gradient(135deg, #d4af37 0%, #f5c518 100%);
-            --shadow-card: 0 10px 40px rgba(0,0,0,0.6);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: 'Poppins', sans-serif;
-            overflow-x: hidden;
-            min-height: 100vh;
-            line-height: 1.5;
-        }
-
-        a { text-decoration: none; color: inherit; }
-        button { cursor: pointer; border: none; font-family: inherit; }
-        input { font-family: inherit; }
-
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .justify-center { justify-content: center; }
-        .text-center { text-align: center; }
-        .w-full { width: 100%; }
-
-        /* =========================================
-           UI COMPONENTS (BUTTONS, INPUTS)
-           ========================================= */
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.95rem;
-        }
-        .btn:active { transform: scale(0.96); }
-        
-        .btn-primary { background: var(--accent-gold); color: #000; box-shadow: 0 4px 15px rgba(212,175,55,0.3); }
-        .btn-primary:hover { background: var(--accent-gold-hover); }
-        
-        .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
-        .btn-secondary:hover { background: rgba(255,255,255,0.2); }
-        
-        .btn-danger { background: var(--accent-red); color: #fff; }
-        .btn-danger:hover { filter: brightness(1.1); }
-
-        .btn-sm { padding: 6px 14px; font-size: 0.8rem; border-radius: 6px; }
-        .btn-icon { width: 40px; height: 40px; border-radius: 50%; padding: 0; background: rgba(255,255,255,0.1); color: white; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn-icon:hover { background: var(--accent-gold); color: #000; }
-
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 8px; font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
-        .form-input {
-            width: 100%;
-            padding: 14px;
-            background: var(--bg-hover);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            color: white;
-            font-size: 1rem;
-            transition: 0.3s;
-        }
-        .form-input:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 3px var(--accent-gold-dim); }
-        .form-input:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* =========================================
-           NAVIGATION
-           ========================================= */
-        .nav-header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 60px;
-            background: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 5%;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .logo { font-size: 1.5rem; font-weight: 800; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; }
-        .nav-links { display: flex; gap: 20px; align-items: center; }
-        .nav-link { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); transition: 0.2s; position: relative; cursor: pointer; }
-        .nav-link.active { color: var(--text-primary); }
-        .nav-link.active::after { content: ''; position: absolute; bottom: -20px; left: 0; width: 100%; height: 2px; background: var(--accent-gold); }
-        
-        @media (max-width: 768px) {
-            .nav-links span { display: none; } /* Hide text links on mobile, keep buttons */
-            .nav-links button { display: flex; }
-        }
-
-        /* =========================================
-           PAGES (HERO, HOME, LOKET)
-           ========================================= */
-        .page-section { display: none; padding-top: 60px; min-height: 100vh; animation: fadeIn 0.4s ease; }
-        .page-section.active { display: block; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .hero-section {
-            position: relative;
-            min-height: 80vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%);
-            padding: 0 20px;
-        }
-        .hero-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 15px; line-height: 1.1; }
-        .hero-desc { font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 30px; }
-
-        .movie-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 20px;
-            padding: 20px 4%;
-        }
-        @media (min-width: 1200px) { .movie-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
-
-        .movie-card {
-            background: var(--bg-card);
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            aspect-ratio: 2/3;
-            cursor: pointer;
-            transition: transform 0.3s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .movie-card:hover { transform: translateY(-5px) scale(1.02); z-index: 2; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .movie-poster { width: 100%; height: 100%; object-fit: cover; }
-        .movie-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 60%);
-            opacity: 0; transition: 0.3s;
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 15px;
-        }
-        .movie-card:hover .movie-overlay { opacity: 1; }
-        .badge-rating { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: var(--accent-gold); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; z-index: 5; }
-        
-        .loket-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px 4%; }
-        .loket-card { background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .room-grid-mini { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 15px; }
-        .room-mini { aspect-ratio: 1; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
-        .room-mini.occupied { background: rgba(70, 211, 105, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
-        .room-mini.full { background: rgba(245, 197, 24, 0.2); color: #f5c518; border: 1px solid #f5c518; }
-        .room-mini.private { background: rgba(229, 9, 20, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
-
-        /* =========================================
-           CINEMA VIEW (THE WATCH PARTY)
-           ========================================= */
-        .cinema-view {
-            position: fixed; inset: 0; z-index: 2000;
-            background: #000;
-            display: none;
-            flex-direction: column;
-        }
-        .cinema-view.active { display: flex; }
-
-        .cinema-header {
-            height: 50px; background: rgba(0,0,0,0.9);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 15px; border-bottom: 1px solid #222;
-        }
-        .cinema-info { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
-        .cinema-title { font-size: 0.9rem; font-weight: 600; color: #fff; }
-
-        .cinema-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column; /* Mobile first: stacked */
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Desktop: Side by Side */
-        @media (min-width: 900px) {
-            .cinema-body { flex-direction: row; }
-            .player-area { flex: 1; height: 100%; }
-            .chat-sidebar { width: 350px; height: 100%; border-left: 1px solid #222; }
-        }
-
-        /* Mobile: Stacked */
-        @media (max-width: 899px) {
-            .player-area { width: 100%; aspect-ratio: 16/9; background: #000; flex-shrink: 0; position: relative; }
-            .chat-sidebar { flex: 1; width: 100%; min-height: 0; border-top: 1px solid #222; }
-        }
-
-        .player-container {
-            width: 100%; height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        #player-container iframe, #player-container div { width: 100% !important; height: 100% !important; }
-
-        /* Sync Indicator */
-        .sync-badge {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-            padding: 4px 10px; border-radius: 20px;
-            font-size: 0.7rem; font-weight: 700; color: var(--accent-green);
-            z-index: 50; display: flex; align-items: center; gap: 5px;
-            border: 1px solid rgba(70, 211, 105, 0.3);
-        }
-        .sync-dot { width: 6px; height: 6px; background: var(--accent-green); border-radius: 50%; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-        /* Chat UI */
-        .chat-header {
-            height: 40px; border-bottom: 1px solid #222;
-            padding: 0 15px; display: flex; align-items: center; justify-content: space-between;
-            font-size: 0.85rem; font-weight: 600; background: rgba(20,20,20,0.5);
-        }
-        .chat-messages {
-            flex: 1; overflow-y: auto; padding: 15px;
-            display: flex; flex-direction: column; gap: 10px;
-            background: rgba(10,10,10,0.8);
-            font-size: 0.85rem;
-        }
-        .chat-input-area {
-            height: 50px; border-top: 1px solid #222;
-            display: flex; align-items: center; padding: 0 10px; background: #000;
-        }
-        .chat-input {
-            flex: 1; background: #1a1a1a; border: 1px solid #333;
-            color: #fff; padding: 10px 15px; border-radius: 20px; margin-right: 10px;
-        }
-        
-        .msg { max-width: 85%; line-height: 1.4; word-wrap: break-word; }
-        .msg.sys { align-self: center; color: var(--text-muted); font-size: 0.75rem; background: #1a1a1a; padding: 4px 10px; border-radius: 10px; }
-        .msg.mine { align-self: flex-end; }
-        .msg.mine .bubble { background: var(--accent-gold); color: #000; border-bottom-right-radius: 2px; }
-        .msg.other { align-self: flex-start; }
-        .msg.other .bubble { background: #333; border-bottom-left-radius: 2px; }
-        .bubble { padding: 8px 12px; border-radius: 12px; display: inline-block; }
-        .sender { font-size: 0.7rem; color: var(--accent-gold); margin-bottom: 2px; display: block; }
-
-        /* Interaction Overlay (For Autoplay Permission) */
-        .interaction-overlay {
-            position: absolute; inset: 0; z-index: 100;
-            background: rgba(0,0,0,0.85);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px);
-            cursor: pointer;
-        }
-        .interact-btn {
-            padding: 15px 40px; font-size: 1.2rem; font-weight: 700;
-            background: var(--accent-gold); color: #000;
-            border-radius: 50px; box-shadow: 0 0 20px rgba(212,175,55,0.4);
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        /* Modals & Toasts */
-        .modal-overlay {
-            position: fixed; inset: 0; z-index: 3000;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-            display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-content {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 12px; width: 100%; max-width: 400px;
-            overflow: hidden; animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        .toast-container { position: fixed; top: 70px; right: 20px; z-index: 4000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast {
-            background: var(--bg-card); border-left: 4px solid var(--accent-gold);
-            padding: 12px 16px; border-radius: 6px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            color: #fff; font-size: 0.85rem;
-            animation: slideInRight 0.3s ease; pointer-events: auto;
-            display: flex; align-items: center; gap: 10px;
-        }
-        @keyframes slideInRight { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        /* Utility */
-        .loading-spinner {
-            width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: var(--accent-gold); border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="nav-header" id="navbar">
-        <div class="logo" onclick="app.showPage('home')">ThMOvie</div>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-header" id="nav-header">
+        <div class="logo" onclick="showPage('home')">ThMOvie</div>
         <div class="nav-links">
-            <div class="nav-link active" onclick="app.showPage('home')" data-page="home">Beranda</div>
-            <div class="nav-link" onclick="app.showPage('loket')" data-page="loket">Loket</div>
-            <div class="nav-link" onclick="app.showRules()">Rules</div>
-            <button class="btn btn-primary btn-sm" onclick="app.openCreateRoom()">🎫 Pesan Tiket</button>
+            <a class="nav-link active" onclick="showPage('home')" data-page="home">Beranda</a>
+            <a class="nav-link" onclick="showPage('loket')" data-page="loket">Loket</a>
+            <a class="nav-link" onclick="showRules()">Rules</a>
+            <button class="btn-nav" onclick="openCreateRoom()">🎫 Pesan Tiket</button>
         </div>
     </nav>
 
-    <!-- TOAST CONTAINER -->
-    <div class="toast-container" id="toast-container"></div>
-
-    <!-- MAIN PAGES -->
-    <main class="main-container">
-        
+    <div class="main-container">
         <!-- HOME PAGE -->
         <div id="home-page" class="page-section active">
             <section class="hero-section">
-                <div>
-                    <div style="display:inline-block; padding:5px 10px; background:var(--accent-gold); color:#000; border-radius:4px; font-weight:700; font-size:0.8rem; margin-bottom:15px;">PREMIUM WATCH PARTY</div>
-                    <h1 class="hero-title">Nonton Bareng<br>Tanpa Batas</h1>
-                    <p class="hero-desc">Sinkronisasi otomatis, chat realtime, dan kualitas HD. Buat room bioskop virtual Anda sendiri sekarang.</p>
-                    <div style="display:flex; gap:10px; justify-content:center;">
-                        <button class="btn btn-primary" onclick="document.getElementById('movies-section').scrollIntoView({behavior:'smooth'})">🎬 Cari Film</button>
-                        <button class="btn btn-secondary" onclick="app.showPage('loket')">🗺️ Pilih Loket</button>
+                <div class="hero-bg"></div>
+                <div class="hero-pattern"></div>
+                <div class="hero-content">
+                    <span class="hero-badge">Premium Watch Party</span>
+                    <h1 class="hero-title">Nonton Bareng Sinema Premium</h1>
+                    <p class="hero-description">Sinkronisasi real-time, chat antar penonton, dan kualitas HD. Nikmati pengalaman bioskop virtual bersama teman.</p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="scrollToMovies()">🎬 Jelajahi Film</button>
+                        <button class="btn btn-secondary" onclick="showPage('loket')">🎫 Cari Loket</button>
                     </div>
                 </div>
             </section>
-            <section id="movies-section">
-                <div class="movie-grid" id="movie-grid">
-                    <!-- Movies rendered via JS -->
+            
+            <section class="section" id="movies-section">
+                <div class="section-header">
+                    <h2 class="section-title">Sedang Tayang</h2>
                 </div>
+                <div class="movie-grid" id="movie-grid"></div>
             </section>
         </div>
 
         <!-- LOKET PAGE -->
         <div id="loket-page" class="page-section">
-            <div style="text-align:center; padding: 40px 20px; background: linear-gradient(180deg, #111 0%, #000 100%);">
-                <h2 style="font-size:2rem; margin-bottom:10px;">Peta Bioskop</h2>
-                <p style="color:var(--text-secondary);">Klik room kosong untuk memesan, klik room terisi untuk gabung.</p>
+            <div class="loket-hero">
+                <h1 class="loket-title">Peta Loket Bioskop</h1>
+                <p class="loket-subtitle">Pilih ruang nonton virtual Anda.</p>
+                <div class="loket-stats">
+                    <div class="loket-stat"><div class="loket-stat-num">6</div><div class="loket-stat-label">Loket</div></div>
+                    <div class="loket-stat"><div class="loket-stat-num">180</div><div class="loket-stat-label">Total Room</div></div>
+                </div>
             </div>
-            <div class="loket-grid" id="loket-grid">
-                <!-- Loket rendered via JS -->
-            </div>
+            <div class="loket-grid" id="loket-grid"></div>
         </div>
 
         <!-- CREATE ROOM PAGE -->
         <div id="create-page" class="page-section">
-            <div style="max-width:500px; margin: 40px auto; padding:20px;">
-                <div style="background:var(--bg-card); padding:30px; border-radius:16px; border:1px solid var(--border-color);">
-                    <h2 style="margin-bottom:20px; text-align:center;">🎫 Buat Room Baru</h2>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Film</label>
-                        <input type="text" id="selected-movie-display" class="form-input" disabled placeholder="Pilih film dari beranda">
-                        <input type="hidden" id="room-video-url">
-                        <input type="hidden" id="room-video-source">
-                    </div>
-
-                    <div id="video-preview" class="hidden" style="background:#222; padding:10px; border-radius:8px; margin-bottom:20px; display:flex; gap:10px; align-items:center;">
-                        <img id="preview-thumb" src="" style="width:60px; height:40px; object-fit:cover; border-radius:4px;">
-                        <div style="flex:1; overflow:hidden;">
-                            <div id="preview-title" style="font-weight:600; font-size:0.9rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">-</div>
-                            <div id="preview-meta" style="font-size:0.75rem; color:var(--text-secondary);">-</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Privasi</label>
-                        <div style="display:flex; gap:15px; margin-bottom:15px;">
-                            <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
-                                <input type="radio" name="visibility" value="public" checked onchange="app.togglePass()"> Public
-                            </label>
-                            <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
-                                <input type="radio" name="visibility" value="private" onchange="app.togglePass()"> Private
-                            </label>
-                        </div>
-                        <div id="password-group" class="hidden">
-                            <input type="text" id="room-password" class="form-input" placeholder="Password Room...">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Jadwal Tayang</label>
-                        <input type="datetime-local" id="room-time" class="form-input">
-                        <div style="margin-top:8px; display:flex; gap:5px;">
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="app.setQuickTime(1)">+1m</button>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="app.setQuickTime(5)">+5m</button>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="app.setQuickTime(60)">+1j</button>
-                        </div>
-                    </div>
-
-                    <div style="background:rgba(212,175,55,0.1); padding:15px; border-radius:8px; text-align:center; margin-bottom:20px;">
-                        <div style="font-size:0.8rem; color:var(--text-secondary);">Kapasitas</div>
-                        <div id="quota-display" style="font-size:1.5rem; font-weight:800; color:var(--accent-gold);">45</div>
-                    </div>
-
-                    <button class="btn btn-primary w-full" onclick="app.processBooking()">Konfirmasi Pesanan</button>
-                    <button class="btn btn-secondary w-full" style="margin-top:10px;" onclick="app.showPage('home')">Batal</button>
+            <div class="create-container">
+                <div class="create-header">
+                    <h1 class="create-title">🎫 Buat Tiket Nonton</h1>
                 </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Film yang Dipilih</label>
+                    <input type="text" id="selected-movie-display" class="form-input" disabled placeholder="Kembali ke beranda pilih film">
+                    <input type="hidden" id="room-video-url">
+                    <input type="hidden" id="room-video-source">
+                </div>
+
+                <div class="video-preview" id="video-preview">
+                    <div class="video-preview-content">
+                        <img id="preview-thumb" class="video-thumb" src="" alt="">
+                        <div class="video-info-preview">
+                            <h4 id="preview-title">-</h4>
+                            <p id="preview-channel">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tipe Room</label>
+                    <div class="visibility-options">
+                        <label class="radio-label">
+                            <input type="radio" name="roomVisibility" value="public" checked onchange="togglePasswordInput()"> Public
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="roomVisibility" value="private" onchange="togglePasswordInput()"> Private
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group hidden" id="password-group">
+                    <label class="form-label">Password</label>
+                    <input type="text" id="room-password" class="form-input" placeholder="Masukkan password...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Jadwal Tayang</label>
+                    <input type="datetime-local" id="room-time" class="form-input">
+                    <div class="quick-time-options">
+                        <button type="button" class="btn-quick-time" onclick="setQuickTime(1)">+1 Menit</button>
+                        <button type="button" class="btn-quick-time" onclick="setQuickTime(5)">+5 Menit</button>
+                        <button type="button" class="btn-quick-time" onclick="setQuickTime(10)">+10 Menit</button>
+                    </div>
+                </div>
+
+                <div class="quota-display">
+                    <div class="quota-number" id="quota-display">45</div>
+                    <div class="quota-label">Kursi Tersedia</div>
+                </div>
+
+                <button class="btn btn-primary" style="width:100%" onclick="processBooking()">Konfirmasi Pemesanan</button>
+                <button class="btn btn-secondary" style="width:100%;margin-top:10px" onclick="showPage('home')">Batal</button>
             </div>
         </div>
-    </main>
+    </div>
 
-    <!-- CINEMA VIEW (FULL SCREEN) -->
+    <!-- CINEMA VIEW (WATCH PARTY) -->
     <div class="cinema-view" id="cinema-view">
-        <header class="cinema-header">
+        <div class="cinema-header">
             <div class="cinema-info">
-                <span id="cinema-loket-badge" style="background:var(--accent-gold); color:#000; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:700; margin-right:8px;">L1-R1</span>
-                <span id="cinema-title" class="cinema-title">Movie Title</span>
+                <span class="cinema-badge" id="cinema-badge">LOKET 1 | ROOM 5</span>
+                <span class="cinema-movie-title" id="cinema-movie-title">Film Title</span>
+                <span class="cinema-url-badge" onclick="copyRoomUrl()">🔗 Salin Link</span>
             </div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-icon" onclick="app.copyLink()">🔗</button>
-                <button class="btn-icon" onclick="app.toggleFullscreen()">⛶</button>
-                <button class="btn-icon" style="background:var(--accent-red);" onclick="app.exitCinema()">✕</button>
+            <div class="cinema-actions">
+                <button class="btn-icon" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+                <button class="btn btn-danger btn-sm" onclick="confirmExit()">Keluar</button>
             </div>
-        </header>
-
-        <div class="cinema-body">
-            <!-- VIDEO AREA -->
-            <div class="player-area" id="player-area">
+        </div>
+        <div class="cinema-main">
+            <div class="cinema-player-area">
+                <div class="sync-indicator" id="sync-indicator">Synced</div>
                 
-                <!-- INTERACTION OVERLAY (Required for Autoplay) -->
-                <div id="interaction-overlay" class="interaction-overlay hidden">
-                    <button class="interact-btn">👆 TAP TO JOIN</button>
-                    <p style="margin-top:15px; color:var(--text-secondary); font-size:0.9rem;">Klik untuk mengaktifkan sinkronisasi & suara</p>
+                <!-- Host Controls Overlay (Visible only to host) -->
+                <div class="host-controls" id="host-controls" style="display:none;">
+                    <div class="host-label">Anda adalah Host</div>
+                    <button class="btn btn-primary btn-sm" onclick="forceStartPlayback()">▶ Mulai Semua Sekarang</button>
+                    <button class="btn btn-secondary btn-sm" onclick="togglePauseAll()">⏸ Pause/Play Semua</button>
                 </div>
 
-                <!-- LOADING -->
-                <div id="player-loading" class="interaction-overlay">
-                    <div class="loading-spinner"></div>
-                    <p style="margin-top:15px;">Memuat Player...</p>
+                <div class="end-screen-overlay" id="end-screen-overlay">
+                    <h2>Film Selesai</h2>
+                    <p>Terima kasih telah menonton di ThMOvie.</p>
+                    <button class="btn btn-primary" style="margin-top:15px" onclick="doExit()">Kembali ke Beranda</button>
                 </div>
 
-                <!-- SYNC BADGE -->
-                <div class="sync-badge hidden" id="sync-badge">
-                    <div class="sync-dot"></div>
-                    <span>SYNCED</span>
+                <div class="countdown-overlay" id="countdown-overlay">
+                    <div class="countdown-timer" id="countdown-timer">--:--</div>
+                    <div class="countdown-label">FILM DIMULAI DALAM</div>
+                    <div class="countdown-room-info" id="countdown-room-info"></div>
+                    <p style="margin-top:10px; font-size:0.8rem; color:#aaa;">Menunggu jadwal tayang...</p>
                 </div>
-
-                <!-- COUNTDOWN (WAITING ROOM) -->
-                <div id="countdown-overlay" class="interaction-overlay hidden" style="background: rgba(0,0,0,0.9);">
-                    <div style="font-size:0.9rem; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px;">Film dimulai dalam</div>
-                    <div id="countdown-timer" style="font-size:4rem; font-weight:800; color:var(--accent-gold);">00:00</div>
-                    <div id="countdown-info" style="margin-top:20px; color:var(--text-secondary);">Menunggu host...</div>
+                
+                <div class="cinema-loading" id="cinema-loading">
+                    <div class="spinner"></div>
+                    <span>Menyiapkan Player...</span>
                 </div>
-
-                <!-- PLAYER CONTAINER -->
+                
                 <div id="player-container"></div>
             </div>
-
-            <!-- CHAT SIDEBAR -->
-            <div class="chat-sidebar">
+            <div class="cinema-sidebar">
                 <div class="chat-header">
-                    <span>Live Chat</span>
-                    <span id="online-count" style="color:var(--text-secondary); font-size:0.8rem;">0 online</span>
+                    <span>💬 Live Chat</span>
+                    <span class="chat-users" id="chat-users">0 online</span>
                 </div>
-                <div class="chat-messages" id="chat-messages">
-                    <!-- Messages here -->
-                </div>
+                <div class="online-users-bar" id="online-users-bar"></div>
+                <div class="chat-messages" id="chat-messages"></div>
                 <div class="chat-input-area">
-                    <input type="text" id="chat-input" class="chat-input" placeholder="Ketik pesan..." autocomplete="off">
-                    <button class="btn btn-primary btn-sm" style="border-radius:50%; width:35px; height:35px; padding:0;" onclick="app.sendChat()">➤</button>
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Ketik pesan..." onkeypress="if(event.key==='Enter')sendChat()">
+                    <button class="btn btn-primary btn-icon" onclick="sendChat()">➤</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- PRINTER OVERLAY -->
+    <div class="printer-overlay" id="printer-overlay">
+        <div class="printer-device"><div class="printer-slot"></div></div>
+        <div id="ticket-animation-container"></div>
+        <div class="printer-status">Mencetak tiket...</div>
     </div>
 
     <!-- MODALS -->
-    <div class="modal-overlay" id="rules-modal" onclick="if(event.target===this) this.classList.remove('active')">
-        <div class="modal-content">
-            <div style="padding:20px; border-bottom:1px solid #333;">
-                <h3>📋 Rules</h3>
+    <div class="modal-overlay" id="rules-modal" onclick="closeRules(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header"><h2>📋 Rules ThMOvie</h2></div>
+            <div class="modal-body">
+                <ul class="rules-list">
+                    <li>Jaga sopan santun di dalam chat room.</li>
+                    <li>Sinkronisasi video otomatis berjalan maksimal 2 detik delay.</li>
+                    <li>Room otomatis terhapus 24 jam setelah selesai.</li>
+                    <li>Host memiliki kendali penuh atas pemutaran (Play/Pause).</li>
+                </ul>
             </div>
-            <div style="padding:20px; font-size:0.9rem; color:var(--text-secondary); line-height:1.6;">
-                <p>1. Sopan di chat room.</p>
-                <p>2. Jangan refresh halaman saat film berlangsung.</p>
-                <p>3. Video akan sinkron otomatis mengikuti Host.</p>
-                <p>4. Room otomatis dibersihkan 24 jam setelah tayang.</p>
-            </div>
-            <div style="padding:15px 20px; text-align:right; background:#111;">
-                <button class="btn btn-primary btn-sm" onclick="document.getElementById('rules-modal').classList.remove('active')">Mengerti</button>
+            <div class="modal-footer"><button class="btn btn-primary" onclick="closeRules()">Mengerti</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="join-modal" onclick="closeJoinModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header"><h2>🎬 Bergabung ke Room</h2></div>
+            <div class="modal-body" id="join-modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeJoinModal()">Batal</button>
+                <button class="btn btn-primary" id="join-confirm-btn" onclick="confirmJoinRoom()">Gabung</button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="join-modal" onclick="if(event.target===this) app.closeModal('join-modal')">
-        <div class="modal-content">
-            <div style="padding:20px; border-bottom:1px solid #333;">
-                <h3>🎬 Join Room</h3>
-            </div>
-            <div id="join-modal-content" style="padding:20px;">
-                <!-- Content injected via JS -->
-            </div>
-            <div style="padding:15px 20px; text-align:right; background:#111; display:flex; justify-content:flex-end; gap:10px;">
-                <button class="btn btn-secondary btn-sm" onclick="app.closeModal('join-modal')">Batal</button>
-                <button class="btn btn-primary btn-sm" onclick="app.confirmJoin()">Gabung</button>
+    <div class="modal-overlay" id="exit-modal" onclick="closeExitModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header"><h2>⚠️ Keluar?</h2></div>
+            <div class="modal-body"><p>Anda akan meninggalkan ruang nonton.</p></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeExitModal()">Batal</button>
+                <button class="btn btn-danger" onclick="doExit()">Keluar</button>
             </div>
         </div>
     </div>
@@ -538,711 +232,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-
-    <script>
-        // ===========================================
-        // DATA.JS (MOVIE DATABASE)
-        // ===========================================
-        const movieDatabase = [
-            {
-                id: "inside_out_1", title: "Inside Out", genre: "Animation • 2015", duration: "1j 35m", rating: "8.1",
-                poster: "https://i.ibb.co.com/YFjZHxkW/Inside-Out-2015-film-poster.jpg",
-                url: "https://thmovie.embedseek.com/#kutep", source: "seekstream", status: "active"
-            },
-            {
-                id: "spy_family", title: "SPY x FAMILY CODE: White", genre: "Animation • 2023", duration: "1j 50m", rating: "8.0",
-                poster: "https://i.ibb.co.com/fdYgkJgD/download.jpg",
-                url: "https://thmovie.embedseek.com/#56uvh", source: "seekstream", status: "active"
-            },
-            {
-                id: "sintel", title: "Sintel (4K)", genre: "Animation • Short", duration: "14m", rating: "8.8",
-                poster: "https://i.ytimg.com/vi/eRsGyueVLvQ/hqdefault.jpg",
-                url: "https://youtube.com/watch?v=eRsGyueVLvQ", source: "youtube", status: "active"
-            },
-            {
-                id: "big_buck", title: "Big Buck Bunny", genre: "Animation • Comedy", duration: "10m", rating: "7.5",
-                poster: "https://images.unsplash.com/photo-1560167016-022b78a0258e?w=500",
-                url: "https://youtube.com/watch?v=aqz-KE-bpKQ", source: "youtube", status: "active"
-            },
-            {
-                id: "coming_soon_1", title: "Spider-Man: Across the Spider-Verse", genre: "Coming Soon", duration: "-", rating: "TBA",
-                poster: "https://i.ibb.co.com/GQgWK7mt/MV5-BNThi-Zj-A3-Mj-It-ZGY5-Ni00-Zm-Jh-LWEw-N2-Et-OTBl-YTA4-Y2-E0-M2-Zm-Xk-Ey-Xk-Fqc-Gc-V1.jpg",
-                url: "", source: "none", status: "coming_soon"
-            }
-        ];
-
-        // ===========================================
-        // INIT.JS (FIREBASE & CONFIG)
-        // ===========================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
-            authDomain: "thmovie-3646f.firebaseapp.com",
-            databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "thmovie-3646f",
-            storageBucket: "thmovie-3646f.firebasestorage.app",
-            messagingSenderId: "1041137356432",
-            appId: "1:1041137356432:web:96edbe3402937c82f09215"
-        };
-
-        let db;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-        } catch (e) { console.error("Firebase Error:", e); }
-
-        // CONSTANTS
-        const TOTAL_LOKET = 6;
-        const ROOMS_PER_LOKET = 30;
-        const SYNC_INTERVAL = 2000;
-        const DRIFT_THRESHOLD = 2.0; // Seconds
-
-        // GLOBAL STATE
-        const state = {
-            page: 'home',
-            user: "User_" + Math.floor(Math.random() * 10000),
-            currentRoomId: null,
-            isHost: false,
-            hasInteracted: false, // Crucial for Autoplay
-            player: null,
-            playerType: null, // 'youtube' | 'seekstream'
-            playerReady: false,
-            roomData: null,
-            syncTimer: null,
-            dbRefs: {} // Room, Chat, Presence refs
-        };
-
-        // ===========================================
-        // APP.JS (LOGIC)
-        // ===========================================
-        const app = {
-            init: () => {
-                app.renderMovies();
-                app.renderLoket();
-                
-                // URL Handler for direct join
-                const params = new URLSearchParams(window.location.search);
-                const roomId = params.get('room');
-                if (roomId) app.showJoinModal(roomId);
-
-                // Interaction overlay click handler
-                document.getElementById('interaction-overlay').addEventListener('click', () => {
-                    state.hasInteracted = true;
-                    document.getElementById('interaction-overlay').classList.add('hidden');
-                    // Re-trigger player load or play if it was waiting
-                    if (state.playerReady && state.playerType === 'youtube') {
-                        state.player.playVideo();
-                    } else {
-                        app.initPlayer(); // If player hasn't loaded yet
-                    }
-                });
-
-                // Navbar Scroll Effect
-                window.addEventListener('scroll', () => {
-                    const nav = document.getElementById('navbar');
-                    if (window.scrollY > 20) nav.style.background = 'rgba(10,10,10,0.98)';
-                    else nav.style.background = 'rgba(10,10,10,0.9)';
-                });
-            },
-
-            showPage: (pageId) => {
-                document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-                document.getElementById(pageId + '-page').classList.add('active');
-                state.page = pageId;
-                
-                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-                const activeLink = document.querySelector(`.nav-link[data-page="${pageId}"]`);
-                if(activeLink) activeLink.classList.add('active');
-
-                if (pageId === 'loket') app.renderLoket();
-                window.scrollTo(0,0);
-            },
-
-            renderMovies: () => {
-                const grid = document.getElementById('movie-grid');
-                grid.innerHTML = movieDatabase.map(m => {
-                    let badge = '';
-                    let overlay = '';
-                    let disabled = '';
-                    
-                    if (m.status === 'coming_soon') {
-                        badge = '<span class="badge-rating" style="background:#555; color:#fff;">SOON</span>';
-                        disabled = 'style="filter:grayscale(1); cursor:not-allowed;"';
-                        overlay = `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; font-weight:bold; color:#fff;">COMING SOON</div>`;
-                    } else {
-                        badge = `<span class="badge-rating">${m.rating === 'NEW' ? 'NEW' : '★ ' + m.rating}</span>`;
-                        overlay = `
-                            <div class="movie-overlay">
-                                <h3 style="color:#fff; font-size:1rem; margin-bottom:5px;">${m.title}</h3>
-                                <p style="color:#ccc; font-size:0.8rem; margin-bottom:10px;">${m.genre}</p>
-                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); app.selectMovie('${m.id}')">Tonton</button>
-                            </div>
-                        `;
-                    }
-
-                    return `
-                        <div class="movie-card" ${disabled} onclick="${m.status === 'active' ? `app.selectMovie('${m.id}')` : ''}">
-                            <img src="${m.poster}" class="movie-poster" loading="lazy">
-                            ${badge}
-                            ${overlay}
-                        </div>
-                    `;
-                }).join('');
-            },
-
-            selectMovie: (id) => {
-                const movie = movieDatabase.find(m => m.id === id);
-                if (!movie) return;
-                
-                state.selectedMovie = movie;
-                document.getElementById('selected-movie-display').value = movie.title;
-                document.getElementById('room-video-url').value = movie.url;
-                document.getElementById('room-video-source').value = movie.source;
-                
-                const prev = document.getElementById('video-preview');
-                prev.classList.remove('hidden');
-                document.getElementById('preview-thumb').src = movie.poster;
-                document.getElementById('preview-title').textContent = movie.title;
-                document.getElementById('preview-meta').textContent = `${movie.genre} • ${movie.duration}`;
-
-                app.showToast('Film dipilih: ' + movie.title, 'success');
-                app.showPage('create');
-            },
-
-            renderLoket: async () => {
-                // Fetch occupied rooms
-                let occupied = {};
-                try {
-                    const snap = await db.ref('rooms').once('value');
-                    if (snap.exists()) {
-                        snap.forEach(c => {
-                            const r = c.val();
-                            if (r && r.globalRoomNum) occupied[r.globalRoomNum] = r;
-                        });
-                    }
-                } catch(e) { console.error(e); }
-
-                const grid = document.getElementById('loket-grid');
-                grid.innerHTML = '';
-                
-                for (let l = 1; l <= TOTAL_LOKET; l++) {
-                    let roomsHtml = '';
-                    let occupiedCount = 0;
-                    const start = (l - 1) * ROOMS_PER_LOKET + 1;
-
-                    for (let r = 1; r <= ROOMS_PER_LOKET; r++) {
-                        const global = start + r - 1;
-                        const room = occupied[global];
-                        let cls = 'available';
-                        let click = `onclick="app.openCreateRoom(${l}, ${r})"`;
-
-                        if (room) {
-                            occupiedCount++;
-                            if (room.visibility === 'private') {
-                                cls = 'private';
-                                click = `onclick="app.showJoinModal('${room.roomId}')"`;
-                            } else if (room.phase === 'ended' || (room.capacity && Object.keys(room.presence||{}).length >= room.capacity)) {
-                                cls = 'full'; // Treat full or ended as red/locked or full
-                                click = `onclick="app.showJoinModal('${room.roomId}')"`;
-                            } else {
-                                cls = 'occupied';
-                                click = `onclick="app.showJoinModal('${room.roomId}')"`;
-                            }
-                        }
-                        roomsHtml += `<div class="room-mini ${cls}" ${click} title="Room ${r}">${r}</div>`;
-                    }
-                    
-                    const avail = ROOMS_PER_LOKET - occupiedCount;
-                    grid.innerHTML += `
-                        <div class="loket-card">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 style="color:var(--accent-gold); font-size:1.2rem;">LOKET ${l}</h3>
-                                <span style="font-size:0.8rem; color:${avail>0?'var(--accent-green)':'var(--accent-red)'}">${avail} Tersedia</span>
-                            </div>
-                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Room ${start} - ${start+ROOMS_PER_LOKET-1}</div>
-                            <div class="room-grid-mini">${roomsHtml}</div>
-                        </div>
-                    `;
-                }
-            },
-
-            openCreateRoom: (loket, room) => {
-                if (!state.selectedMovie) {
-                    app.showToast('Pilih film dulu dari beranda!', 'error');
-                    return;
-                }
-                const input = document.getElementById('selected-movie-display');
-                input.placeholder = `Loket ${loket} • Room ${room}`;
-                input.dataset.loket = loket;
-                input.dataset.room = room;
-                
-                // Set default time +5 mins
-                app.setQuickTime(5);
-                app.showPage('create');
-            },
-
-            togglePass: () => {
-                const isPrivate = document.querySelector('input[name="visibility"]:checked').value === 'private';
-                const group = document.getElementById('password-group');
-                if (isPrivate) group.classList.remove('hidden');
-                else group.classList.add('hidden');
-            },
-
-            setQuickTime: (mins) => {
-                const now = new Date();
-                now.setMinutes(now.getMinutes() + mins);
-                // Format: YYYY-MM-DDTHH:MM
-                const pad = (n) => String(n).padStart(2,'0');
-                const str = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-                const el = document.getElementById('room-time');
-                el.value = str;
-                el.min = str; // Simple constraint
-            },
-
-            processBooking: async () => {
-                const movie = state.selectedMovie;
-                if (!movie) return app.showToast('Film belum dipilih', 'error');
-
-                const timeVal = document.getElementById('room-time').value;
-                if (!timeVal) return app.showToast('Jadwal belum ditentukan', 'error');
-
-                const scheduleTime = new Date(timeVal).getTime();
-                if (scheduleTime < Date.now()) return app.showToast('Waktu tidak valid', 'error');
-
-                const loket = parseInt(document.getElementById('selected-movie-display').dataset.loket) || 0;
-                const room = parseInt(document.getElementById('selected-movie-display').dataset.room) || 0;
-                
-                // Determine Room Number
-                let globalNum;
-                if (loket && room) {
-                    globalNum = (loket - 1) * ROOMS_PER_LOKET + room;
-                    // Check availability again
-                    const snap = await db.ref('rooms').orderByChild('globalRoomNum').equalTo(globalNum).once('value');
-                    if (snap.exists()) return app.showToast('Room sudah diambil!', 'error');
-                } else {
-                    // Find random available (simplified)
-                    return app.showToast('Pilih Room dari Loket dulu', 'error');
-                }
-
-                const visibility = document.querySelector('input[name="visibility"]:checked').value;
-                let password = null;
-                if (visibility === 'private') {
-                    password = document.getElementById('room-password').value || null;
-                    if (!password) return app.showToast('Password wajib untuk private', 'error');
-                }
-
-                const newRoomRef = db.ref('rooms').push();
-                const roomData = {
-                    roomId: newRoomRef.key,
-                    loket: loket,
-                    room: room,
-                    globalRoomNum: globalNum,
-                    videoSource: movie.source,
-                    videoId: movie.id,
-                    videoUrl: movie.url,
-                    videoTitle: movie.title,
-                    capacity: 45, // Fixed or random
-                    scheduleTime: scheduleTime,
-                    phase: 'waiting',
-                    playState: 0, // 0: paused/ended, 1: playing
-                    currentTime: 0,
-                    lastSync: firebase.database.ServerValue.TIMESTAMP,
-                    visibility: visibility,
-                    password: password,
-                    host: state.user,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP
-                };
-
-                await newRoomRef.set(roomData);
-                app.enterRoom(newRoomRef.key, roomData, true);
-            },
-
-            // ================= ROOM & CINEMA LOGIC =================
-
-            showJoinModal: (roomId) => {
-                state.pendingJoinId = roomId;
-                db.ref('rooms/' + roomId).once('value').then(snap => {
-                    const room = snap.val();
-                    if (!room) return app.showToast('Room tidak ditemukan', 'error');
-
-                    let html = `
-                        <div style="text-align:center; margin-bottom:15px;">
-                            <div style="font-size:1.2rem; font-weight:700; color:var(--accent-gold);">${room.videoTitle}</div>
-                            <div style="font-size:0.9rem; color:var(--text-secondary);">Loket ${room.loket} | Room ${room.room}</div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Nama Anda</label>
-                            <input id="join-name" class="form-input" value="${state.user}">
-                        </div>
-                    `;
-
-                    if (room.visibility === 'private') {
-                        html += `<div class="form-group"><label class="form-label">Password</label><input id="join-pass" type="password" class="form-input" placeholder="Masukkan password"></div>`;
-                    }
-                    
-                    document.getElementById('join-modal-content').innerHTML = html;
-                    document.getElementById('join-modal').classList.add('active');
-                });
-            },
-
-            closeModal: (id) => document.getElementById(id).classList.remove('active'),
-
-            confirmJoin: () => {
-                const roomId = state.pendingJoinId;
-                const name = document.getElementById('join-name').value.trim();
-                if (!name) return app.showToast('Nama wajib diisi', 'error');
-                state.user = name;
-
-                db.ref('rooms/' + roomId).once('value').then(snap => {
-                    const room = snap.val();
-                    if (room.visibility === 'private') {
-                        const pass = document.getElementById('join-pass').value;
-                        if (pass !== room.password) return app.showToast('Password Salah', 'error');
-                    }
-                    app.closeModal('join-modal');
-                    app.enterRoom(roomId, room, false);
-                });
-            },
-
-            enterRoom: (roomId, roomData, isHost) => {
-                // Cleanup Previous
-                app.cleanupCinema();
-
-                // Update State
-                state.currentRoomId = roomId;
-                state.isHost = isHost;
-                state.roomData = roomData;
-                state.dbRefs.room = db.ref('rooms/' + roomId);
-                state.dbRefs.chat = db.ref('rooms/' + roomId + '/chat');
-                state.dbRefs.presence = db.ref('rooms/' + roomId + '/presence/' + state.user);
-
-                // UI Setup
-                document.getElementById('cinema-view').classList.add('active');
-                document.getElementById('cinema-title').textContent = roomData.videoTitle;
-                document.getElementById('cinema-loket-badge').textContent = `L${roomData.loket}-R${roomData.room}`;
-                document.getElementById('chat-messages').innerHTML = '';
-                
-                // URL Update
-                const url = new URL(window.location.href);
-                url.searchParams.set('room', roomId);
-                window.history.pushState({}, '', url);
-
-                // Set Presence
-                state.dbRefs.presence.set({
-                    user: state.user,
-                    isHost: isHost,
-                    joinedAt: firebase.database.ServerValue.TIMESTAMP
-                });
-                state.dbRefs.presence.onDisconnect().remove();
-
-                // Listeners
-                app.setupChat();
-                app.setupPresence();
-                app.setupRoomListener();
-
-                // Start Countdown or Play
-                if (roomData.phase === 'waiting') {
-                    app.startCountdown();
-                } else {
-                    app.hideOverlays();
-                    app.initPlayer();
-                }
-            },
-
-            hideOverlays: () => {
-                document.getElementById('countdown-overlay').classList.add('hidden');
-                document.getElementById('player-loading').classList.add('hidden');
-            },
-
-            startCountdown: () => {
-                const overlay = document.getElementById('countdown-overlay');
-                overlay.classList.remove('hidden');
-                document.getElementById('player-loading').classList.add('hidden');
-                
-                const timer = setInterval(() => {
-                    if (!state.roomData) { clearInterval(timer); return; }
-                    const diff = state.roomData.scheduleTime - Date.now();
-                    if (diff <= 0) {
-                        clearInterval(timer);
-                        // Auto Start trigger by Host logic or Cron? 
-                        // For simplicity, if time is up, wait for DB update to 'playing'
-                        document.getElementById('countdown-timer').textContent = "00:00";
-                        document.getElementById('countdown-info').textContent = "Menunggu Host memulai...";
-                    } else {
-                        const m = Math.floor(diff / 60000);
-                        const s = Math.floor((diff % 60000) / 1000);
-                        document.getElementById('countdown-timer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-                    }
-                }, 1000);
-            },
-
-            initPlayer: () => {
-                // Determine Source
-                const src = state.roomData.videoSource;
-                const container = document.getElementById('player-container');
-                container.innerHTML = ''; // Clear old
-
-                if (src === 'youtube') {
-                    state.playerType = 'youtube';
-                    // Extract ID
-                    let vidId = state.roomData.videoId;
-                    // If URL is full link
-                    if (state.roomData.videoUrl && state.roomData.videoUrl.includes('youtube.com')) {
-                        const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-                        const match = state.roomData.videoUrl.match(reg);
-                        if (match) vidId = match[1];
-                    }
-
-                    if (typeof YT !== 'undefined') {
-                        state.player = new YT.Player('player-container', {
-                            height: '100%',
-                            width: '100%',
-                            videoId: vidId,
-                            playerVars: {
-                                autoplay: state.hasInteracted ? 1 : 0, // Requires interaction first
-                                controls: 1,
-                                modestbranding: 1,
-                                rel: 0,
-                                playsinline: 1
-                            },
-                            events: {
-                                onReady: (e) => {
-                                    state.playerReady = true;
-                                    document.getElementById('player-loading').classList.add('hidden');
-                                    if (!state.hasInteracted) {
-                                        document.getElementById('interaction-overlay').classList.remove('hidden');
-                                    } else {
-                                        app.startSyncLoop(); // Start syncing
-                                        if (state.roomData.phase === 'playing') e.target.playVideo();
-                                    }
-                                },
-                                onStateChange: app.onPlayerStateChange
-                            }
-                        });
-                    }
-                } else if (src === 'seekstream') {
-                    state.playerType = 'seekstream';
-                    // SeekStream Wrapper
-                    const wrapper = document.createElement('div');
-                    wrapper.style.cssText = "width:100%; height:100%; position:relative;";
-                    
-                    const iframe = document.createElement('iframe');
-                    iframe.src = state.roomData.videoUrl;
-                    iframe.style.cssText = "width:100%; height:100%; border:none; position:absolute; top:0; left:0;";
-                    iframe.setAttribute('allowfullscreen', 'true');
-                    iframe.setAttribute('allow', 'autoplay');
-                    
-                    // Overlay to block controls if needed (optional)
-                    // const block = document.createElement('div');
-                    // block.style.cssText = "position:absolute; inset:0; z-index:10; background:transparent;";
-
-                    wrapper.appendChild(iframe);
-                    container.appendChild(wrapper);
-                    
-                    state.playerReady = true;
-                    state.player = { /* Dummy object for SeekStream since we can't control it via JS API easily */ };
-                    document.getElementById('player-loading').classList.add('hidden');
-                    document.getElementById('sync-badge').classList.add('hidden'); // No sync for simple iframe usually
-                }
-            },
-
-            // ================= SYNC LOGIC (THE CORE) =================
-
-            onPlayerStateChange: (event) => {
-                if (!state.isHost) return; // Only host controls
-                
-                const ytState = event.data;
-                let isPlaying = (ytState === YT.PlayerState.PLAYING);
-                let currentTime = 0;
-                
-                try { currentTime = state.player.getCurrentTime(); } catch(e){}
-
-                // Update Firebase to force sync to others
-                if (state.dbRefs.room) {
-                    state.dbRefs.room.update({
-                        playState: isPlaying ? 1 : 0,
-                        currentTime: currentTime,
-                        lastSync: firebase.database.ServerValue.TIMESTAMP
-                    });
-                }
-            },
-
-            startSyncLoop: () => {
-                if (state.syncTimer) clearInterval(state.syncTimer);
-                
-                document.getElementById('sync-badge').classList.remove('hidden');
-
-                // If I am HOST, I update server every 2s (just in case)
-                // If I am CLIENT, I just listen. But to correct clock drift, we check local vs server constantly.
-                
-                state.syncTimer = setInterval(() => {
-                    if (!state.playerReady || state.playerType !== 'youtube') return;
-
-                    if (state.isHost) {
-                        // Host just updates time
-                        try {
-                            state.dbRefs.room.update({
-                                currentTime: state.player.getCurrentTime(),
-                                playState: (state.player.getPlayerState() === YT.PlayerState.PLAYING) ? 1 : 0,
-                                lastSync: firebase.database.ServerValue.TIMESTAMP
-                            });
-                        } catch(e){}
-                    } else {
-                        // Client Logic: Correct Drift
-                        // We use the `state.roomData` which is updated by `setupRoomListener`
-                        if (state.roomData.phase === 'playing') {
-                            const serverTime = state.roomData.currentTime;
-                            const serverLastUpdate = state.roomData.lastSync || Date.now();
-                            const expectedTime = serverTime + ((Date.now() - serverLastUpdate) / 1000);
-                            
-                            try {
-                                const localTime = state.player.getCurrentTime();
-                                const diff = Math.abs(localTime - expectedTime);
-
-                                if (diff > DRIFT_THRESHOLD) {
-                                    // Force seek
-                                    console.log(`Syncing... Drift: ${diff.toFixed(2)}s`);
-                                    state.player.seekTo(expectedTime, true);
-                                }
-                            } catch(e){}
-                        }
-                    }
-                }, SYNC_INTERVAL);
-            },
-
-            setupRoomListener: () => {
-                state.dbRefs.room.on('value', snap => {
-                    const data = snap.val();
-                    if (!data) {
-                        app.showToast('Room dihapus', 'error');
-                        app.exitCinema();
-                        return;
-                    }
-                    const oldPhase = state.roomData.phase;
-                    state.roomData = data;
-
-                    // Handle Phase Change
-                    if (oldPhase === 'waiting' && data.phase === 'playing') {
-                        app.hideOverlays();
-                        app.initPlayer(); // Reload/Start player
-                        if(state.isHost && state.playerReady) state.player.playVideo();
-                    }
-
-                    // Handle State Change (Play/Pause) FOR CLIENTS
-                    if (!state.isHost && state.playerReady && state.playerType === 'youtube') {
-                        const shouldPlay = (data.playState === 1);
-                        const currentState = state.player.getPlayerState();
-                        const isPlaying = (currentState === YT.PlayerState.PLAYING);
-
-                        if (shouldPlay && !isPlaying) {
-                            state.player.playVideo();
-                        } else if (!shouldPlay && isPlaying) {
-                            state.player.pauseVideo();
-                        }
-                    }
-                });
-            },
-
-            setupChat: () => {
-                const chatBox = document.getElementById('chat-messages');
-                state.dbRefs.chat.limitToLast(50).on('child_added', snap => {
-                    const msg = snap.val();
-                    const div = document.createElement('div');
-                    div.className = `msg ${msg.sender === state.user ? 'mine' : 'other'} ${msg.type === 'sys' ? 'sys' : ''}`;
-                    
-                    if (msg.type === 'sys') {
-                        div.innerHTML = `<div class="bubble" style="background:transparent; border:1px solid #444; color:#aaa;">${msg.text}</div>`;
-                    } else {
-                        div.innerHTML = `
-                            <span class="sender">${msg.sender}</span>
-                            <div class="bubble">${msg.text}</div>
-                        `;
-                    }
-                    chatBox.appendChild(div);
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                });
-            },
-
-            sendChat: () => {
-                const inp = document.getElementById('chat-input');
-                const text = inp.value.trim();
-                if (!text) return;
-                
-                state.dbRefs.chat.push({
-                    sender: state.user,
-                    text: text,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                });
-                inp.value = '';
-            },
-
-            setupPresence: () => {
-                state.dbRefs.room.child('presence').on('value', snap => {
-                    const count = snap.numChildren();
-                    document.getElementById('online-count').textContent = count + " online";
-                });
-            },
-
-            // ================= UTILS =================
-            
-            cleanupCinema: () => {
-                if (state.syncTimer) clearInterval(state.syncTimer);
-                if (state.player && state.player.destroy && typeof state.player.destroy === 'function') {
-                    try { state.player.destroy(); } catch(e){}
-                }
-                state.player = null;
-                state.playerReady = false;
-                
-                // Detach listeners
-                if (state.dbRefs.room) state.dbRefs.room.off();
-                if (state.dbRefs.chat) state.dbRefs.chat.off();
-                if (state.dbRefs.presence) state.dbRefs.presence.remove();
-
-                document.getElementById('cinema-view').classList.remove('active');
-                document.getElementById('player-container').innerHTML = '';
-                
-                // Reset URL
-                const url = new URL(window.location.href);
-                url.searchParams.delete('room');
-                window.history.pushState({}, '', url);
-            },
-
-            exitCinema: () => {
-                if(confirm('Keluar dari room?')) {
-                    app.cleanupCinema();
-                    app.showPage('home');
-                }
-            },
-
-            copyLink: () => {
-                navigator.clipboard.writeText(window.location.href);
-                app.showToast('Link disalin!', 'success');
-            },
-
-            toggleFullscreen: () => {
-                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                else document.exitFullscreen();
-            },
-
-            showToast: (msg, type='info') => {
-                const con = document.getElementById('toast-container');
-                const el = document.createElement('div');
-                el.className = 'toast';
-                let icon = 'ℹ️';
-                if (type === 'success') icon = '✅';
-                if (type === 'error') icon = '❌';
-                el.innerHTML = `<span>${icon}</span> <span>${msg}</span>`;
-                con.appendChild(el);
-                setTimeout(() => {
-                    el.style.opacity = '0';
-                    el.style.transform = 'translateX(50px)';
-                    setTimeout(() => el.remove(), 300);
-                }, 3000);
-            }
-        };
-
-        // START APP
-        window.onload = app.init;
-
-    </script>
+    
+    <script src="data.js"></script>
+    <script src="init.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
