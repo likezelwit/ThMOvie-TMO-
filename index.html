@@ -42,7 +42,6 @@
             <section class="section" id="movies-section">
                 <div class="section-header">
                     <h2 class="section-title">Sedang Tayang</h2>
-                    <!-- Removed specific button, moved to Nav -->
                 </div>
                 <div class="movie-grid" id="movie-grid"></div>
             </section>
@@ -77,9 +76,6 @@
                     <input type="hidden" id="room-video-source">
                     <p class="form-hint">Film akan terisi otomatis jika dipilih dari halaman utama</p>
                 </div>
-
-                <!-- Removed manual link input to simplify UX based on "Active Movies" request. 
-                     If manual link is needed, logic would go here, but user emphasized specific movies. -->
 
                 <div class="video-preview" id="video-preview">
                     <div class="video-preview-content">
@@ -155,6 +151,7 @@
 
                 <div class="countdown-overlay" id="countdown-overlay">
                     <div class="countdown-timer" id="countdown-timer">--:--</div>
+                    <div class="countdown-label">FILM DIMULAI DALAM</div> <!-- LABEL BARU -->
                     <div class="countdown-room-info" id="countdown-room-info"></div>
                 </div>
                 
