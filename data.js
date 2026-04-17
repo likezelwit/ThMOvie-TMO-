@@ -1,4 +1,5 @@
 const movieDatabase = [
+    // --- SEEKSTREAM MOVIES ---
     {
         id: "inside_out_1",
         title: "Inside Out",
@@ -7,8 +8,8 @@ const movieDatabase = [
         rating: "8.1",
         poster: "https://i.ibb.co.com/YFjZHxkW/Inside-Out-2015-film-poster.jpg",
         url: "https://thmovie.embedseek.com/#kutep",
-        source: "seekstream", // New property
-        status: "active" // New property: 'active', 'placeholder', 'coming_soon'
+        source: "seekstream",
+        status: "active"
     },
     {
         id: "spy_family_code_white",
@@ -28,11 +29,36 @@ const movieDatabase = [
         duration: "1j 36m",
         rating: "NEW",
         poster: "https://i.ibb.co.com/YFjZHxkW/Inside-Out-2015-film-poster.jpg",
-        url: "", // Empty because downloading
+        url: "",
         source: "none",
-        status: "placeholder" // Special status
+        status: "placeholder"
     },
-    // Moved to Coming Soon
+
+    // --- YOUTUBE MOVIES (NEW ADDITIONS) ---
+    {
+        id: "yt_sintel",
+        title: "Sintel (4K)",
+        genre: "Animation • Short • 2010",
+        duration: "14m",
+        rating: "8.8",
+        poster: "https://i.ytimg.com/vi/eRsGyueVLvQ/hqdefault.jpg",
+        url: "https://youtube.com/watch?v=eRsGyueVLvQ", // Sintel Short Film
+        source: "youtube",
+        status: "active"
+    },
+    {
+        id: "yt_tears_of_steel",
+        title: "Tears of Steel",
+        genre: "Sci-Fi • Action • 2012",
+        duration: "12m",
+        rating: "7.9",
+        poster: "https://i.ytimg.com/vi/R6MlUcmOul8/hqdefault.jpg",
+        url: "https://youtube.com/watch?v=R6MlUcmOul8", // Blender Foundation
+        source: "youtube",
+        status: "active"
+    },
+
+    // --- COMING SOON ---
     {
         id: "vina_7_hari",
         title: "Vina Sebelum 7 Hari",
