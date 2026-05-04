@@ -1,5 +1,4 @@
 const movieDatabase = [
-    // --- SEEKSTREAM MOVIES ---
     {
         id: "inside_out_1",
         title: "Inside Out",
@@ -60,12 +59,12 @@ const movieDatabase = [
         status: "placeholder"
     },
     {
-        id: "vina_7_hari",
-        title: "Vina Sebelum 7 Hari",
-        genre: "Horror • 2024",
-        duration: "1j 48m",
+        id: "Plankton: The Movie (2025)",
+        title: "Plankton: The Movie (2025)",
+        genre: "animation, comedy, adventure, musical • 2024",
+        duration: "1j 20m",
         rating: "6.5",
-        poster: "https://i.ibb.co.com/3Vhq3Xs/download.jpg",
+        poster: "https://ibb.co.com/ns8tmLXv",
         url: "",
         source: "none",
         status: "coming_soon"
