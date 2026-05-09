@@ -10,7 +10,7 @@
         body { background-color: #0f0f0f; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; }
         .cinema-header { margin-bottom: 25px; }
         .vowviw-container { position: relative; width: 100%; max-width: 900px; margin: 0 auto; padding-bottom: 56.25%; height: 0; background: #000; border-radius: 12px; box-shadow: 0 0 30px rgba(0, 150, 255, 0.3); overflow: hidden; border: 2px solid #222; }
-        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; outline: none; }
         .footer { margin-top: 30px; font-size: 13px; color: #666; }
     </style>
 </head>
@@ -22,10 +22,10 @@
     </div>
 
     <div class="vowviw-container">
-        <!-- Video Player TMO -->
-        <video id="tmo-player" controls crossorigin="anonymous">
+        <!-- Video Player TMO - Hapus crossorigin="anonymous" buat hindari blokir CORS -->
+        <video id="tmo-player" controls>
             <source src="https://www.dropbox.com/scl/fi/1au84x7468vxi1jib88x0/Inside-Out-2015.mp4?rlkey=m0xoy2zfss4y1n4oi5tuila4i&st=3pgco0lj&raw=1" type="video/mp4">
-            Browser lo jadul, gak kuat muter film ini.
+            Browser lo gak kuat muter film ini.
         </video>
     </div>
 
@@ -34,30 +34,53 @@
     </div>
 
     <script>
-        // Inisialisasi Ably pake Root Key lo
+        // Pakai Root Key lo buat kontrol penuh
         const ably = new Ably.Realtime('4PuneA.m9z7NA:9tNxlKi-0-BnCULHgl54eS8A7agg3ivOQMiVisCncCI');
         const channel = ably.channels.get('tmo-nobar');
         const video = document.getElementById('tmo-player');
 
-        // Kirim sinyal pas lo klik Play/Pause/Seek
-        video.onplay = () => channel.publish('sync', { action: 'play', time: video.currentTime });
-        video.onpause = () => channel.publish('sync', { action: 'pause', time: video.currentTime });
-        video.onseeked = () => channel.publish('sync', { action: 'seek', time: video.currentTime });
+        // FLAG biar gak terjadi looping sinyal (sinyal balik)
+        let isReceiving = false;
 
-        // Terima sinyal dari temen-temen biar layar sinkron
+        // Kirim sinyal pas lo klik Play/Pause/Seek
+        video.onplay = () => {
+            if (!isReceiving) {
+                channel.publish('sync', { action: 'play', time: video.currentTime });
+            }
+        };
+
+        video.onpause = () => {
+            if (!isReceiving) {
+                channel.publish('sync', { action: 'pause', time: video.currentTime });
+            }
+        };
+
+        video.onseeked = () => {
+            if (!isReceiving) {
+                channel.publish('sync', { action: 'seek', time: video.currentTime });
+            }
+        };
+
+        // Terima sinyal dari temen-temen
         channel.subscribe('sync', (message) => {
             const data = message.data;
-            
-            // Sinkronkan waktu video kalau beda lebih dari 0.5 detik
-            if (Math.abs(video.currentTime - data.time) > 0.5) {
+            isReceiving = true; // Kunci biar video.onplay gak ngirim balik sinyal
+
+            // Samain waktu kalau selisihnya jauh
+            if (Math.abs(video.currentTime - data.time) > 1.0) {
                 video.currentTime = data.time;
             }
 
             if (data.action === 'play') {
-                video.play();
+                video.play().catch(() => {
+                    console.log("Browser blokir autoplay, user harus klik sekali");
+                });
             } else if (data.action === 'pause') {
                 video.pause();
             }
+
+            // Buka kunci setelah selesai proses
+            setTimeout(() => { isReceiving = false; }, 500);
         });
     </script>
 </body>
