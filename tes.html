@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThMovie - Inside Out (Real-time)</title>
-    <!-- Library Ably buat sinkronisasi nobar -->
+    <title>ThMovie - Google Drive Sync</title>
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
         body { background-color: #0f0f0f; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; }
@@ -18,14 +17,14 @@
 
     <div class="cinema-header">
         <h1>🎬 ThMovie (TMO)</h1>
-        <p>Sekarang Memutar: Inside Out (2015)</p>
+        <p>Streaming via Google Drive - Real-time Mode</p>
     </div>
 
     <div class="vowviw-container">
-        <!-- Video Player TMO - Hapus crossorigin="anonymous" buat hindari blokir CORS -->
+        <!-- Tag video menggunakan link Direct Download Google Drive -->
         <video id="tmo-player" controls>
-            <source src="https://www.dropbox.com/scl/fi/1au84x7468vxi1jib88x0/Inside-Out-2015.mp4?rlkey=m0xoy2zfss4y1n4oi5tuila4i&st=3pgco0lj&raw=1" type="video/mp4">
-            Browser lo gak kuat muter film ini.
+            <source src="https://docs.google.com/uc?export=download&id=1tqBTAqkhx0oPFHknnCAa5AxfMK-RvJh2" type="video/mp4">
+            Browser lo gak support tag video.
         </video>
     </div>
 
@@ -34,52 +33,21 @@
     </div>
 
     <script>
-        // Pakai Root Key lo buat kontrol penuh
         const ably = new Ably.Realtime('4PuneA.m9z7NA:9tNxlKi-0-BnCULHgl54eS8A7agg3ivOQMiVisCncCI');
         const channel = ably.channels.get('tmo-nobar');
         const video = document.getElementById('tmo-player');
 
-        // FLAG biar gak terjadi looping sinyal (sinyal balik)
         let isReceiving = false;
 
-        // Kirim sinyal pas lo klik Play/Pause/Seek
-        video.onplay = () => {
-            if (!isReceiving) {
-                channel.publish('sync', { action: 'play', time: video.currentTime });
-            }
-        };
+        video.onplay = () => { if (!isReceiving) channel.publish('sync', { action: 'play', time: video.currentTime }); };
+        video.onpause = () => { if (!isReceiving) channel.publish('sync', { action: 'pause', time: video.currentTime }); };
+        video.onseeked = () => { if (!isReceiving) channel.publish('sync', { action: 'seek', time: video.currentTime }); };
 
-        video.onpause = () => {
-            if (!isReceiving) {
-                channel.publish('sync', { action: 'pause', time: video.currentTime });
-            }
-        };
-
-        video.onseeked = () => {
-            if (!isReceiving) {
-                channel.publish('sync', { action: 'seek', time: video.currentTime });
-            }
-        };
-
-        // Terima sinyal dari temen-temen
         channel.subscribe('sync', (message) => {
             const data = message.data;
-            isReceiving = true; // Kunci biar video.onplay gak ngirim balik sinyal
-
-            // Samain waktu kalau selisihnya jauh
-            if (Math.abs(video.currentTime - data.time) > 1.0) {
-                video.currentTime = data.time;
-            }
-
-            if (data.action === 'play') {
-                video.play().catch(() => {
-                    console.log("Browser blokir autoplay, user harus klik sekali");
-                });
-            } else if (data.action === 'pause') {
-                video.pause();
-            }
-
-            // Buka kunci setelah selesai proses
+            isReceiving = true;
+            if (Math.abs(video.currentTime - data.time) > 1.0) video.currentTime = data.time;
+            data.action === 'play' ? video.play() : video.pause();
             setTimeout(() => { isReceiving = false; }, 500);
         });
     </script>
