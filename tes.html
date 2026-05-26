@@ -68,18 +68,93 @@
         const channel = ably.channels.get('tmo-nobar');
         const video = document.getElementById('tmo-player');
 
+        const myClientId = 'user_' + Math.random().toString(36).substr(2, 9);
         let isReceiving = false;
+        let isHost = false;
 
-        video.onplay = () => { if (!isReceiving) channel.publish('sync', { action: 'play', time: video.currentTime }); };
-        video.onpause = () => { if (!isReceiving) channel.publish('sync', { action: 'pause', time: video.currentTime }); };
-        video.onseeked = () => { if (!isReceiving) channel.publish('sync', { action: 'seek', time: video.currentTime }); };
+        // Ambil data kehadiran (Presence) di room Ably
+        channel.presence.enter(myClientId);
+        channel.presence.get((err, members) => {
+            if (!err && members.length === 1) {
+                // Jika cuma ada 1 orang di room, berarti dia adalah Host pertama
+                isHost = true;
+                console.log("Kamu adalah Host utama room ini.");
+            } else {
+                // Jika ada orang lain, minta data detik terbaru dari penonton lama
+                setTimeout(() => {
+                    channel.publish('request-status', { from: myClientId });
+                }, 1000);
+            }
+        });
 
+        // Deteksi aksi penonton
+        video.onplay = () => { 
+            if (!isReceiving) channel.publish('sync', { action: 'play', time: video.currentTime, sender: myClientId }); 
+        };
+        video.onpause = () => { 
+            if (!isReceiving) channel.publish('sync', { action: 'pause', time: video.currentTime, sender: myClientId }); 
+        };
+        video.onseeked = () => { 
+            if (!isReceiving) channel.publish('sync', { action: 'seek', time: video.currentTime, sender: myClientId }); 
+        };
+
+        // Mendengarkan sinyal sinkronisasi video
         channel.subscribe('sync', (message) => {
             const data = message.data;
+            if (data.sender === myClientId) return; // Abaikan sinyal dari diri sendiri
+
             isReceiving = true;
-            if (Math.abs(video.currentTime - data.time) > 1.0) video.currentTime = data.time;
-            data.action === 'play' ? video.play() : video.pause();
+            if (Math.abs(video.currentTime - data.time) > 1.5) {
+                video.currentTime = data.time;
+            }
+            
+            if (data.action === 'play') {
+                video.play().catch(() => {});
+            } else if (data.action === 'pause') {
+                video.pause();
+            }
+            
             setTimeout(() => { isReceiving = false; }, 500);
+        });
+
+        // Menjawab permintaan dari orang baru yang baru masuk web
+        channel.subscribe('request-status', (message) => {
+            if (isHost && message.data.from !== myClientId) {
+                // Hanya Host yang berhak mengirimkan detik terkininya ke pengguna baru
+                channel.publish('response-status', {
+                    to: message.data.from,
+                    time: video.currentTime,
+                    playing: !video.paused
+                });
+            }
+        });
+
+        // Pengguna baru menerima data setelan dari Host lama
+        channel.subscribe('response-status', (message) => {
+            const data = message.data;
+            if (data.to === myClientId) {
+                isReceiving = true;
+                video.currentTime = data.time;
+                if (data.playing) {
+                    video.play().catch(() => {});
+                } else {
+                    video.pause();
+                }
+                setTimeout(() => { isReceiving = false; }, 500);
+            }
+        });
+
+        // Jika Host menutup tab/keluar, otomatis tunjuk orang lain yang ada di room jadi Host baru
+        channel.presence.subscribe('leave', (member) => {
+            channel.presence.get((err, members) => {
+                if (!err && members.length > 0) {
+                    // Siapa yang berada di urutan daftar paling atas jadi Host pengganti
+                    if (members[0].clientId === myClientId) {
+                        isHost = true;
+                        console.log("Host lama keluar. Kamu sekarang jadi Host baru.");
+                    }
+                }
+            });
         });
     </script>
 </body>
