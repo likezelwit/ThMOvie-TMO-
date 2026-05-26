@@ -1,75 +1,55 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThMovie - Google Drive Sync Fix</title>
-    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
-    <style>
-        body { background-color: #0f0f0f; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; }
-        .cinema-header { margin-bottom: 25px; }
-        .vowviw-container { position: relative; width: 100%; max-width: 900px; margin: 0 auto; padding-bottom: 56.25%; height: 0; background: #000; border-radius: 12px; box-shadow: 0 0 30px rgba(0, 150, 255, 0.3); overflow: hidden; border: 2px solid #222; }
-        iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        
-        /* Gaya tombol kontrol watch party */
-        .sync-controls { margin-top: 20px; }
-        .btn-sync { background-color: #0096ff; color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; margin: 0 10px; transition: 0.2s; box-shadow: 0 4px 15px rgba(0, 150, 255, 0.4); }
-        .btn-sync:hover { background-color: #0077cc; }
-        .btn-pause { background-color: #e11d48; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4); }
-        .btn-pause:hover { background-color: #be123c; }
-        
-        .status-text { margin-top: 15px; font-size: 14px; color: #00ffcc; font-family: monospace; }
-        .footer { margin-top: 30px; font-size: 13px; color: #666; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThMovie - Google Drive Sync</title>
+    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+    <style>
+        body { background-color: #0f0f0f; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .cinema-header { margin-bottom: 25px; }
+        .vowviw-container { position: relative; width: 100%; max-width: 900px; margin: 0 auto; padding-bottom: 56.25%; height: 0; background: #000; border-radius: 12px; box-shadow: 0 0 30px rgba(0, 150, 255, 0.3); overflow: hidden; border: 2px solid #222; }
+        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; outline: none; }
+        .footer { margin-top: 30px; font-size: 13px; color: #666; }
+    </style>
 </head>
 <body>
 
-    <div class="cinema-header">
-        <h1>🎬 ThMovie (TMO)</h1>
-        <p>Streaming via Google Drive - Real-time Mode</p>
-    </div>
+    <div class="cinema-header">
+        <h1>🎬 ThMovie (TMO)</h1>
+        <p>Streaming via Google Drive - Real-time Mode</p>
+    </div>
 
-    <div class="vowviw-container">
-        <iframe id="tmo-frame" src="https://drive.google.com/file/d/1FbTKyYp0Zw4noWK-87W49NsyFwNbuLA8/preview"></iframe>
-    </div>
+    <div class="vowviw-container">
+        <!-- Tag video menggunakan link Direct Download Google Drive -->
+        <video id="tmo-player" controls>
+            <source src="https://docs.google.com/uc?export=download&id=1FbTKyYp0Zw4noWK-87W49NsyFwNbuLA8" type="video/mp4">
+            Browser lo gak support tag video.
+        </video>
+    </div>
 
-    <div class="sync-controls">
-        <button class="btn-sync" onclick="sendSync('play')">▶ Mulaikan Bersama</button>
-        <button class="btn-sync btn-pause" onclick="sendSync('pause')">⏸ Berhentikan Bersama</button>
-    </div>
-    <div id="status" class="status-text">Sistem Siap Sedia...</div>
+    <div class="footer">
+        <p>&copy; 2026 ThMovie Production by Gilang - Kelas VI A</p>
+    </div>
 
-    <div class="footer">
-        <p>&copy; 2026 ThMovie Production by Gilang - Kelas VI A</p>
-    </div>
+    <script>
+        const ably = new Ably.Realtime('4PuneA.m9z7NA:9tNxlKi-0-BnCULHgl54eS8A7agg3ivOQMiVisCncCI');
+        const channel = ably.channels.get('tmo-nobar');
+        const video = document.getElementById('tmo-player');
 
-    <script>
-        const ably = new Ably.Realtime('4PuneA.m9z7NA:9tNxlKi-0-BnCULHgl54eS8A7agg3ivOQMiVisCncCI');
-        const channel = ably.channels.get('tmo-nobar');
-        const statusDiv = document.getElementById('status');
-        const iframe = document.getElementById('tmo-frame');
+        let isReceiving = false;
 
-        // Fungsi untuk mengirim perintah tombol ke semua pemain lewat Ably
-        function sendSync(actionName) {
-            channel.publish('sync', { action: actionName });
-            statusDiv.innerText = "Kamu mengirim perintah: " + actionName.toUpperCase();
-        }
+        video.onplay = () => { if (!isReceiving) channel.publish('sync', { action: 'play', time: video.currentTime }); };
+        video.onpause = () => { if (!isReceiving) channel.publish('sync', { action: 'pause', time: video.currentTime }); };
+        video.onseeked = () => { if (!isReceiving) channel.publish('sync', { action: 'seek', time: video.currentTime }); };
 
-        // Menerima perintah dari pemain lain
-        channel.subscribe('sync', (message) => {
-            const data = message.data;
-            const currentSrc = iframe.src;
-            
-            if (data.action === 'play') {
-                statusDiv.innerText = "Menerima perintah: PLAY dari penonton lain";
-                // Trik memicu reload/play pada iframe jika sempat macet
-                iframe.src = currentSrc; 
-            } else if (data.action === 'pause') {
-                statusDiv.innerText = "Menerima perintah: PAUSE dari penonton lain";
-                iframe.src = ""; // Mengosongkan sementara untuk menghentikan video secara paksa
-                setTimeout(() => { iframe.src = currentSrc; }, 100);
-            }
-        });
-    </script>
+        channel.subscribe('sync', (message) => {
+            const data = message.data;
+            isReceiving = true;
+            if (Math.abs(video.currentTime - data.time) > 1.0) video.currentTime = data.time;
+            data.action === 'play' ? video.play() : video.pause();
+            setTimeout(() => { isReceiving = false; }, 500);
+        });
+    </script>
 </body>
 </html>
