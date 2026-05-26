@@ -70,24 +70,22 @@
 
         const myClientId = 'user_' + Math.random().toString(36).substr(2, 9);
         let isReceiving = false;
-        let isHost = false;
+        let hasHostResponded = false;
 
-        // Ambil data kehadiran (Presence) di room Ably
-        channel.presence.enter(myClientId);
-        channel.presence.get((err, members) => {
-            if (!err && members.length === 1) {
-                // Jika cuma ada 1 orang di room, berarti dia adalah Host pertama
-                isHost = true;
-                console.log("Kamu adalah Host utama room ini.");
-            } else {
-                // Jika ada orang lain, minta data detik terbaru dari penonton lama
-                setTimeout(() => {
-                    channel.publish('request-status', { from: myClientId });
-                }, 1000);
-            }
-        });
+        // Saat pertama kali masuk web, langsung minta status dari penonton yang sudah ada
+        setTimeout(() => {
+            channel.publish('request-status', { from: myClientId });
+            
+            // Tunggu 2 detik, kalau tidak ada penonton lama yang menjawab, 
+            // berarti kamulah orang pertama/Host di room ini.
+            setTimeout(() => {
+                if (!hasHostResponded) {
+                    console.log("Tidak ada Host lain. Kamu adalah Host pertama di room ini.");
+                }
+            }, 2000);
+        }, 1000);
 
-        // Deteksi aksi penonton
+        // Deteksi aksi penonton (Hanya kirim sinyal jika bukan karena kiriman sistem Ably)
         video.onplay = () => { 
             if (!isReceiving) channel.publish('sync', { action: 'play', time: video.currentTime, sender: myClientId }); 
         };
@@ -98,10 +96,10 @@
             if (!isReceiving) channel.publish('sync', { action: 'seek', time: video.currentTime, sender: myClientId }); 
         };
 
-        // Mendengarkan sinyal sinkronisasi video
+        // Mendengarkan sinyal kontrol video (Play, Pause, Seek)
         channel.subscribe('sync', (message) => {
             const data = message.data;
-            if (data.sender === myClientId) return; // Abaikan sinyal dari diri sendiri
+            if (data.sender === myClientId) return; // Abaikan sinyal buatan sendiri
 
             isReceiving = true;
             if (Math.abs(video.currentTime - data.time) > 1.5) {
@@ -112,49 +110,43 @@
                 video.play().catch(() => {});
             } else if (data.action === 'pause') {
                 video.pause();
+            } else if (data.action === 'seek') {
+                video.currentTime = data.time;
             }
             
             setTimeout(() => { isReceiving = false; }, 500);
         });
 
-        // Menjawab permintaan dari orang baru yang baru masuk web
+        // Menjawab permintaan data dari pengguna baru belakangan
         channel.subscribe('request-status', (message) => {
-            if (isHost && message.data.from !== myClientId) {
-                // Hanya Host yang berhak mengirimkan detik terkininya ke pengguna baru
-                channel.publish('response-status', {
-                    to: message.data.from,
-                    time: video.currentTime,
-                    playing: !video.paused
-                });
-            }
+            if (message.data.from === myClientId) return;
+
+            // Jika kita sudah memutar video (bukan menit 0), atau kita penonton lama, kita kirim status kita
+            // Pengguna baru akan mengambil data dari siapa pun penonton lama yang merespon paling cepat
+            channel.publish('response-status', {
+                to: message.data.from,
+                time: video.currentTime,
+                playing: !video.paused
+            });
         });
 
-        // Pengguna baru menerima data setelan dari Host lama
+        // Menerima data setelan detik dari penonton lama
         channel.subscribe('response-status', (message) => {
             const data = message.data;
-            if (data.to === myClientId) {
-                isReceiving = true;
-                video.currentTime = data.time;
-                if (data.playing) {
-                    video.play().catch(() => {});
-                } else {
-                    video.pause();
-                }
-                setTimeout(() => { isReceiving = false; }, 500);
-            }
-        });
+            if (data.to !== myClientId || hasHostResponded) return;
 
-        // Jika Host menutup tab/keluar, otomatis tunjuk orang lain yang ada di room jadi Host baru
-        channel.presence.subscribe('leave', (member) => {
-            channel.presence.get((err, members) => {
-                if (!err && members.length > 0) {
-                    // Siapa yang berada di urutan daftar paling atas jadi Host pengganti
-                    if (members[0].clientId === myClientId) {
-                        isHost = true;
-                        console.log("Host lama keluar. Kamu sekarang jadi Host baru.");
-                    }
-                }
-            });
+            // Kunci agar hanya menerima respon pertama kali saja saat masuk web
+            hasHostResponded = true; 
+            isReceiving = true;
+
+            video.currentTime = data.time;
+            if (data.playing) {
+                video.play().catch(() => {});
+            } else {
+                video.pause();
+            }
+            
+            setTimeout(() => { isReceiving = false; }, 800);
         });
     </script>
 </body>
