@@ -16,8 +16,9 @@
         input:focus { border-color: #0078ff; }
         button { width: 100%; padding: 15px; background: #0078ff; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.3s; }
         button:hover { background: #0056b3; transform: translateY(-2px); }
+        button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         .note { font-size: 0.8rem; color: #888; margin-top: 5px; }
-        #status { margin-top: 20px; text-align: center; font-weight: bold; }
+        #status { margin-top: 20px; text-align: center; font-weight: bold; min-height: 20px; }
     </style>
 </head>
 <body>
@@ -27,43 +28,44 @@
     
     <div class="form-group">
         <label>Judul Film</label>
-        <input type="text" id="movieTitle" value="Attack On Titan High School">
+        <input type="text" id="movieTitle" placeholder="Contoh: Naruto Shippuden">
     </div>
 
     <div class="form-group">
         <label>Genre</label>
-        <input type="text" id="movieGenre" value="Animation, Action">
+        <input type="text" id="movieGenre" placeholder="Contoh: Action, Anime">
     </div>
 
     <div class="form-group">
         <label>Link Poster (URL Gambar)</label>
-        <!-- Mengambil src dari kode gambar yang Anda berikan -->
-        <input type="text" id="moviePoster" value="https://i.ibb.co.com/bwFGNvt/MV5-BZm-Vk-ODZj-ODgt-Yj-Yz-YS00-Yz-Mz-LTli-Nm-It-Mz-Ax-MTAz-Nzkx-MWI3-Xk-Ey-Xk-Fqc-Gc-V1.jpg">
+        <input type="text" id="moviePoster" placeholder="https://...">
     </div>
 
     <div class="form-group">
-        <label>Link Dropbox Video (Harus diakhiri &dl=0)</label>
-        <input type="text" id="dropboxLink" value="https://www.dropbox.com/scl/fi/c2gb5n9r9pep1gsdo6z82/Attack-On-Titan-High-School-Shingeki-Kyojin-chuugakkou-eps-1-indonesia-sub-Bstation.mp4?rlkey=0cg5yqmy35616hjsh0ykycf2m&st=i9srle11&dl=0">
-        <div class="note">Sistem akan otomatis mengubah link menjadi &raw=1</div>
+        <label>Link Dropbox Video (Wajib diakhiri &dl=0)</label>
+        <input type="text" id="dropboxLink" placeholder="https://www.dropbox.com/...&dl=0">
+        <div class="note" style="color: #0078ff; font-weight:bold;">Sistem akan otomatis mengubah link menjadi &raw=1</div>
     </div>
 
-    <button onclick="uploadMovie()">Kirim ke Firebase</button>
+    <button onclick="uploadMovie()" id="btnSubmit">Kirim ke Firebase</button>
     <div id="status"></div>
 </div>
 
 <script type="module">
-    // --- PASTIKAN ANDA MENGISI KONFIGURASI INI DARI FIREBASE CONSOLE ---
+    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // --- KONFIGURASI FIREBASE ANDA (SUDAH DIUPDATE) ---
     const firebaseConfig = {
-        apiKey: "ISI_API_KEY_ANDA_DISINI",
-        authDomain: "PROJECT_ID_ANDA.firebaseapp.com",
-        databaseURL: "https://PROJECT_ID_ANDA-default-rtdb.firebaseio.com",
-        projectId: "PROJECT_ID_ANDA",
-        storageBucket: "PROJECT_ID_ANDA.appspot.com",
-        messagingSenderId: "SENDER_ID",
-        appId: "APP_ID"
+        apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
+        authDomain: "thmovie-3646f.firebaseapp.com",
+        databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "thmovie-3646f",
+        storageBucket: "thmovie-3646f.firebasestorage.app",
+        messagingSenderId: "1041137356432",
+        appId: "1:1041137356432:web:96edbe3402937c82f09215",
+        measurementId: "G-6SNE976L7G"
     };
 
     // Inisialisasi Firebase
@@ -76,6 +78,11 @@
         const genre = document.getElementById('movieGenre').value;
         const poster = document.getElementById('moviePoster').value;
         let videoLink = document.getElementById('dropboxLink').value;
+
+        if(!title || !poster || !videoLink) {
+            alert("Mohon isi semua data!");
+            return;
+        }
 
         // Logika Ubah Link Dropbox
         if (videoLink.includes('&dl=0')) {
@@ -94,16 +101,30 @@
             createdAt: new Date().toISOString()
         };
 
+        const btn = document.getElementById('btnSubmit');
+        const originalText = btn.innerText;
+        btn.innerText = "Mengirim...";
+        btn.disabled = true;
+
         push(moviesRef, newMovie)
             .then(() => {
                 document.getElementById('status').innerText = "Berhasil dikirim ke Firebase!";
                 document.getElementById('status').style.color = "green";
-                // Bersihkan input jika mau
-                // document.getElementById('movieTitle').value = '';
+                
+                // Reset Form
+                document.getElementById('movieTitle').value = '';
+                document.getElementById('movieGenre').value = '';
+                document.getElementById('moviePoster').value = '';
+                document.getElementById('dropboxLink').value = '';
             })
             .catch((error) => {
+                console.error(error);
                 document.getElementById('status').innerText = "Error: " + error.message;
                 document.getElementById('status').style.color = "red";
+            })
+            .finally(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
             });
     }
 </script>
