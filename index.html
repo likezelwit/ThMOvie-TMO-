@@ -84,7 +84,8 @@
         /* SELECT TIME VIEW */
         .time-input-group { margin-top: 30px; text-align: left; }
         .time-input-group label { display: block; font-weight: 700; margin-bottom: 10px; color: var(--gray); }
-        .time-input-group input { width: 100%; padding: 15px; font-size: 1.2rem; border: 2px solid #ddd; border-radius: 15px; outline: none; font-family: 'Inter', sans-serif; }
+        .time-input-wrapper { display: flex; gap: 10px; align-items: center; }
+        .time-input-group input { width: 100%; padding: 15px; font-size: 1.2rem; border: 2px solid #ddd; border-radius: 15px; outline: none; font-family: 'Inter', sans-serif; flex: 1; }
         .time-input-group input:focus { border-color: var(--primary); }
         .back-link { display: inline-block; margin-top: 20px; color: var(--gray); font-weight: 600; cursor: pointer; }
         .back-link:hover { color: var(--primary); text-decoration: underline; }
@@ -201,11 +202,17 @@
                     <h2>Pilih Jam</h2>
                     <p>Anda menonton <strong id="display-movie-time" style="color:var(--primary)">...</strong> di kelas <strong id="display-class-time" style="color:var(--primary)">...</strong></p>
                 </div>
+                
                 <div class="time-input-group">
                     <label for="user-time">Masukkan Jam Tayang:</label>
-                    <input type="time" id="user-time" min="09:00" max="23:59">
+                    <div class="time-input-wrapper">
+                        <input type="time" id="user-time" min="09:00" max="23:59">
+                        <!-- TOMBOL BARU: + 2 Menit -->
+                        <button class="btn" onclick="setTimeNowPlus2()" style="padding: 0 15px; font-size: 0.9rem; white-space: nowrap;">+ 2 Menit</button>
+                    </div>
                     <small style="color:#999; display:block; margin-top:5px;">*Format jam otomatis (AM/PM)</small>
                 </div>
+
                 <br>
                 <button class="btn" onclick="confirmBooking()" style="width: 100%; font-size: 1.1rem;">Konfirmasi Pesanan</button>
                 <div class="back-link" onclick="switchView('class')">
@@ -268,7 +275,6 @@
 
     <script type="module">
         // --- FIREBASE CONFIGURATION ---
-        // PENTING: GANTI DENGAN KONFIGURASI DARI FIREBASE CONSOLE ANDA
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -280,6 +286,7 @@
               storageBucket: "thmovie-3646f.firebasestorage.app",
               messagingSenderId: "1041137356432",
               appId: "1:1041137356432:web:96edbe3402937c82f09215",
+              measurementId: "G-6SNE976L7G"
          };
 
         const app = initializeApp(firebaseConfig);
@@ -287,29 +294,30 @@
         const moviesRef = ref(db, 'movies/');
 
         // --- GLOBAL VARIABLES ---
-        let tickets = [];
+        // Mengambil tiket dari LocalStorage agar tidak hilang saat refresh
+        let savedTickets = localStorage.getItem('tmoTickets');
+        let tickets = savedTickets ? JSON.parse(savedTickets) : [];
+        
         let currentBooking = { movie: '', type: '', time: '' };
-        let allMovies = []; // Untuk pencarian
+        let allMovies = []; 
 
         // --- FETCH MOVIES FROM FIREBASE ---
         function loadMovies() {
             onValue(moviesRef, (snapshot) => {
                 const container = document.getElementById('movies-container');
-                container.innerHTML = ''; // Reset
+                container.innerHTML = ''; 
                 
                 const data = snapshot.val();
-                allMovies = []; // Reset search array
+                allMovies = []; 
 
                 if (data) {
                     snapshot.forEach((childSnapshot) => {
                         const movie = childSnapshot.val();
-                        // Simpan untuk search
                         allMovies.push(movie);
 
-                        // Buat Elemen Kartu Film
                         const card = document.createElement('div');
                         card.className = 'movie-card';
-                        card.dataset.title = movie.title.toLowerCase(); // Untuk search
+                        card.dataset.title = movie.title.toLowerCase(); 
                         card.onclick = () => startBooking(movie.title);
 
                         card.innerHTML = `
@@ -333,12 +341,13 @@
         // Jalankan saat load
         loadMovies();
 
-        // --- EXPORT FUNGSI KE WINDOW (Agar bisa dipanggil HTML biasa) ---
+        // --- EXPORT FUNGSI KE WINDOW ---
         window.switchView = switchView;
         window.startBooking = startBooking;
         window.selectClassType = selectClassType;
         window.confirmBooking = confirmBooking;
         window.searchMovie = searchMovie;
+        window.setTimeNowPlus2 = setTimeNowPlus2; // Export fungsi waktu baru
 
         // --- LOGIC FUNCTIONS ---
         function switchView(viewName) {
@@ -382,6 +391,20 @@
             switchView('time');
         }
 
+        // --- FUNGSI BARU: Set Waktu Sekarang + 2 Menit ---
+        function setTimeNowPlus2() {
+            const now = new Date();
+            // Tambahkan 2 menit
+            now.setMinutes(now.getMinutes() + 2);
+
+            // Format ke HH:MM (24 jam) untuk input type="time"
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            const timeString = `${hours}:${minutes}`;
+            document.getElementById('user-time').value = timeString;
+        }
+
         function convertToAMPM(time24) {
             if (!time24) return time24;
             let [hours, minutes] = time24.split(':');
@@ -403,6 +426,9 @@
                 date: new Date().toLocaleDateString('id-ID')
             });
 
+            // --- SIMPAN KE LOCAL STORAGE ---
+            localStorage.setItem('tmoTickets', JSON.stringify(tickets));
+
             alert(`Tiket Berhasil!\nFilm: ${currentBooking.movie}\nKelas: ${currentBooking.type}\nJam: ${currentBooking.time}`);
             switchView('ticket');
         }
@@ -414,11 +440,9 @@
                 list.innerHTML = '<div class="text-center" style="color:var(--gray); padding:40px;">Belum ada tiket yang dipesan.</div>';
                 return;
             }
-            // Ambil poster pertama dari allMovies jika ada, atau pakai placeholder
             const defaultPoster = "https://picsum.photos/seed/ticket/100/150";
 
             tickets.forEach(t => {
-                // Cari poster berdasarkan judul (simple lookup)
                 const movieData = allMovies.find(m => m.title === t.movie);
                 const posterUrl = movieData ? movieData.poster : defaultPoster;
 
