@@ -294,7 +294,6 @@
         const moviesRef = ref(db, 'movies/');
 
         // --- GLOBAL VARIABLES ---
-        // Mengambil tiket dari LocalStorage agar tidak hilang saat refresh
         let savedTickets = localStorage.getItem('tmoTickets');
         let tickets = savedTickets ? JSON.parse(savedTickets) : [];
         
@@ -338,7 +337,6 @@
             });
         }
 
-        // Jalankan saat load
         loadMovies();
 
         // --- EXPORT FUNGSI KE WINDOW ---
@@ -347,7 +345,8 @@
         window.selectClassType = selectClassType;
         window.confirmBooking = confirmBooking;
         window.searchMovie = searchMovie;
-        window.setTimeNowPlus2 = setTimeNowPlus2; // Export fungsi waktu baru
+        window.setTimeNowPlus2 = setTimeNowPlus2;
+        window.watchNow = watchNow; // Export fungsi baru
 
         // --- LOGIC FUNCTIONS ---
         function switchView(viewName) {
@@ -391,16 +390,11 @@
             switchView('time');
         }
 
-        // --- FUNGSI BARU: Set Waktu Sekarang + 2 Menit ---
         function setTimeNowPlus2() {
             const now = new Date();
-            // Tambahkan 2 menit
             now.setMinutes(now.getMinutes() + 2);
-
-            // Format ke HH:MM (24 jam) untuk input type="time"
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-
             const timeString = `${hours}:${minutes}`;
             document.getElementById('user-time').value = timeString;
         }
@@ -420,13 +414,17 @@
             const displayTime = convertToAMPM(timeInput);
             currentBooking.time = displayTime;
             
+            // Cari videoSource dari data film
+            const movieData = allMovies.find(m => m.title === currentBooking.movie);
+            const videoUrl = movieData ? movieData.videoSource : '';
+            
             tickets.push({
                 ...currentBooking,
                 id: Date.now(),
-                date: new Date().toLocaleDateString('id-ID')
+                date: new Date().toLocaleDateString('id-ID'),
+                videoSource: videoUrl // <--- TAMBAHKAN INI
             });
 
-            // --- SIMPAN KE LOCAL STORAGE ---
             localStorage.setItem('tmoTickets', JSON.stringify(tickets));
 
             alert(`Tiket Berhasil!\nFilm: ${currentBooking.movie}\nKelas: ${currentBooking.type}\nJam: ${currentBooking.time}`);
@@ -456,6 +454,12 @@
                         <div class="t-info"><i class="far fa-calendar"></i> ${t.date}</div>
                         <div class="t-info"><i class="far fa-clock"></i> ${t.time}</div>
                         <div class="t-badge">${t.type}</div>
+                        
+                        <!-- TOMBOL TONTON SEKARANG -->
+                        <br>
+                        <button class="movie-btn" onclick="watchNow('${t.movie}')" style="background:var(--primary); color:white; margin-top:10px;">
+                            <i class="fas fa-play"></i> Tonton Sekarang
+                        </button>
                     </div>
                 </div>`;
                 list.innerHTML += html;
@@ -471,6 +475,24 @@
             slides[idx].classList.add('active');
         }
         setInterval(nextSlide, 5000);
+
+        // --- FUNGSI BARU: WATCH NOW ---
+        function watchNow(movieTitle) {
+            const movie = allMovies.find(m => m.title === movieTitle);
+            
+            if(!movie) {
+                alert("Data film tidak ditemukan!");
+                return;
+            }
+
+            // Simpan data ke SessionStorage
+            sessionStorage.setItem('activeMovieTitle', movie.title);
+            sessionStorage.setItem('activeVideoSource', movie.videoSource);
+            sessionStorage.setItem('activePoster', movie.poster);
+
+            // Pindah ke halaman movie.html
+            window.location.href = 'movie.html';
+        }
 
     </script>
 </body>
