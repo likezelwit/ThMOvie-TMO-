@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThMovie - Cinema XXI Edition</title>
-    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+    <title>ThMovie XXI - Home</title>
     <style>
-        /* Menggunakan palet warna Cinema XXI modern */
         body { 
             background: linear-gradient(180deg, #101518 0%, #0b0d0e 100%) !important; 
             color: #ffffff !important; 
@@ -15,8 +13,6 @@
             padding: 0; 
             text-align: center;
         }
-
-        /* Header Premium ala XXI */
         .xxi-navbar {
             background-color: #ffffff;
             padding: 15px 20px;
@@ -29,7 +25,7 @@
             font-size: 24px;
             font-weight: bold;
             font-style: italic;
-            color: #004d40; /* Warna Hijau Tua Keemasan XXI */
+            color: #004d40;
         }
         .xxi-tag {
             background-color: #00897b;
@@ -39,10 +35,8 @@
             font-size: 12px;
             font-weight: bold;
         }
-
-        /* Hero & Slogan Text */
         .xxi-hero-text {
-            margin: 30px auto 15px auto;
+            margin: 40px auto 20px auto;
             font-size: 28px;
             font-weight: 300;
             color: #e0e0e0;
@@ -50,53 +44,19 @@
         .xxi-hero-text strong {
             color: #00bfa5;
         }
-
-        /* Kontainer Video Sinema Modern */
-        .vowviw-container { 
-            position: relative; 
-            width: 90%; 
-            max-width: 950px; 
-            margin: 0 auto 25px auto; 
-            padding-bottom: 53%; /* Rasio bioskop sedikit lebih lebar */
-            height: 0; 
-            background: #000; 
-            border-radius: 16px; 
-            box-shadow: 0 20px 50px rgba(0, 137, 123, 0.25); 
-            overflow: hidden; 
-            border: 3px solid #1c2429; 
-        }
-        video { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            outline: none; 
-        }
-
-        /* Menu Ikonik Bulat ala M.21Cineplex */
         .xxi-menu-container {
             display: flex;
             justify-content: center;
             gap: 25px;
-            margin: 30px auto;
+            margin: 20px auto 40px auto;
             max-width: 600px;
-            padding: 0 10px;
         }
         .menu-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            cursor: pointer;
-            text-decoration: none;
             color: #b0bec5;
             font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .menu-item:hover {
-            color: #00bfa5;
-            transform: translateY(-3px);
         }
         .icon-circle {
             width: 55px;
@@ -109,13 +69,10 @@
             align-items: center;
             font-size: 22px;
             margin-bottom: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-
-        /* Section List Film / Episode "Now Playing" */
         .now-playing-section {
             max-width: 950px;
-            margin: 40px auto;
+            margin: 0 auto;
             text-align: left;
             padding: 0 20px;
         }
@@ -124,13 +81,12 @@
             font-weight: 600;
             border-left: 5px solid #00bfa5;
             padding-left: 10px;
-            margin-bottom: 20px;
-            color: #ffffff;
+            margin-bottom: 25px;
         }
         .poster-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
         }
         .poster-card {
             background-color: #162025;
@@ -139,6 +95,10 @@
             border: 1px solid #25333c;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             transition: transform 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            display: block;
         }
         .poster-card:hover {
             transform: scale(1.04);
@@ -146,16 +106,15 @@
         }
         .poster-img-dummy {
             width: 100%;
-            height: 220px;
+            height: 240px;
             background: linear-gradient(45deg, #004d40, #00796b);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: bold;
-            color: #ffffff;
             text-align: center;
-            padding: 10px;
+            padding: 15px;
             box-sizing: border-box;
         }
         .poster-info {
@@ -165,9 +124,6 @@
             font-size: 14px;
             font-weight: bold;
             margin: 0 0 5px 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         .movie-type {
             font-size: 11px;
@@ -178,10 +134,8 @@
             border-radius: 4px;
             font-weight: bold;
         }
-
-        /* Footer Khas */
         .footer { 
-            margin-top: 60px; 
+            margin-top: 80px; 
             padding: 20px;
             font-size: 12px; 
             color: #546e7a;
@@ -201,45 +155,26 @@
         Feel the moments <strong>beyond</strong>
     </div>
 
-    <div class="vowviw-container">
-        <video id="tmo-player" controls>
-            <source src="https://www.dropbox.com/scl/fi/c2gb5n9r9pep1gsdo6z82/Attack-On-Titan-High-School-Shingeki-Kyojin-chuugakkou-eps-1-indonesia-sub-Bstation.mp4?rlkey=0cg5yqmy35616hjsh0ykycf2m&st=xj3do6k4&raw=1" type="video/mp4">
-            Browser lo gak support tag video.
-        </video>
-    </div>
-
     <div class="xxi-menu-container">
-        <div class="menu-item">
-            <div class="icon-circle">🎬</div>
-            <span>Cinema</span>
-        </div>
-        <div class="menu-item">
-            <div class="icon-circle">🎥</div>
-            <span>Movies</span>
-        </div>
-        <div class="menu-item">
-            <div class="icon-circle">🍿</div>
-            <span>m.food</span>
-        </div>
-        <div class="menu-item">
-            <div class="icon-circle">🛋️</div>
-            <span>Private</span>
-        </div>
+        <div class="menu-item"><div class="icon-circle">🎬</div><span>Cinema</span></div>
+        <div class="menu-item"><div class="icon-circle">🎥</div><span>Movies</span></div>
+        <div class="menu-item"><div class="icon-circle">🍿</div><span>m.food</span></div>
+        <div class="menu-item"><div class="icon-circle">🛋️</div><span>Private</span></div>
     </div>
 
     <div class="now-playing-section">
         <div class="section-title">Now Playing</div>
         <div class="poster-grid">
             
-            <div class="poster-card">
-                <div class="poster-img-dummy">AOT High School<br>Episode 1</div>
+            <a href="tes.html" class="poster-card">
+                <div class="poster-img-dummy">ATTACK ON TITAN<br>High School<br>Episode 1</div>
                 <div class="poster-info">
                     <p class="movie-title">AOT Junior High E01</p>
                     <span class="movie-type">SUNDA/IND SUB</span>
                 </div>
-            </div>
+            </a>
 
-            <div class="poster-card" style="opacity: 0.5;">
+            <div class="poster-card" style="opacity: 0.4; cursor: default;">
                 <div class="poster-img-dummy" style="background: #25333c;">Coming<br>Soon</div>
                 <div class="poster-info">
                     <p class="movie-title">Episode 02</p>
@@ -251,82 +186,8 @@
     </div>
 
     <div class="footer">
-        <p>&copy; 2026 ThMovie Production by Gilang - Kelas VI A. All Rights Reserved.</p>
+        <p>&copy; 2026 ThMovie Production by Gilang - Kelas VI A.</p>
     </div>
 
-    <script>
-        const ably = new Ably.Realtime('4PuneA.m9z7NA:9tNxlKi-0-BnCULHgl54eS8A7agg3ivOQMiVisCncCI');
-        const channel = ably.channels.get('tmo-nobar');
-        const video = document.getElementById('tmo-player');
-
-        const myClientId = 'user_' + Math.random().toString(36).substr(2, 9);
-        let isReceiving = false;
-        let hasHostResponded = false;
-
-        setTimeout(() => {
-            channel.publish('request-status', { from: myClientId });
-            setTimeout(() => {
-                if (!hasHostResponded) {
-                    console.log("Kamu adalah Host pertama di room ini.");
-                }
-            }, 2000);
-        }, 1000);
-
-        video.onplay = () => { 
-            if (!isReceiving) channel.publish('sync', { action: 'play', time: video.currentTime, sender: myClientId }); 
-        };
-        video.onpause = () => { 
-            if (!isReceiving) channel.publish('sync', { action: 'pause', time: video.currentTime, sender: myClientId }); 
-        };
-        video.onseeked = () => { 
-            if (!isReceiving) channel.publish('sync', { action: 'seek', time: video.currentTime, sender: myClientId }); 
-        };
-
-        channel.subscribe('sync', (message) => {
-            const data = message.data;
-            if (data.sender === myClientId) return;
-
-            isReceiving = true;
-            if (Math.abs(video.currentTime - data.time) > 1.5) {
-                video.currentTime = data.time;
-            }
-            
-            if (data.action === 'play') {
-                video.play().catch(() => {});
-            } else if (data.action === 'pause') {
-                video.pause();
-            } else if (data.action === 'seek') {
-                video.currentTime = data.time;
-            }
-            
-            setTimeout(() => { isReceiving = false; }, 500);
-        });
-
-        channel.subscribe('request-status', (message) => {
-            if (message.data.from === myClientId) return;
-            channel.publish('response-status', {
-                to: message.data.from,
-                time: video.currentTime,
-                playing: !video.paused
-            });
-        });
-
-        channel.subscribe('response-status', (message) => {
-            const data = message.data;
-            if (data.to !== myClientId || hasHostResponded) return;
-
-            hasHostResponded = true; 
-            isReceiving = true;
-
-            video.currentTime = data.time;
-            if (data.playing) {
-                video.play().catch(() => {});
-            } else {
-                video.pause();
-            }
-            
-            setTimeout(() => { isReceiving = false; }, 800);
-        });
-    </script>
 </body>
 </html>
