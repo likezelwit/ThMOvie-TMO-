@@ -3,191 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThMovie XXI - Home</title>
+    <title>TMO Cinemas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800&display=swap" rel="stylesheet">
+    
     <style>
-        body { 
-            background: linear-gradient(180deg, #101518 0%, #0b0d0e 100%) !important; 
-            color: #ffffff !important; 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            text-align: center;
+        :root {
+            --primary: #0078ff;
+            --bg-body: #f4f6f8;
+            --white: #ffffff;
+            --text: #222;
+            --gray: #666;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        .xxi-navbar {
-            background-color: #ffffff;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .xxi-brand {
-            font-size: 24px;
-            font-weight: bold;
-            font-style: italic;
-            color: #004d40;
-        }
-        .xxi-tag {
-            background-color: #00897b;
-            color: white;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .xxi-hero-text {
-            margin: 40px auto 20px auto;
-            font-size: 28px;
-            font-weight: 300;
-            color: #e0e0e0;
-        }
-        .xxi-hero-text strong {
-            color: #00bfa5;
-        }
-        .xxi-menu-container {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin: 20px auto 40px auto;
-            max-width: 600px;
-        }
-        .menu-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #b0bec5;
-            font-size: 13px;
-        }
-        .icon-circle {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            border: 2px solid #00897b;
-            background-color: #162025;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 22px;
-            margin-bottom: 8px;
-        }
-        .now-playing-section {
-            max-width: 950px;
-            margin: 0 auto;
-            text-align: left;
-            padding: 0 20px;
-        }
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            border-left: 5px solid #00bfa5;
-            padding-left: 10px;
-            margin-bottom: 25px;
-        }
-        .poster-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 25px;
-        }
-        .poster-card {
-            background-color: #162025;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #25333c;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-            cursor: pointer;
-            text-decoration: none;
-            color: white;
-            display: block;
-        }
-        .poster-card:hover {
-            transform: scale(1.04);
-            border-color: #00bfa5;
-        }
-        .poster-img-dummy {
-            width: 100%;
-            height: 240px;
-            background: linear-gradient(45deg, #004d40, #00796b);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-        .poster-info {
-            padding: 12px;
-        }
-        .movie-title {
-            font-size: 14px;
-            font-weight: bold;
-            margin: 0 0 5px 0;
-        }
-        .movie-type {
-            font-size: 11px;
-            color: #00bfa5;
-            background-color: rgba(0,191,165,0.1);
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .footer { 
-            margin-top: 80px; 
-            padding: 20px;
-            font-size: 12px; 
-            color: #546e7a;
-            border-top: 1px solid #1c2429;
-            background-color: #090c0e;
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-body); color: var(--text); }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        img { width: 100%; display: block; object-fit: cover; }
+
+        /* HEADER */
+        header { background: var(--white); padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .header-container { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        
+        .logo { font-size: 1.5rem; font-weight: 900; color: var(--text); display: flex; align-items: center; gap: 5px; }
+        .logo span { color: var(--primary); }
+        
+        .search-bar { flex: 1; margin: 0 20px; display: none; position: relative; }
+        @media(min-width: 768px) { .search-bar { display: block; } }
+        
+        .search-bar input { width: 100%; padding: 10px 40px 10px 15px; border-radius: 20px; border: 1px solid #ddd; background: #f9f9f9; outline: none; }
+        .search-bar input:focus { border-color: var(--primary); background: white; }
+        .search-bar i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--gray); }
+
+        /* NAV ICONS (Cinema & m.food Removed) */
+        .sub-nav { background: var(--white); padding: 10px 0; border-bottom: 1px solid #eee; }
+        .nav-icons { max-width: 1000px; margin: 0 auto; display: flex; justify-content: center; gap: 60px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gray); font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
+        .nav-item:hover, .nav-item.active { color: var(--primary); }
+
+        /* HERO SLIDER */
+        .hero { max-width: 1000px; margin: 30px auto; padding: 0 20px; height: 400px; position: relative; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
+        
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: 0.8s; background-size: cover; background-position: center; }
+        .slide.active { opacity: 1; }
+        
+        .slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
+        
+        .slide-content { position: relative; z-index: 2; padding: 40px; color: white; max-width: 60%; }
+        .slide-content h2 { font-size: 2rem; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; }
+        .slide-content p { font-size: 1rem; margin-bottom: 20px; }
+        
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 50px; font-weight: 700; cursor: pointer; }
+        .btn:hover { background: #0056b3; transform: translateY(-2px); }
+
+        /* NOW PLAYING (Single Movie) */
+        .now-playing { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .now-playing h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; border-left: 5px solid var(--primary); padding-left: 15px; }
+        
+        .movie-card { background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); max-width: 250px; transition: 0.3s; cursor: pointer; }
+        .movie-card:hover { transform: translateY(-5px); }
+        
+        .poster { height: 375px; position: relative; overflow: hidden; }
+        .poster img { height: 100%; transition: 0.5s; }
+        .movie-card:hover .poster img { transform: scale(1.1); }
+        
+        .movie-info { padding: 15px; text-align: center; }
+        .movie-title { font-weight: 800; margin-bottom: 5px; font-size: 1rem; }
+        .movie-genre { font-size: 0.8rem; color: var(--gray); margin-bottom: 10px; }
+        .movie-btn { background: #eee; color: var(--text); border: none; padding: 8px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
+        .movie-btn:hover { background: var(--primary); color: white; }
+
+        /* FOOTER */
+        footer { text-align: center; padding: 30px; color: var(--gray); font-size: 0.8rem; margin-top: 50px; }
+
+        /* MOBILE */
+        @media(max-width: 768px) {
+            .hero { height: 250px; }
+            .slide-content h2 { font-size: 1.2rem; }
+            .nav-icons { gap: 40px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="xxi-navbar">
-        <div class="xxi-brand">ThMovie XXI</div>
-        <div class="xxi-tag">JABODETABEK</div>
-    </div>
-
-    <div class="xxi-hero-text">
-        Feel the moments <strong>beyond</strong>
-    </div>
-
-    <div class="xxi-menu-container">
-        <div class="menu-item"><div class="icon-circle">🎬</div><span>Cinema</span></div>
-        <div class="menu-item"><div class="icon-circle">🎥</div><span>Movies</span></div>
-        <div class="menu-item"><div class="icon-circle">🍿</div><span>m.food</span></div>
-        <div class="menu-item"><div class="icon-circle">🛋️</div><span>Private</span></div>
-    </div>
-
-    <div class="now-playing-section">
-        <div class="section-title">Now Playing</div>
-        <div class="poster-grid">
+    <header>
+        <div class="header-container">
+            <a href="#" class="logo"><i class="fas fa-play-circle" style="color:var(--primary)"></i> TMO <span>Cinemas</span></a>
             
-            <a href="tes.html" class="poster-card">
-                <div class="poster-img-dummy">ATTACK ON TITAN<br>High School<br>Episode 1</div>
-                <div class="poster-info">
-                    <p class="movie-title">AOT Junior High E01</p>
-                    <span class="movie-type">SUNDA/IND SUB</span>
-                </div>
-            </a>
+            <div class="search-bar">
+                <input type="text" placeholder="Cari film...">
+                <i class="fas fa-search"></i>
+            </div>
+            
+            <!-- Lokasi JABODETABEK Dihapus -->
+        </div>
+    </header>
 
-            <div class="poster-card" style="opacity: 0.4; cursor: default;">
-                <div class="poster-img-dummy" style="background: #25333c;">Coming<br>Soon</div>
-                <div class="poster-info">
-                    <p class="movie-title">Episode 02</p>
-                    <span class="movie-type" style="color:#78909c; background:none;">2D</span>
+    <nav class="sub-nav">
+        <ul class="nav-icons">
+            <!-- Cinema & m.food Dihapus -->
+            <li class="nav-item active"><i class="fas fa-ticket-alt"></i>Movies</li>
+            <li class="nav-item"><i class="fas fa-glass-cheers"></i>Private</li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="hero" id="slider">
+            <!-- Slide 1 -->
+            <div class="slide active" style="background-image: url('https://picsum.photos/seed/mandalorian/1000/400');">
+                <div class="slide-content">
+                    <h2>The Mandalorian</h2>
+                    <p>Exclusively at TMO. Saksikan galaksi di layar lebar.</p>
+                    <button class="btn">Lihat Jadwal</button>
                 </div>
             </div>
-
+            <!-- Slide 2 -->
+            <div class="slide" style="background-image: url('https://picsum.photos/seed/nature/1000/400');">
+                <div class="slide-content">
+                    <h2 style="color: #81c784;">Bring Your Tumbler</h2>
+                    <p>Diskon 30% untuk setiap pembelian minuman.</p>
+                    <button class="btn" style="background: #4caf50;">Cek Promo</button>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="slide" style="background-image: url('https://picsum.photos/seed/drink/1000/400');">
+                <div class="slide-content">
+                    <h2 style="color: #f48fb1;">Hibiscus Berry Tea</h2>
+                    <p>Minuman segar terbaru dari TMO m.food.</p>
+                    <button class="btn" style="background: #e91e63;">Pesan</button>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="footer">
-        <p>&copy; 2026 ThMovie Production by Gilang - Kelas VI A.</p>
-    </div>
+        <!-- NOW PLAYING (1 Film) -->
+        <section class="now-playing">
+            <h3>Now Playing</h3>
+            <div class="movie-card">
+                <div class="poster">
+                    <img src="https://picsum.photos/seed/deadpool/300/450" alt="Poster Film">
+                </div>
+                <div class="movie-info">
+                    <div class="movie-title">Deadpool & Wolverine</div>
+                    <div class="movie-genre">Action, Comedy</div>
+                    <button class="movie-btn" onclick="alert('Memesan tiket...')">Beli Tiket</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2023 TMO Cinemas. All rights reserved.
+    </footer>
+
+    <script>
+        let slides = document.querySelectorAll('.slide');
+        let idx = 0;
+        function next() {
+            slides[idx].classList.remove('active');
+            idx = (idx + 1) % slides.length;
+            slides[idx].classList.add('active');
+        }
+        setInterval(next, 5000);
+    </script>
 
 </body>
 </html>
