@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMO Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            margin: 0; 
+            background: #000; 
+            color: white; 
+            font-family: 'Inter', sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+        
+        /* Header Player */
+        .player-header {
+            padding: 15px 20px;
+            background: rgba(20,20,20,0.9);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            z-index: 10;
+        }
+        
+        .movie-info { display: flex; align-items: center; gap: 15px; }
+        .movie-thumb { width: 40px; height: 40px; border-radius: 5px; object-fit: cover; }
+        .movie-title { font-weight: 600; font-size: 1.1rem; }
+        .sync-status { font-size: 0.8rem; color: #4caf50; background: rgba(76, 175, 80, 0.1); padding: 5px 10px; border-radius: 20px; }
+        
+        .exit-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .exit-btn:hover { background: #555; }
+
+        /* Video Container */
+        .video-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            max-height: 100vh;
+            outline: none;
+        }
+
+        /* Sync Indicator */
+        .sync-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; animation: pulse 2s infinite; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* Error State */
+        .error-msg {
+            text-align: center;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-header">
+        <div class="movie-info">
+            <img id="m-poster" class="movie-thumb" src="">
+            <div>
+                <div id="m-title" class="movie-title">Loading...</div>
+                <div class="sync-status"><i class="fas fa-sync-alt fa-spin"></i> SINKRONISASI AKTIF</div>
+            </div>
+        </div>
+        <button class="exit-btn" onclick="window.location.href='index.html'">
+            <i class="fas fa-sign-out-alt"></i> Keluar
+        </button>
+    </div>
+
+    <div class="video-wrapper">
+        <video id="mainVideo" controls>
+            Browser Anda tidak mendukung tag video.
+        </video>
+        <div class="sync-indicator">
+            <div class="dot"></div>
+            Live Sync Mode: ON
+        </div>
+    </div>
+
+<script type="module">
+    // --- FIREBASE CONFIG ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
+        authDomain: "thmovie-3646f.firebaseapp.com",
+        databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "thmovie-3646f",
+        storageBucket: "thmovie-3646f.firebasestorage.app",
+        messagingSenderId: "1041137356432",
+        appId: "1:1041137356432:web:96edbe3402937c82f09215",
+        measurementId: "G-6SNE976L7G"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 1. AMBIL DATA MOVIE DARI SESSIONSTORAGE
+    const movieTitle = sessionStorage.getItem('activeMovieTitle');
+    const videoSource = sessionStorage.getItem('activeVideoSource');
+    const posterSource = sessionStorage.getItem('activePoster');
+
+    const video = document.getElementById('mainVideo');
+    const titleEl = document.getElementById('m-title');
+    const posterEl = document.getElementById('m-poster');
+
+    if (!videoSource || !movieTitle) {
+        document.querySelector('.video-wrapper').innerHTML = '<div class="error-msg"><h2>Data Film Tidak Ditemukan.</h2><p>Silakan kembali ke halaman Tiket.</p></div>';
+    } else {
+        titleEl.innerText = movieTitle;
+        posterEl.src = posterSource;
+        video.src = videoSource;
+    }
+
+    // 2. LOGIKA SINCRONISASI (SYNC LOGIC)
+    // Buat referensi unik berdasarkan Judul Film (ganti spasi dengan underscore agar aman untuk URL DB)
+    const cleanTitle = movieTitle.replace(/\s+/g, '_').toLowerCase();
+    const syncRef = ref(db, 'sync_rooms/' + cleanTitle);
+
+    // Fungsi update status ke Firebase (Setiap 1 detik)
+    let isSyncing = false;
+    setInterval(() => {
+        if (video.paused) {
+            set(syncRef, {
+                currentTime: video.currentTime,
+                isPlaying: false,
+                lastUpdate: Date.now()
+            });
+        } else {
+            set(syncRef, {
+                currentTime: video.currentTime,
+                isPlaying: true,
+                lastUpdate: Date.now()
+            });
+        }
+    }, 1000);
+
+    // Fungsi Mendengarkan perubahan dari User lain
+    onValue(syncRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        // Cek apakah update ini masih baru (bukan data lama 10 detik yang lalu)
+        const now = Date.now();
+        if (now - data.lastUpdate > 5000) return; // Abaikan data stp
+
+        // LOGIKA ANTAR USER:
+        // Jika perbedaan waktu > 2 detik, sinkronkan waktu video
+        if (Math.abs(video.currentTime - data.currentTime) > 2) {
+            isSyncing = true;
+            video.currentTime = data.currentTime;
+            setTimeout(() => { isSyncing = false; }, 500); // Kunci sinkron sebentar
+        }
+
+        // Sinkronisasi Play/Pause
+        if (data.isPlaying && video.paused) {
+            // Jika user lain play, kita play
+            // Perlu interaksi user untuk autoplay di Chrome, jadi kita coba play, jika gagal biarkan user klik
+            video.play().catch(e => console.log("Autoplay blocked, need user interaction"));
+        } else if (!data.isPlaying && !video.paused) {
+            // Jika user lain pause, kita pause
+            video.pause();
+        }
+    });
+
+</script>
+</body>
+</html>
