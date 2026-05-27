@@ -259,7 +259,9 @@ video.addEventListener('ended',()=>{if(!modalActive)cleanupRoom()});
 // ===== INIT =====
 const urlP=new URLSearchParams(window.location.search);
 roomId=urlP.get('room');
+// Baca contentType dari sessionStorage untuk Host
 contentType=(sessionStorage.getItem('activeContentType')||'movie').toLowerCase();
+
 if(!roomId)initHost();else initGuest();
 
 // ===== HOST =====
@@ -271,17 +273,34 @@ function initHost(){
 
     const t=sessionStorage.getItem('activeMovieTitle'),v=sessionStorage.getItem('activeVideoSource'),p=sessionStorage.getItem('activePoster'),bt=sessionStorage.getItem('activeBookingTime'),rt=sessionStorage.getItem('activeRoomType')||'PUBLIC';
     if(!v||!t){showErr('Data Film Tidak Ditemukan','Kembali ke halaman Tiket.');return}
-    titleEl.textContent=t;setPoster(p);video.src=v;videoReady=true;
+    
+    titleEl.textContent=t;
+    setPoster(p);
+    video.src=v;
+    videoReady=true;
+    
     bookingTimestamp=bt?parseInt(bt,10):null;if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
 
-    // Show content type badge
-    if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex'}
+    // Tampilkan Badge Tipe (Series/OVA) jika bukan Movie
+    if(contentType!=='movie'){
+        typeBadge.textContent=contentType.toUpperCase();
+        typeBadge.style.display='inline-flex';
+    }
 
     const isPrivate=rt==='PRIVATE';
-    set(ref(db,'sync_rooms/'+roomId+'/meta'),{title:t,videoSrc:v,posterSrc:p||'',targetTime:bookingTimestamp||0,createdAt:Date.now(),isPrivate,contentType:contentType||'movie'}).then(()=>setSyncStatus(true)).catch(()=>setSyncStatus(false));
+    // Simpan metadata ke Firebase termasuk contentType
+    set(ref(db,'sync_rooms/'+roomId+'/meta'),{
+        title:t,
+        videoSrc:v,
+        posterSrc:p||'',
+        targetTime:bookingTimestamp||0,
+        createdAt:Date.now(),
+        isPrivate,
+        contentType:contentType||'movie' // <--- Penting: Kirim contentType ke Firebase
+    }).then(()=>setSyncStatus(true)).catch(()=>setSyncStatus(false));
+    
     onDisconnect(ref(db,'sync_rooms/'+roomId)).remove();
     
-    // Register viewer
     registerViewer();
     setupSync();setupSender();decideMode();
 }
@@ -295,9 +314,20 @@ function initGuest(){
     const unsub=onValue(ref(db,'sync_rooms/'+roomId+'/meta'),snap=>{
         unsub();const m=snap.val();
         if(!m){showErr('Room Tidak Ditemukan','Kamar ini mungkin sudah dihapus.');setSyncStatus(false);return}
-        titleEl.textContent=m.title||'Unknown';setPoster(m.posterSrc);
+        titleEl.textContent=m.title||'Unknown';
+        setPoster(m.posterSrc);
+        
+        // Baca contentType dari Firebase (yang dikirim oleh Host)
         contentType=(m.contentType||'movie').toLowerCase();
-        if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex'}
+        
+        // Update Badge Tipe
+        if(contentType!=='movie'){
+            typeBadge.textContent=contentType.toUpperCase();
+            typeBadge.style.display='inline-flex';
+        } else {
+            typeBadge.style.display='none';
+        }
+
         if(m.videoSrc){video.src=m.videoSrc;videoReady=true}else{showErr('Video Tidak Tersedia','Sumber video tidak ditemukan.');return}
         bookingTimestamp=m.targetTime?parseInt(m.targetTime,10):null;if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
         setSyncStatus(true);registerViewer();setupSync();checkGuestInit();
@@ -339,7 +369,7 @@ function startCd(ts){
             interactBtn.style.display='none'; // Sembunyikan tombol interaksi
             // AUTO-PLAY langsung tanpa hambatan
             hideModal();
-            video.play().then(()=>{console.log('Auto-play berhasil setelah countdown')}).catch(()=>{showToast('Klik video untuk memulai')});
+            video.play().then(()=>{console.log('Auto-play berhasil setelah countdown')}).catch(()=>showToast('Klik video untuk memulai')});
             if(isHost)sendSync();
         }
     }
