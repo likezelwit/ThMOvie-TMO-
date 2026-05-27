@@ -168,7 +168,7 @@
         <div id="modeCountdown" class="mode"><div class="m-icon spin" style="border-color:#0078ff"><i class="fas fa-clock" style="font-size:1.2rem;color:#0078ff;margin-bottom:2px"></i><div class="time-disp" id="cdTimer">00:00:00</div></div><h2 class="m-title">Film Belum Mulai</h2><p class="m-sub">Film dapat diputar pada jam tayang:</p><div class="m-time" id="cdTarget">--:--</div><button id="btnInteract" class="btn-p green" style="margin-bottom:12px"><i class="fas fa-hand-pointer"></i> Klik OKE untuk Izinkan Pemutaran</button><button id="btnCdStart" class="btn-p" disabled><i class="fas fa-hourglass-half"></i> Menunggu Jam Tayang...</button></div>
         <div id="modeReady" class="mode"><div class="m-icon" style="border-color:#4caf50"><i class="fas fa-play" style="font-size:1.3rem;color:#4caf50"></i></div><h2 class="m-title" id="readyTitle">Siap Menonton</h2><p class="m-sub" id="readySub">Bagikan link ke teman, lalu klik tombol di bawah.</p><button id="btnReady" class="btn-p"><i class="fas fa-play"></i> Mulai Nonton</button></div>
         <div id="modeWaiting" class="mode"><div class="m-icon spin" style="border-color:#ff9800"><i class="fas fa-hourglass-half" style="font-size:1.2rem;color:#ff9800"></i></div><h2 class="m-title">Menunggu Host<span class="wait-dots"></span></h2><p class="m-sub">Host belum memulai film.</p></div>
-        <div id="modeJoin" class="mode"><div class="m-icon" style="border-color:#ff9800"><i class="fas fa-user-plus" style="font-size:1.2rem;color:#ff9800"></i></div><h2 class="m-title">Film Sedang Berjalan</h2><p class="m-sub">Klik untuk bergabung di posisi yang sama.</p><button id="btnJoin" class="btn-p orange pulse"><i class="fas fa-sign-in-alt"></i> Bergabung Sekarang</button></div>
+        <div id="modeJoin" class="mode"><div class="m-icon spin" style="border-color:#ff9800"><i class="fas fa-user-plus" style="font-size:1.2rem;color:#ff9800"></i></div><h2 class="m-title">Film Sedang Berjalan</h2><p class="m-sub">Klik untuk bergabung di posisi yang sama.</p><button id="btnJoin" class="btn-p orange pulse"><i class="fas fa-sign-in-alt"></i> Bergabung Sekarang</button></div>
         <div id="modeError" class="mode"><div class="m-icon" style="border-color:#f44336"><i class="fas fa-exclamation-triangle" style="font-size:1.3rem;color:#f44336"></i></div><h2 class="m-title" id="errTitle">Terjadi Kesalahan</h2><p class="m-sub" id="errMsg">Deskripsi error.</p><button class="btn-s" id="btnErrBack"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</button></div>
     </div>
 </div>
@@ -296,7 +296,7 @@ function initHost(){
         targetTime:bookingTimestamp||0,
         createdAt:Date.now(),
         isPrivate,
-        contentType:contentType||'movie' // <--- Penting: Kirim contentType ke Firebase
+        contentType:contentType||'movie'
     }).then(()=>setSyncStatus(true)).catch(()=>setSyncStatus(false));
     
     onDisconnect(ref(db,'sync_rooms/'+roomId)).remove();
@@ -311,8 +311,10 @@ function initGuest(){
     viewerBadge.style.display='inline-flex';
     showMode('loading');showModal();
 
-    const unsub=onValue(ref(db,'sync_rooms/'+roomId+'/meta'),snap=>{
-        unsub();const m=snap.val();
+    // PERBAIKAN: Menghapus argumen error callback (ke-3) pada onValue
+    // Karena modular SDK v9 tidak mendukung itu.
+    onValue(ref(db,'sync_rooms/'+roomId+'/meta'),snap=>{
+        const m=snap.val();
         if(!m){showErr('Room Tidak Ditemukan','Kamar ini mungkin sudah dihapus.');setSyncStatus(false);return}
         titleEl.textContent=m.title||'Unknown';
         setPoster(m.posterSrc);
@@ -331,7 +333,7 @@ function initGuest(){
         if(m.videoSrc){video.src=m.videoSrc;videoReady=true}else{showErr('Video Tidak Tersedia','Sumber video tidak ditemukan.');return}
         bookingTimestamp=m.targetTime?parseInt(m.targetTime,10):null;if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
         setSyncStatus(true);registerViewer();setupSync();checkGuestInit();
-    },()=>{showErr('Gagal Terhubung','Periksa koneksi internet.');setSyncStatus(false)});
+    }); 
 }
 
 function registerViewer(){
@@ -356,7 +358,6 @@ function decideMode(){if(!videoReady){showErr('Video Tidak Tersedia','Sumber vid
 function startCd(ts){
     showMode('countdown');showModal();
     document.getElementById('cdTarget').textContent=fmtTime(ts);
-    // Tampilkan tombol interaksi
     const interactBtn=document.getElementById('btnInteract');
     interactBtn.style.display='inline-flex';
 
@@ -366,8 +367,7 @@ function startCd(ts){
         if(d<=0){
             clearInterval(cdInterval);cdInterval=null;
             document.getElementById('cdTimer').textContent='00:00:00';
-            interactBtn.style.display='none'; // Sembunyikan tombol interaksi
-            // AUTO-PLAY langsung tanpa hambatan
+            interactBtn.style.display='none';
             hideModal();
             video.play().then(()=>{console.log('Auto-play berhasil setelah countdown')}).catch(()=>showToast('Klik video untuk memulai')});
             if(isHost)sendSync();
@@ -385,7 +385,6 @@ function showErr(t,m){document.getElementById('errTitle').textContent=t;document
 function startPlay(){hasInteracted=true;if(cdInterval){clearInterval(cdInterval);cdInterval=null}hideModal();video.play().catch(()=>showToast('Klik video untuk memulai'));if(isHost)sendSync()}
 function joinPlay(){hasInteracted=true;setSyncFlag(false);hideModal();video.play().catch(()=>showToast('Klik video untuk memulai'))}
 
-// Tombol interaksi — menandai hasInteracted untuk Chrome autoplay policy
 document.getElementById('btnInteract').addEventListener('click',function(){
     hasInteracted=true;
     this.style.display='none';
@@ -405,7 +404,7 @@ document.getElementById('exitBtn').addEventListener('click',()=>{location.href='
 // Video events
 video.addEventListener('waiting',()=>{if(!video.paused)bufferOv.classList.add('show')});
 video.addEventListener('canplay',()=>bufferOv.classList.remove('show'));
-video.addEventListener('playing',()=>bufferOv.classList.remove('show'));
+video.addEventListener('playing',()=>bufferOv.classList.remove('show'});
 video.addEventListener('pause',()=>{if(!isHost&&!isSyncing&&hasInteracted&&!modalActive)showToast('Hanya Host yang dapat mengontrol')});
 video.addEventListener('error',function(){const e=video.error;let m='Sumber video tidak dapat dimuat.';if(e)switch(e.code){case 2:m='Error jaringan.';break;case 3:m='Dekode gagal.';break;case 4:m='Sumber tidak valid atau kedaluwarsa.';break}showErr('Gagal Memuat Video',m)});
 
@@ -456,8 +455,6 @@ function onCopyOk(){const b=document.getElementById('btnCopy'),o=b.innerHTML;b.i
 
 // Cleanup
 window.addEventListener('beforeunload',()=>{
-    // Jika host dan video belum selesai, jangan hapus room (biar guest bisa join)
-    // Room akan dihapus oleh onDisconnect atau saat video ended
     if(cdInterval)clearInterval(cdInterval);if(sendInterval)clearInterval(sendInterval);
     if(syncSeekTo)clearTimeout(syncSeekTo);if(toastTo)clearTimeout(toastTo);if(ctrlHideTimer)clearTimeout(ctrlHideTimer);
 });
