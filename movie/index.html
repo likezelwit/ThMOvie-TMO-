@@ -55,7 +55,6 @@
             position: relative;
             overflow: hidden;
             max-height: calc(100vh - 70px);
-            aspect-ratio: 16/9;
         }
 
         video {
@@ -65,7 +64,7 @@
             outline: none;
         }
 
-        /* Start Up Modal Styles (NEW) */
+        /* Start Up Modal Styles */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -98,14 +97,14 @@
             width: 80px; height: 80px;
             border-radius: 50%;
             border: 4px solid #0078ff;
-            border-top: 4px solid #0078ff;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             margin: 0 auto 15px;
         }
 
-        .time-display { font-size: 1.2rem; font-weight: 800; margin-top: 10px; }
+        .time-display { font-size: 1.1rem; font-weight: 800; }
 
         /* SHARE BOX */
         .share-box {
@@ -116,7 +115,6 @@
             align-items: center;
             gap: 10px;
             border: 1px solid #333;
-            margin-bottom: 10px;
             animation: slideDown 0.5s ease;
         }
 
@@ -154,7 +152,8 @@
             white-space: nowrap;
             transition: 0.2s;
         }
-        .copy-btn:hover { background: #0078ff; }
+        .copy-btn:hover:not(:disabled) { background: #0078ff; }
+        .copy-btn:disabled { background: #555; cursor: not-allowed; opacity: 0.6; }
 
         /* SYNC INDICATOR */
         .sync-indicator {
@@ -175,20 +174,17 @@
         
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* Disabled Video Overlay (Non-interactive state) */
+        /* Disabled Video Overlay */
         .video-controls-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.9);
             z-index: 50;
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
         }
-        .modal-active .video-controls-overlay { opacity: 1; }
+        .video-controls-overlay.modal-active { display: flex; }
 
         .error-msg {
             text-align: center;
@@ -202,7 +198,6 @@
 
     <div class="player-header">
         <div class="header-left">
-            <!-- SHARE BOX -->
             <div id="share-area" class="share-box">
                 <div class="share-label"><i class="fas fa-users"></i> Room</div>
                 <div class="url-input-group">
@@ -236,47 +231,46 @@
             Live Sync Mode: ON
         </div>
         
-        <!-- OVERLAY UNTUK MENONAKSAK KONTROL (SAAT BELUM MULAI) -->
         <div class="video-controls-overlay" id="controlsOverlay">
             <div style="text-align: center; padding: 40px;">
                 <div class="countdown-circle">
-                    <i class="fas fa-clock" style="font-size: 1.5rem; color: #0078ff;"></i>
-                    <div class="time-display" id="countdownTimer">00:00</div>
+                    <i class="fas fa-clock" style="font-size: 1.2rem; color: #0078ff; margin-bottom: 2px;"></i>
+                    <div class="time-display" id="countdownTimer">00:00:00</div>
                 </div>
                 <h2 style="font-size: 2rem; color: white; margin-bottom: 10px;">FILM BELUM MULAI!</h2>
                 <p style="color: #ccc; margin-bottom: 25px;">Film dapat diputar pada jam tayang:</p>
-                <p id="targetTimeDisplay" style="font-size: 1.2rem; color: #0078ff; font-weight: 800;"></p>
+                <p id="targetTimeDisplay" style="font-size: 1.2rem; color: #0078ff; font-weight: 800; margin-bottom: 20px;"></p>
                 
-                <button id="btnStartNow" class="copy-btn" style="padding: 15px 40px; background: #0078ff; font-weight: bold; border-radius: 50px; font-size: 1.1rem;">
+                <button id="btnStartNowMain" class="copy-btn" style="padding: 15px 40px; background: #0078ff; font-weight: bold; border-radius: 50px; font-size: 1.1rem;">
                     OKE, MULAI NONTON!
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- START UP MODAL POPUP -->
-        <div class="modal-overlay" id="startUpModal">
-            <div class="modal-content">
-                <i class="fas fa-clock" style="font-size: 2rem; color: #0078ff; margin-bottom: 15px;"></i>
-                <h2 style="color: white;">Belum Saatnya!</h2>
-                <p style="color: #ccc; margin-bottom: 20px;">Film ini belum bisa diputar. Menunggu sampai jam tayang.</p>
-                <div class="countdown-circle">
-                    <div class="time-display" id="modalCountdown">00:00</div>
-                </div>
-                <p id="modalTargetTime" style="font-size: 1.2rem; color: #4caf50; font-weight: bold; margin-top: 10px;">00:00</p>
-                <button id="btnStartNow" class="copy-btn" style="padding: 15px 40px; background: #0078ff; font-weight: bold; border-radius: 50px; font-size: 1.1rem;">
-                    OKE, MULAI NONTON!
-                </button>
+    <div class="modal-overlay" id="startUpModal">
+        <div class="modal-content">
+            <i class="fas fa-clock" style="font-size: 2rem; color: #0078ff; margin-bottom: 15px;"></i>
+            <h2 style="color: white; margin-top: 0;">Belum Saatnya!</h2>
+            <p style="color: #ccc; margin-bottom: 20px;">Film ini belum bisa diputar. Menunggu sampai jam tayang.</p>
+            <div class="countdown-circle" style="width: 100px; height: 100px;">
+                <div class="time-display" id="modalCountdown" style="font-size: 1.3rem;">00:00:00</div>
             </div>
+            <p id="modalTargetTime" style="font-size: 1.2rem; color: #4caf50; font-weight: bold; margin-top: 10px; margin-bottom: 20px;">00:00</p>
+            <button id="btnStartNowModal" class="copy-btn" style="padding: 15px 40px; background: #0078ff; font-weight: bold; border-radius: 50px; font-size: 1.1rem;">
+                OKE, MULAI NONTON!
+            </button>
         </div>
+    </div>
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
         authDomain: "thmovie-3646f.firebaseapp.com",
-        databaseURL: "https://thmovie-3646f-default-rtdb.asia-sobeast1.firebasedatabase.app",
+        databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
         projectId: "thmovie-3646f",
         storageBucket: "thmovie-3646f.firebasestorage.app",
         messagingSenderId: "1041137356432",
@@ -292,19 +286,25 @@
     const titleEl = document.getElementById('m-title');
     const posterEl = document.getElementById('m-poster');
     const contentArea = document.getElementById('content-area');
+    const shareArea = document.getElementById('share-area');
+    const shareInput = document.getElementById('shareLinkInput');
+    
     const startUpModal = document.getElementById('startUpModal');
+    const controlsOverlay = document.getElementById('controlsOverlay');
     const countdownTimer = document.getElementById('countdownTimer');
     const modalCountdown = document.getElementById('modalCountdown');
     const targetTimeEl = document.getElementById('targetTimeDisplay');
     const modalTargetTime = document.getElementById('modalTargetTime');
-    const btnStartNowMain = document.getElementById('btnStartNow');
-    const btnStartNowModal = document.getElementById('btnStartNow');
-    const controlsOverlay = document.getElementById('controlsOverlay');
+    
+    const btnStartNowMain = document.getElementById('btnStartNowMain');
+    const btnStartNowModal = document.getElementById('btnStartNowModal');
 
     // Ambil parameter room dari URL
     const urlParams = new URLSearchParams(window.location.search);
     let roomId = urlParams.get('room');
     let isHost = false;
+
+    let bookingTimestamp = null;
 
     if (!roomId) {
         isHost = true;
@@ -312,15 +312,12 @@
         const newUrl = `${window.location.pathname}?room=${roomId}`;
         window.history.replaceState({path: newUrl}, '', newUrl);
         
-        // Ambil data film dari sessionStorage
+        // Ambil data film dari sessionStorage Host
         const movieTitle = sessionStorage.getItem('activeMovieTitle');
         const videoSource = sessionStorage.getItem('activeVideoSource');
         const posterSource = sessionStorage.getItem('activePoster');
-        // Ambil waktu pesanan dari session storage (agar bisa dicek oleh guest)
-        const bookingTimestamp = sessionStorage.getItem('activeBookingTime'); // Dalam format angka milidetik
-        const bookingDate = sessionStorage.getItem('activeBookingDate'); // Dalam format string "11/23/2023"
+        const activeBookingTime = sessionStorage.getItem('activeBookingTime'); 
 
-        // Setup awal video
         if (!videoSource || !movieTitle) {
             contentArea.innerHTML = '<div class="error-msg"><h2>Data Film Tidak Ditemukan.</h2><p>Silakan kembali ke halaman Tiket.</p></div>';
         } else {
@@ -328,11 +325,14 @@
             if(posterSource) posterEl.src = posterSource;
             video.src = videoSource;
 
-            // Simpan metadata film untuk Guest (hanya sekali saat baru masuk)
+            bookingTimestamp = activeBookingTime ? parseInt(activeBookingTime, 10) : null;
+
+            // Simpan metadata film + waktu tayang ke Firebase agar Guest bisa sinkronisasi
             set(ref(db, 'sync_rooms/' + roomId + '/meta'), {
                 title: movieTitle,
                 videoSrc: videoSource,
-                posterSrc: posterSource || ""
+                posterSrc: posterSource || "",
+                targetTime: bookingTimestamp || 0
             });
         }
     } else {
@@ -343,73 +343,56 @@
     shareArea.style.display = 'flex';
     shareInput.value = window.location.href;
 
-    // Tampilkan Tombol Start Now (Sembunyi saat onload di script bawah agar update otomatis)
-    // Kita gunakan checkInterval di bawah untuk menangani logika Start Up
-
-    // Sync Logic
     const syncRef = ref(db, 'sync_rooms/' + roomId + '/status');
+    const metaRef = ref(db, 'sync_rooms/' + roomId + '/meta');
+    
     let isSyncing = false;
-    let startUpInterval = null; // Menyimpan ID interval countdown agar bisa dimatikan
+    let startUpInterval = null;
 
-    // Fungsi Check Start Up (Dipanggil berulang-ulang)
+    // Jika Guest, tarik metadata film dari Firebase terlebih dahulu
+    if (!isHost) {
+        onValue(metaRef, (snapshot) => {
+            const meta = snapshot.val();
+            if (meta) {
+                titleEl.innerText = meta.title;
+                if(meta.posterSrc) posterEl.src = meta.posterSrc;
+                if(video.src !== meta.videoSrc) video.src = meta.videoSrc;
+                
+                bookingTimestamp = meta.targetTime ? parseInt(meta.targetTime, 10) : null;
+                checkStartUp();
+            } else {
+                contentArea.innerHTML = '<div class="error-msg"><h2>Kamar Tidak Valid atau Telah Dihapus.</h2><p>Minta Host untuk membagikan ulang link.</p></div>';
+            }
+        }, { onlyOnce: true });
+    } else {
+        // Jika Host langsung cek waktu muat
+        checkStartUp();
+    }
+
+    // Fungsi Pengendali Waktu Mulai Film
     function checkStartUp() {
-        // 1. Ambil waktu pesanan
-        let targetTime = null;
-
-        if (bookingTimestamp) {
-            // Parse timestamp dari string ke angka
-            targetTime = parseInt(bookingTimestamp, 10);
-        }
-
-        // Jika tidak ada waktu pesanan, langsung tampilkan video
-        if (!targetTime) {
+        if (!bookingTimestamp || bookingTimestamp <= 0) {
             startVideo(); 
             return;
         }
 
-        // 2. Hitung selisih sekarang (detik)
         const now = Date.now();
-        const diffMs = targetTime - now;
+        const diffMs = bookingTimestamp - now;
 
         if (diffMs > 0) {
-            // 3. Jika belum waktunya -> Tampilkan Modal & Pause Video
-            showStartUpModal(targetTime);
-            startCountdown(targetTime);
-            
-            // 4. Pause video agar tidak berjalan saat pop up
+            // Belum waktunya tayang
+            controlsOverlay.classList.add('modal-active');
+            startUpModal.classList.add('active');
             if (!video.paused) video.pause();
-            controlsOverlay.classList.add('modal-active'); // Disable controls
+            
+            // Aktifkan hitung mundur per detik
+            if (startUpInterval) clearInterval(startUpInterval);
+            updateCountdown(bookingTimestamp);
+            startUpInterval = setInterval(() => updateCountdown(bookingTimestamp), 1000);
         } else {
-            // 5. Jika sudah waktunya -> Tampilkan video & sembunyikan overlay
+            // Sudah masuk waktu tayang
             startVideo();
-            controlsOverlay.classList.remove('modal-active');
         }
-    }
-
-    function startVideo() {
-        // Bersihkan interval countdown jika ada
-        if (startUpInterval) clearInterval(startUpInterval);
-        controlsOverlay.classList.remove('modal-active');
-        startUpModal.classList.remove('active');
-        
-        // Pastikan video bisa diputar (untuk browser yang memblokir autoplay, user harus interaksi pertama jika error)
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(e => console.log("Autoplay blocked, but user interaction might fix it"));
-        }
-    }
-
-    function showStartUpModal(targetTimestamp) {
-        startUpModal.classList.add('active');
-        
-        // Mulai hitung mundur
-        if (startUpInterval) clearInterval(startUpInterval);
-
-        updateCountdown(targetTimestamp);
-
-        startUpInterval = setInterval(() => {
-            updateCountdown(targetTimestamp);
-        }, 1000);
     }
 
     function updateCountdown(targetTs) {
@@ -417,62 +400,63 @@
         let diff = targetTs - now;
 
         if (diff <= 0) {
-            // Waktu habis
             clearInterval(startUpInterval);
-            document.getElementById('countdownTimer').innerText = "00:00";
-            document.getElementById('btnStartNowMain').innerText = "OKE, MULAI NONTON!";
-            document.getElementById('btnStartNowModal').innerText = "MULAI NONTON!";
+            countdownTimer.innerText = "00:00:00";
+            modalCountdown.innerText = "00:00:00";
+            
+            btnStartNowMain.disabled = false;
+            btnStartNowModal.disabled = false;
+            btnStartNowMain.innerText = "OKE, MULAI NONTON!";
+            btnStartNowModal.innerText = "MULAI NONTON!";
         } else {
-            // Format jam: hh:mm:ss
-            const d = Math.floor((diff / (1000 * 60)) * 24);
-            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const m = Math.floor((diff / 1000) % 60);
-            const s = Math.floor((diff % 1000) / 1000);
+            // Perbaikan rumus hitung waktu real jam:menit:detik
+            const h = Math.floor(diff / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-            // Padding angka nol (04 -> 04)
             const hStr = h.toString().padStart(2, '0');
             const mStr = m.toString().padStart(2, '0');
-            const sStr = s.toString().perpadStart(2, '0');
+            const sStr = s.toString().padStart(2, '0');
             
-            // Update tampilan UI
             const timeStr = `${hStr}:${mStr}:${sStr}`;
-            document.getElementById('countdownTimer').innerText = timeStr;
-            document.getElementById('modalCountdown').innerText = timeStr;
-            document.getElementById('targetTimeDisplay').innerText = new Date(targetTs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); // Tampilkan waktu target yang jelas
-            document.getElementById('modalTargetTime').innerText = new Date(targetTs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); // Tampilkan waktu target yang jelas
+            countdownTimer.innerText = timeStr;
+            modalCountdown.innerText = timeStr;
 
-            document.getElementById('btnStartNowMain').disabled = true;
-            document.getElementById('btnStartNowModal').disabled = true;
+            const timeFormatted = new Date(targetTs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            targetTimeEl.innerText = timeFormatted;
+            modalTargetTime.innerText = timeFormatted;
+
+            // Kunci tombol jika belum saatnya
+            btnStartNowMain.disabled = true;
+            btnStartNowModal.disabled = true;
+            btnStartNowMain.innerText = "MENUNGGU JAM TAYANG...";
+            btnStartNowModal.innerText = "BELUM MULAI";
         }
     }
 
-    // Jalankan logika Start Up saat halaman dimuat
-    checkStartUp();
+    function startVideo() {
+        if (startUpInterval) clearInterval(startUpInterval);
+        controlsOverlay.classList.remove('modal-active');
+        startUpModal.classList.remove('active');
+        
+        video.play().catch(e => console.log("Autoplay dicegah oleh kebijakan browser. Butuh klik dari user."));
+    }
 
-    // Sync Logic (Host & Guest)
-    onValue(syncRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
+    // Hubungkan fungsi tombol start ke Event Listener agar bisa diklik saat countdown beres
+    btnStartNowMain.addEventListener('click', startVideo);
+    btnStartNowModal.addEventListener('click', startVideo);
 
-        const now = Date.now();
-        if (now - data.lastUpdate > 5000) return;
-
-        // Sinkronisasi Waktu
-        if (Math.abs(video.currentTime - data.currentTime) > 2) {
-            isSyncing = true;
-            video.currentTime = data.currentTime;
-            setTimeout(() => { isSyncing; }, 500);
+    // --- REALTIME SYNC PLAYBACK LOGIC ---
+    setInterval(() => {
+        if (!isSyncing && !video.paused) {
+            set(syncRef, {
+                currentTime: video.currentTime,
+                isPlaying: !video.paused,
+                lastUpdate: Date.now()
+            });
         }
+    }, 1000);
 
-        // Sinkronisasi Play/Pause
-        if (data.isPlaying && video.paused) {
-            video.play().catch(e => console.log("Autoplay blocked, but user interaction"));
-        } else if (!data.isPlaying && !video.paused) {
-            video.pause();
-        }
-    });
-
-    // Update status saat user interaksi dengan video
     video.onplay = () => {
         if (!isSyncing) set(syncRef, { currentTime: video.currentTime, isPlaying: true, lastUpdate: Date.now() });
     };
@@ -483,8 +467,27 @@
         if (!isSyncing) set(syncRef, { currentTime: video.currentTime, isPlaying: !video.paused, lastUpdate: Date.now() });
     };
 
-    // --- EVENT LISTENERS TOMBOL ---
-    // Tombol Copy Link
+    onValue(syncRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        const now = Date.now();
+        if (now - data.lastUpdate > 5000) return;
+
+        if (Math.abs(video.currentTime - data.currentTime) > 2) {
+            isSyncing = true;
+            video.currentTime = data.currentTime;
+            setTimeout(() => { isSyncing = false; }, 500);
+        }
+
+        if (data.isPlaying && video.paused) {
+            video.play().catch(e => console.log("Gagal memutar otomatis. Menunggu interaksi klik."));
+        } else if (!data.isPlaying && !video.paused) {
+            video.pause();
+        }
+    });
+
+    // Copy Link Clipboard Action
     document.getElementById('btnCopyAction').addEventListener('click', function() {
         shareInput.select();
         shareInput.setSelectionRange(0, 99999); 
@@ -495,23 +498,6 @@
             setTimeout(() => { btn.innerHTML = originalText; }, 2000);
         });
     });
-
-    // Tombol Start Now (Tombol Overlay)
-    function startVideoNow() {
-        startUpModal.classList.remove('active');
-        controlsOverlay.classList.remove('modal-active');
-        video.play();
-    }
-
-    // Tombol Start Now (Tombol Modal)
-    function startVideoFromModal() {
-        startVideoNow();
-    }
-
-    // Export fungsi ke window agar bisa dipanggil
-    window.startVideoNow = startVideoNow;
-    window.startVideoFromModal = startVideoFromModal;
-
     </script>
 </body>
 </html>
