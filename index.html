@@ -56,7 +56,7 @@
         .slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
         .slide-content { position: relative; z-index: 2; padding: 40px; color: white; max-width: 60%; }
         .slide-content h2 { font-size: 2rem; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; cursor: pointer; transition: 0.2s; font-family: 'Inter', sans-serif; }
         .btn:hover { background: #0056b3; transform: translateY(-2px); }
 
         /* MOVIE LIST */
@@ -71,7 +71,7 @@
         .movie-info { padding: 15px; text-align: center; }
         .movie-title { font-weight: 800; margin-bottom: 5px; font-size: 1rem; }
         .movie-genre { font-size: 0.8rem; color: var(--gray); margin-bottom: 10px; }
-        .movie-btn { background: #eee; color: var(--text); border: none; padding: 8px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
+        .movie-btn { background: #eee; color: var(--text); border: none; padding: 8px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-family: 'Inter', sans-serif; }
         .movie-btn:hover { background: var(--primary); color: white; }
 
         /* SELECT CLASS VIEW */
@@ -79,7 +79,7 @@
         .booking-header h2 { color: var(--primary); font-size: 2rem; margin-bottom: 10px; }
         .booking-card { background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: var(--shadow); max-width: 600px; margin: 0 auto; }
         .class-options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
-        .class-btn { padding: 30px; border: 2px solid #eee; border-radius: 20px; background: white; font-weight: 800; font-size: 1.2rem; cursor: pointer; transition: 0.3s; }
+        .class-btn { padding: 30px; border: 2px solid #eee; border-radius: 20px; background: white; font-weight: 800; font-size: 1.2rem; cursor: pointer; transition: 0.3s; font-family: 'Inter', sans-serif; }
         .class-btn:hover { border-color: var(--primary); background: #e3f2fd; color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
         /* SELECT TIME VIEW */
@@ -101,9 +101,36 @@
         .t-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 5px; }
         .t-info { font-size: 0.9rem; color: #555; margin-bottom: 2px; }
         .t-badge { display: inline-block; background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-top: 5px; font-weight: bold; }
+        .t-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .t-actions .movie-btn { width: auto; padding: 8px 16px; font-size: 0.8rem; }
+
+        /* FIX #4: Tombol hapus tiket */
+        .btn-delete { 
+            background: transparent; color: #999; border: 1px solid #ccc; 
+            padding: 8px 16px; border-radius: 20px; font-weight: 600; 
+            cursor: pointer; transition: 0.2s; font-size: 0.8rem; 
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-delete:hover { background: #f44336; color: white; border-color: #f44336; }
 
         /* PRIVATE VIEW */
         .private-header h3 { color: var(--private-header); border-left: 5px solid var(--private-header); font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; padding-left: 15px; }
+
+        /* FIX #3: Toast notification */
+        .toast-container {
+            position: fixed; top: 80px; right: 20px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+        }
+        .toast {
+            background: #222; color: white; padding: 14px 22px; border-radius: 10px;
+            font-size: 0.85rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            border-left: 4px solid #4caf50; pointer-events: auto;
+            transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 340px; display: flex; align-items: center; gap: 10px;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left-color: #f44336; }
+        .toast i { font-size: 1.1rem; flex-shrink: 0; }
 
         /* FOOTER */
         footer { background-color: #1a1a1a; color: #aaa; margin-top: 80px; padding: 60px 20px 30px; position: relative; }
@@ -111,7 +138,7 @@
         .footer-top { display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 30px; border-radius: 16px; margin-bottom: 50px; flex-wrap: wrap; gap: 20px; }
         .app-info h3 { color: white; font-size: 1.4rem; margin-bottom: 5px; }
         .store-btns { display: flex; gap: 15px; }
-        .store-btn { display: flex; align-items: center; gap: 10px; background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: 600; }
+        .store-btn { display: flex; align-items: center; gap: 10px; background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: 600; font-family: 'Inter', sans-serif; }
         .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; border-bottom: 1px solid #333; padding-bottom: 40px; }
         .footer-col h4 { color: white; margin-bottom: 20px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; }
         .footer-col ul { list-style: none; }
@@ -131,8 +158,9 @@
     <header>
         <div class="header-container">
             <a href="#" class="logo" onclick="switchView('home')"><i class="fas fa-play-circle" style="color:var(--primary)"></i> TMO <span>Cinemas</span></a>
+            <!-- FIX #5: Search auto-navigate ke home -->
             <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Cari film..." onkeyup="searchMovie()">
+                <input type="text" id="searchInput" placeholder="Cari film..." oninput="handleSearch()" onfocus="handleSearchFocus()">
                 <i class="fas fa-search"></i>
             </div>
         </div>
@@ -140,7 +168,7 @@
 
     <nav class="sub-nav">
         <ul class="nav-icons">
-            <li class="nav-item" onclick="switchView('home')" id="nav-movies"><i class="fas fa-film"></i>Movies</li>
+            <li class="nav-item active" onclick="switchView('home')" id="nav-movies"><i class="fas fa-film"></i>Movies</li>
             <li class="nav-item" onclick="switchView('ticket')" id="nav-ticket"><i class="fas fa-receipt"></i>Ticket</li>
             <li class="nav-item" onclick="switchView('private')" id="nav-private"><i class="fas fa-glass-cheers"></i>Private</li>
         </ul>
@@ -209,7 +237,7 @@
                         <input type="time" id="user-time" min="09:00" max="23:59">
                         <button class="btn" onclick="setTimeNowPlus2()" style="padding: 0 15px; font-size: 0.9rem; white-space: nowrap;">+ 2 Menit</button>
                     </div>
-                    <small style="color:#999; display:block; margin-top:5px;">*Format jam otomatis (AM/PM)</small>
+                    <small style="color:#999; display:block; margin-top:5px;">*Waktu akan otomatis dikonversi ke format AM/PM</small>
                 </div>
 
                 <br>
@@ -238,6 +266,9 @@
             </div>
         </div>
     </main>
+
+    <!-- FIX #3: Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <footer>
         <div class="footer-container">
@@ -283,7 +314,6 @@
     </footer>
 
     <script type="module">
-        // --- FIREBASE CONFIGURATION ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -302,14 +332,51 @@
         const db = getDatabase(app);
         const moviesRef = ref(db, 'movies/');
 
-        // --- GLOBAL VARIABLES ---
+        // --- GLOBAL STATE ---
         let savedTickets = localStorage.getItem('tmoTickets');
         let tickets = savedTickets ? JSON.parse(savedTickets) : [];
         
         let currentBooking = { movie: '', type: '', time: '', roomType: 'PUBLIC' };
         let allMovies = []; 
 
-        // --- FETCH MOVIES FROM FIREBASE ---
+        // === FIX #3: Toast System ===
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            const icon = type === 'error' ? 'fa-times-circle' : 'fa-check-circle';
+            toast.innerHTML = `<i class="fas ${icon}" style="color:${type === 'error' ? '#f44336' : '#4caf50'}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            
+            // Trigger animation
+            requestAnimationFrame(() => { toast.classList.add('show'); });
+            
+            // Auto-remove
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // === FIX #1 & #2: Konversi time input → Unix timestamp (ms) ===
+        function timeInputToTimestamp(time24) {
+            if (!time24) return null;
+            const [hours, minutes] = time24.split(':').map(Number);
+            const date = new Date();
+            date.setHours(hours, minutes, 0, 0);
+            return date.getTime();
+        }
+
+        function convertToAMPM(time24) {
+            if (!time24) return time24;
+            let [hours, minutes] = time24.split(':');
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        // === LOAD MOVIES ===
         function loadMovies() {
             onValue(moviesRef, (snapshot) => {
                 const container = document.getElementById('movies-container');
@@ -323,7 +390,6 @@
                         const movie = childSnapshot.val();
                         allMovies.push(movie);
 
-                        // Render ke HOME
                         const card = document.createElement('div');
                         card.className = 'movie-card';
                         card.dataset.title = movie.title.toLowerCase(); 
@@ -331,7 +397,7 @@
 
                         card.innerHTML = `
                             <div class="poster">
-                                <img src="${movie.poster}" alt="${movie.title}">
+                                <img src="${movie.poster}" alt="${movie.title}" onerror="this.src='https://picsum.photos/seed/fallback/200/300'">
                             </div>
                             <div class="movie-info">
                                 <div class="movie-title">${movie.title}</div>
@@ -342,7 +408,7 @@
                         container.appendChild(card);
                     });
                     
-                    if(document.getElementById('view-private').classList.contains('active')) {
+                    if (document.getElementById('view-private').classList.contains('active')) {
                         renderPrivateMovies();
                     }
 
@@ -354,47 +420,54 @@
 
         loadMovies();
 
-        // --- EXPORT FUNGSI KE WINDOW ---
+        // --- EXPORT KE WINDOW ---
         window.switchView = switchView;
         window.startBooking = startBooking;
         window.selectClassType = selectClassType;
         window.confirmBooking = confirmBooking;
-        window.searchMovie = searchMovie;
+        window.handleSearch = handleSearch;
+        window.handleSearchFocus = handleSearchFocus;
         window.setTimeNowPlus2 = setTimeNowPlus2;
-        window.watchNow = watchNow; 
+        window.watchNow = watchNow;
+        window.deleteTicket = deleteTicket;
 
-        // --- LOGIC FUNCTIONS ---
+        // --- VIEW SWITCHING ---
         function switchView(viewName) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewName}`).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             
-            if(viewName === 'home') document.getElementById('nav-movies').classList.add('active');
-            if(viewName === 'ticket') {
+            if (viewName === 'home') document.getElementById('nav-movies').classList.add('active');
+            if (viewName === 'ticket') {
                 document.getElementById('nav-ticket').classList.add('active');
                 renderTickets();
             }
-            if(viewName === 'private') {
+            if (viewName === 'private') {
                 document.getElementById('nav-private').classList.add('active');
                 renderPrivateMovies(); 
             }
             window.scrollTo(0, 0);
         }
 
-        function searchMovie() {
+        // --- FIX #5: Search otomatis navigate ke home ---
+        function handleSearchFocus() {
+            if (!document.getElementById('view-home').classList.contains('active')) {
+                switchView('home');
+            }
+        }
+
+        function handleSearch() {
+            if (!document.getElementById('view-home').classList.contains('active')) {
+                switchView('home');
+            }
             const input = document.getElementById('searchInput').value.toLowerCase();
             const cards = document.querySelectorAll('.movie-card');
-            
             cards.forEach(card => {
-                if(card.dataset.title.includes(input)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+                card.style.display = card.dataset.title.includes(input) ? 'block' : 'none';
             });
         }
 
-        // Modifikasi startBooking untuk menangkap asal tipe room
+        // --- BOOKING FLOW ---
         function startBooking(movieTitle, typeOfRoom = 'PUBLIC') {
             currentBooking = { movie: movieTitle, type: '', time: '', roomType: typeOfRoom };
             document.getElementById('display-movie-name').innerText = movieTitle;
@@ -414,76 +487,126 @@
             now.setMinutes(now.getMinutes() + 2);
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            const timeString = `${hours}:${minutes}`;
-            document.getElementById('user-time').value = timeString;
+            document.getElementById('user-time').value = `${hours}:${minutes}`;
         }
 
-        function convertToAMPM(time24) {
-            if (!time24) return time24;
-            let [hours, minutes] = time24.split(':');
-            let ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            return `${hours}:${minutes} ${ampm}`;
-        }
-
+        // === FIX #1: confirmBooking menyimpan TIMESTAMP, bukan string ===
         function confirmBooking() {
             const timeInput = document.getElementById('user-time').value;
-            if (!timeInput) { alert("Mohon pilih jam tayang terlebih dahulu!"); return; }
+            if (!timeInput) {
+                showToast('Mohon pilih jam tayang terlebih dahulu!', 'error');
+                return;
+            }
+
+            // Konversi ke Unix timestamp (ms) — inilah yang dibutuhkan player
+            const bookingTimestamp = timeInputToTimestamp(timeInput);
+            // Simpan display string terpisah untuk rendering tiket
             const displayTime = convertToAMPM(timeInput);
-            currentBooking.time = displayTime;
-            
+
             const movieData = allMovies.find(m => m.title === currentBooking.movie);
             const videoUrl = movieData ? movieData.videoSource : '';
             
             tickets.push({
-                ...currentBooking,
+                movie: currentBooking.movie,
+                type: currentBooking.type,
+                timeDisplay: displayTime,           // "2:30 PM" — untuk tampilan tiket
+                bookingTimestamp: bookingTimestamp,   // 1718234400000 — untuk player
+                roomType: currentBooking.roomType,
                 id: Date.now(),
                 date: new Date().toLocaleDateString('id-ID'),
-                videoSource: videoUrl 
+                videoSource: videoUrl
             });
 
             localStorage.setItem('tmoTickets', JSON.stringify(tickets));
 
-            alert(`Tiket Berhasil!\nFilm: ${currentBooking.movie}\nKelas: ${currentBooking.type}\nJam: ${currentBooking.time}\nKategori: ${currentBooking.roomType}`);
+            // FIX #3: Toast instead of alert
+            showToast(`Tiket berhasil! ${currentBooking.movie} — ${displayTime}`);
             switchView('ticket');
         }
 
+        // --- RENDER TICKETS ---
         function renderTickets() {
             const list = document.getElementById('ticket-list');
             list.innerHTML = '';
+            
             if (tickets.length === 0) {
                 list.innerHTML = '<div class="text-center" style="color:var(--gray); padding:40px;">Belum ada tiket yang dipesan.</div>';
                 return;
             }
+
             const defaultPoster = "https://picsum.photos/seed/ticket/100/150";
 
-            tickets.forEach(t => {
+            // Tampilkan terbaru di atas
+            const sorted = [...tickets].reverse();
+
+            sorted.forEach(t => {
                 const movieData = allMovies.find(m => m.title === t.movie);
                 const posterUrl = movieData ? movieData.poster : defaultPoster;
 
-                // Mengubah judul header jika tiket dibuat dari luar menu Private
                 const roomHeaderTitle = t.roomType === 'PUBLIC' ? `Ruangan Tersedia - ${t.movie}` : `Private Screening - ${t.movie}`;
-
+                
+                // FIX #6: Gunakan t.id bukan t.movie di onclick untuk menghindari crash
+                // FIX #1: Tampilkan timeDisplay bukan t.time
                 const html = `
                 <div class="ticket-card">
                     <div class="t-poster">
-                        <img src="${posterUrl}" style="width:100%; height:100%; object-fit:cover;">
+                        <img src="${posterUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='${defaultPoster}'">
                     </div>
                     <div class="t-details">
                         <div style="font-size:0.75rem; color:var(--primary); font-weight:800; text-transform:uppercase; margin-bottom:2px;">${roomHeaderTitle}</div>
                         <div class="t-title">${t.movie}</div>
                         <div class="t-info"><i class="far fa-calendar"></i> ${t.date}</div>
-                        <div class="t-info"><i class="far fa-clock"></i> ${t.time}</div>
+                        <div class="t-info"><i class="far fa-clock"></i> ${t.timeDisplay || t.time || '-'}</div>
                         <div class="t-badge" style="${t.roomType === 'PRIVATE' ? 'background:var(--private-header);' : ''}">${t.type}</div>
-                        <br>
-                        <button class="movie-btn" onclick="watchNow('${t.movie}')" style="background:var(--primary); color:white; margin-top:10px;">
-                            <i class="fas fa-play"></i> Tonton Sekarang
-                        </button>
+                        <div class="t-actions">
+                            <button class="movie-btn" onclick="watchNow(${t.id})" style="background:var(--primary); color:white;">
+                                <i class="fas fa-play"></i> Tonton Sekarang
+                            </button>
+                            <button class="btn-delete" onclick="deleteTicket(${t.id})">
+                                <i class="fas fa-trash-alt"></i> Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>`;
                 list.innerHTML += html;
             });
+        }
+
+        // === FIX #4: Hapus tiket ===
+        function deleteTicket(ticketId) {
+            if (!confirm('Hapus tiket ini?')) return; // Satu-satunya confirm yang wajar
+            tickets = tickets.filter(t => t.id !== ticketId);
+            localStorage.setItem('tmoTickets', JSON.stringify(tickets));
+            renderTickets();
+            showToast('Tiket berhasil dihapus');
+        }
+
+        // === FIX #2 & #1: watchNow pakai ID tiket, kirim timestamp yang benar ===
+        function watchNow(ticketId) {
+            // Cari tiket berdasarkan ID (bukan judul)
+            const ticket = tickets.find(t => t.id === ticketId);
+            
+            if (!ticket) {
+                showToast('Tiket tidak ditemukan!', 'error');
+                return;
+            }
+
+            const movie = allMovies.find(m => m.title === ticket.movie);
+            if (!movie) {
+                showToast('Data film tidak ditemukan di database!', 'error');
+                return;
+            }
+
+            sessionStorage.setItem('activeMovieTitle', movie.title);
+            sessionStorage.setItem('activeVideoSource', movie.videoSource);
+            sessionStorage.setItem('activePoster', movie.poster);
+
+            // FIX #1: Kirim TIMESTAMP yang benar ke player
+            // Prioritaskan bookingTimestamp dari tiket (yang sudah benar), fallback ke 0 (langsung mulai)
+            const ts = ticket.bookingTimestamp || 0;
+            sessionStorage.setItem('activeBookingTime', String(ts));
+
+            window.location.href = 'movie/index.html';
         }
         
         function renderPrivateMovies() {
@@ -499,12 +622,11 @@
                 const card = document.createElement('div');
                 card.className = 'movie-card';
                 card.dataset.title = movie.title.toLowerCase(); 
-                // Set parameter 'PRIVATE' ketika diklik dari halaman private screening
                 card.onclick = () => startBooking(movie.title, 'PRIVATE');
 
                 card.innerHTML = `
                     <div class="poster">
-                        <img src="${movie.poster}" alt="${movie.title}">
+                        <img src="${movie.poster}" alt="${movie.title}" onerror="this.src='https://picsum.photos/seed/fallback/200/300'">
                     </div>
                     <div class="movie-info">
                         <div class="movie-title">${movie.title}</div>
@@ -516,7 +638,7 @@
             });
         }
 
-        // Slider Logic
+        // Slider
         let slides = document.querySelectorAll('.slide');
         let idx = 0;
         function nextSlide() {
@@ -526,20 +648,29 @@
         }
         setInterval(nextSlide, 5000);
 
-        function watchNow(movieTitle) {
-            const movie = allMovies.find(m => m.title === movieTitle);
-            
-            if(!movie) {
-                alert("Data film tidak ditemukan!");
-                return;
+        // === MIGRASI: Perbaiki tiket lama yang masih pakai format string ===
+        // Jalankan sekali saat load untuk memperbaiki data lama di localStorage
+        (function migrateOldTickets() {
+            let needsSave = false;
+            tickets.forEach(t => {
+                // Jika tiket lama tidak punya bookingTimestamp tapi punya time (string AM/PM)
+                if (!t.bookingTimestamp && t.time && !t.timeDisplay) {
+                    // Coba parse balik — tidak bisa konversi AM/PM → timestamp tanpa tanggal,
+                    // jadi set ke 0 (film langsung bisa ditonton)
+                    t.timeDisplay = t.time;
+                    t.bookingTimestamp = 0;
+                    needsSave = true;
+                }
+                // Jika punya time tapi belum punya timeDisplay
+                if (t.time && !t.timeDisplay) {
+                    t.timeDisplay = t.time;
+                    needsSave = true;
+                }
+            });
+            if (needsSave) {
+                localStorage.setItem('tmoTickets', JSON.stringify(tickets));
             }
-
-            sessionStorage.setItem('activeMovieTitle', movie.title);
-            sessionStorage.setItem('activeVideoSource', movie.videoSource);
-            sessionStorage.setItem('activePoster', movie.poster);
-
-            window.location.href = 'movie/index.html';
-        }
+        })();
     </script>
 </body>
 </html>
