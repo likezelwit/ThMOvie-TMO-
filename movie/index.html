@@ -18,7 +18,6 @@
             overflow: hidden; 
         }
         
-        /* Header Player - Dibuat responsif & fleksibel */
         .player-header {
             padding: 10px 20px;
             background: rgba(20,20,20,0.9);
@@ -39,14 +38,13 @@
         }
 
         .movie-info { display: flex; align-items: center; gap: 12px; }
-        .movie-thumb { width: 35px; height: 35px; border-radius: 5px; object-fit: cover; }
+        .movie-thumb { width: 35px; height: 35px; border-radius: 5px; object-fit: cover; background: #222; }
         .movie-title { font-weight: 600; font-size: 1rem; }
         .sync-status { font-size: 0.75rem; color: #4caf50; background: rgba(76, 175, 80, 0.1); padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
         
         .exit-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
         .exit-btn:hover { background: #555; }
 
-        /* Video Container - Diperbaiki agar tidak memotong bagian bawah di laptop */
         .video-wrapper {
             flex: 1;
             display: flex;
@@ -55,18 +53,17 @@
             background: #000;
             position: relative;
             overflow: hidden;
-            max-height: calc(100vh - 70px); /* Membatasi tinggi video dikurangi tinggi header */
+            max-height: calc(100vh - 70px);
         }
 
         video {
             width: 100%;
             height: 100%;
             max-height: 100%;
-            object-fit: contain; /* Menjaga rasio video pas di monitor laptop */
+            object-fit: contain;
             outline: none;
         }
 
-        /* SHARE ROOM UI */
         .share-box {
             background: #111;
             padding: 8px 12px;
@@ -114,7 +111,6 @@
         }
         .copy-btn:hover { background: #0078ff; }
 
-        /* Sync Indicator */
         .sync-indicator {
             position: absolute;
             bottom: 20px;
@@ -133,7 +129,7 @@
         
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        .error-msg { text-align: center; color: #fff; padding: 20px; }
+        .error-msg { text-align: center; color: #fff; padding: 20px; width: 100%; }
     </style>
 </head>
 <body>
@@ -164,7 +160,7 @@
         </button>
     </div>
 
-    <div class="video-wrapper">
+    <div class="video-wrapper" id="content-area">
         <video id="mainVideo" controls>
             Browser Anda tidak mendukung tag video.
         </video>
@@ -175,9 +171,8 @@
     </div>
 
     <script type="module">
-    // --- FIREBASE CONFIG ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
@@ -193,44 +188,71 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // 1. AMBIL DATA MOVIE
-    const movieTitle = sessionStorage.getItem('activeMovieTitle');
-    const videoSource = sessionStorage.getItem('activeVideoSource');
-    const posterSource = sessionStorage.getItem('activePoster');
-
     const video = document.getElementById('mainVideo');
     const titleEl = document.getElementById('m-title');
     const posterEl = document.getElementById('m-poster');
     const shareArea = document.getElementById('share-area');
     const shareInput = document.getElementById('shareLinkInput');
+    const contentArea = document.getElementById('content-area');
 
-    if (!videoSource || !movieTitle) {
-        document.querySelector('.video-wrapper').innerHTML = '<div class="error-msg"><h2>Data Film Tidak Ditemukan.</h2><p>Silakan kembali ke halaman Tiket.</p></div>';
-    } else {
-        titleEl.innerText = movieTitle;
-        if(posterSource) posterEl.src = posterSource;
-        video.src = videoSource;
-    }
-
-    // 2. LOGIKA ROOM & URL
+    // Ambil parameter room dari URL
     const urlParams = new URLSearchParams(window.location.search);
     let roomId = urlParams.get('room');
+    let isHost = false;
 
     if (!roomId) {
+        // JIKA HOST (Buka dari tiket)
+        isHost = true;
         roomId = 'room_' + Math.random().toString(36).substring(2, 8);
         const newUrl = `${window.location.pathname}?room=${roomId}`;
         window.history.replaceState({path: newUrl}, '', newUrl);
-        console.log("Room Created:", roomId);
+        
+        // Ambil data dari sessionStorage milik Host
+        const movieTitle = sessionStorage.getItem('activeMovieTitle');
+        const videoSource = sessionStorage.getItem('activeVideoSource');
+        const posterSource = sessionStorage.getItem('activePoster');
+
+        if (!videoSource || !movieTitle) {
+            contentArea.innerHTML = '<div class="error-msg"><h2>Data Film Tidak Ditemukan.</h2><p>Silakan kembali ke halaman Tiket.</p></div>';
+        } else {
+            titleEl.innerText = movieTitle;
+            if(posterSource) posterEl.src = posterSource;
+            video.src = videoSource;
+
+            // Simpan info metadata film ke Firebase agar Guest bisa baca
+            set(ref(db, 'sync_rooms/' + roomId + '/meta'), {
+                title: movieTitle,
+                videoSrc: videoSource,
+                posterSrc: posterSource || ""
+            });
+        }
     } else {
-        console.log("Joined Room:", roomId);
+        // JIKA GUEST (Masuk lewat link share)
+        isHost = false;
+        console.log("Joined Room sebagai Guest:", roomId);
     }
 
     shareArea.style.display = 'flex';
     shareInput.value = window.location.href;
 
-    // 3. LOGIKA SINKRONISASI (SYNC LOGIC)
-    const syncRef = ref(db, 'sync_rooms/' + roomId);
+    const syncRef = ref(db, 'sync_rooms/' + roomId + '/status');
+    const metaRef = ref(db, 'sync_rooms/' + roomId + '/meta');
 
+    // Ambil data film dari Firebase khusus untuk Guest
+    if (!isHost) {
+        onValue(metaRef, (snapshot) => {
+            const meta = snapshot.val();
+            if (meta) {
+                titleEl.innerText = meta.title;
+                if(meta.posterSrc) posterEl.src = meta.posterSrc;
+                if(video.src !== meta.videoSrc) video.src = meta.videoSrc;
+            } else {
+                contentArea.innerHTML = '<div class="error-msg"><h2>Kamar Tidak Valid atau Telah Dihapus.</h2><p>Minta Host untuk membagikan ulang link.</p></div>';
+            }
+        }, { onlyOnce: true });
+    }
+
+    // Interval pengiriman status sinkronisasi
     let isSyncing = false;
     setInterval(() => {
         if (!isSyncing && !video.paused) {
@@ -242,23 +264,17 @@
         }
     }, 1000);
 
-    // Kirim data instan pas di-klik pause atau play biar gak nunggu interval 1 detik
     video.onplay = () => {
-        if (!isSyncing) {
-            set(syncRef, { currentTime: video.currentTime, isPlaying: true, lastUpdate: Date.now() });
-        }
+        if (!isSyncing) set(syncRef, { currentTime: video.currentTime, isPlaying: true, lastUpdate: Date.now() });
     };
     video.onpause = () => {
-        if (!isSyncing) {
-            set(syncRef, { currentTime: video.currentTime, isPlaying: false, lastUpdate: Date.now() });
-        }
+        if (!isSyncing) set(syncRef, { currentTime: video.currentTime, isPlaying: false, lastUpdate: Date.now() });
     };
     video.onseeked = () => {
-        if (!isSyncing) {
-            set(syncRef, { currentTime: video.currentTime, isPlaying: !video.paused, lastUpdate: Date.now() });
-        }
+        if (!isSyncing) set(syncRef, { currentTime: video.currentTime, isPlaying: !video.paused, lastUpdate: Date.now() });
     };
 
+    // Dengarkan perubahan status pemutaran
     onValue(syncRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
@@ -273,13 +289,13 @@
         }
 
         if (data.isPlaying && video.paused) {
-            video.play().catch(e => console.log("Autoplay blocked"));
+            video.play().catch(e => console.log("Autoplay ditolak, butuh klik layar"));
         } else if (!data.isPlaying && !video.paused) {
             video.pause();
         }
     });
 
-    // --- PERBAIKAN LOGIKA COPY LINK DI DALAM MODUL ---
+    // Copy Link button event
     document.getElementById('btnCopyAction').addEventListener('click', function() {
         shareInput.select();
         shareInput.setSelectionRange(0, 99999); 
@@ -287,9 +303,7 @@
             const btn = document.getElementById('btnCopyAction');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-            }, 2000);
+            setTimeout(() => { btn.innerHTML = originalText; }, 2000);
         });
     });
     </script>
