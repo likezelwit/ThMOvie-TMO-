@@ -16,6 +16,7 @@
             --gray: #666;
             --shadow: 0 10px 30px rgba(0,0,0,0.1);
             --ticket-bg: #fff9c4;
+            --private-header: #e91e63; /* Warna khusus Private */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -101,6 +102,9 @@
         .t-info { font-size: 0.9rem; color: #555; margin-bottom: 2px; }
         .t-badge { display: inline-block; background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-top: 5px; font-weight: bold; }
 
+        /* PRIVATE VIEW (Reuse Styles) */
+        .private-header h2 { color: var(--private-header); border-left: 5px solid var(--private-header); }
+
         /* FOOTER */
         footer { background-color: #1a1a1a; color: #aaa; margin-top: 80px; padding: 60px 20px 30px; position: relative; }
         .footer-container { max-width: 1000px; margin: 0 auto; }
@@ -138,7 +142,8 @@
         <ul class="nav-icons">
             <li class="nav-item" onclick="switchView('home')" id="nav-movies"><i class="fas fa-film"></i>Movies</li>
             <li class="nav-item" onclick="switchView('ticket')" id="nav-ticket"><i class="fas fa-receipt"></i>Ticket</li>
-            <li class="nav-item"><i class="fas fa-glass-cheers"></i>Private</li>
+            <!-- Menu Private Sekarang Bisa Diklik -->
+            <li class="nav-item" onclick="switchView('private')" id="nav-private"><i class="fas fa-glass-cheers"></i>Private</li>
         </ul>
     </nav>
 
@@ -228,6 +233,19 @@
             </div>
             <div id="ticket-list"></div>
         </div>
+
+        <!-- VIEW 5: PRIVATE LIST (BARU) -->
+        <div id="view-private" class="view-section">
+            <div class="now-playing">
+                <div class="private-header">
+                    <h3>Private Screening</h3>
+                </div>
+                <!-- Tempat Film Muncul (Sama sumber datanya dengan Home) -->
+                <div id="private-movies-container" class="movie-grid">
+                    <p class="text-center" style="grid-column: 1/-1; color: #999;">Memuat daftar private...</p>
+                </div>
+            </section>
+        </div>
     </main>
 
     <footer>
@@ -314,6 +332,7 @@
                         const movie = childSnapshot.val();
                         allMovies.push(movie);
 
+                        // Render ke HOME
                         const card = document.createElement('div');
                         card.className = 'movie-card';
                         card.dataset.title = movie.title.toLowerCase(); 
@@ -331,6 +350,13 @@
                         `;
                         container.appendChild(card);
                     });
+                    
+                    // Jika tampilan Private terbuka, render ulang ke sana
+                    const privateContainer = document.getElementById('private-movies-container');
+                    if(document.getElementById('view-private').classList.contains('active')) {
+                        renderPrivateMovies();
+                    }
+
                 } else {
                     container.innerHTML = '<p class="text-center" style="grid-column: 1/-1; color: #999;">Belum ada film. Gunakan Admin Panel untuk menambahkan.</p>';
                 }
@@ -346,17 +372,22 @@
         window.confirmBooking = confirmBooking;
         window.searchMovie = searchMovie;
         window.setTimeNowPlus2 = setTimeNowPlus2;
-        window.watchNow = watchNow; // Export fungsi baru
+        window.watchNow = watchNow; 
 
         // --- LOGIC FUNCTIONS ---
         function switchView(viewName) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewName}`).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
             if(viewName === 'home') document.getElementById('nav-movies').classList.add('active');
             if(viewName === 'ticket') {
                 document.getElementById('nav-ticket').classList.add('active');
                 renderTickets();
+            }
+            if(viewName === 'private') {
+                document.getElementById('nav-private').classList.add('active');
+                renderPrivateMovies(); // Render list film private
             }
             window.scrollTo(0, 0);
         }
@@ -422,7 +453,7 @@
                 ...currentBooking,
                 id: Date.now(),
                 date: new Date().toLocaleDateString('id-ID'),
-                videoSource: videoUrl // <--- TAMBAHKAN INI
+                videoSource: videoUrl 
             });
 
             localStorage.setItem('tmoTickets', JSON.stringify(tickets));
@@ -466,6 +497,37 @@
             });
         }
         
+        // --- FUNGSI RENDER PRIVATE (BARU) ---
+        function renderPrivateMovies() {
+            const container = document.getElementById('private-movies-container');
+            container.innerHTML = '';
+            
+            if (allMovies.length === 0) {
+                container.innerHTML = '<p class="text-center" style="grid-column: 1/-1; color: #999;">Tidak ada film.</p>';
+                return;
+            }
+
+            allMovies.forEach(movie => {
+                // Gunakan struktur kartu yang sama dengan Home
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.dataset.title = movie.title.toLowerCase(); 
+                card.onclick = () => startBooking(movie.title); // Bisa memesan tiket dari sini juga
+
+                card.innerHTML = `
+                    <div class="poster">
+                        <img src="${movie.poster}" alt="${movie.title}">
+                    </div>
+                    <div class="movie-info">
+                        <div class="movie-title">${movie.title}</div>
+                        <div class="movie-genre">${movie.genre}</div>
+                        <button class="movie-btn">Beli Tiket</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
         // Slider Logic
         let slides = document.querySelectorAll('.slide');
         let idx = 0;
@@ -490,8 +552,8 @@
             sessionStorage.setItem('activeVideoSource', movie.videoSource);
             sessionStorage.setItem('activePoster', movie.poster);
 
-            // Pindah ke halaman movie.html
-            window.location.href = 'movie.html';
+            // Pindah ke halaman movie/index.html
+            window.location.href = 'movie/index.html';
         }
 
     </script>
