@@ -6,671 +6,588 @@
     <title>TMO Cinemas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
     <style>
-        :root {
-            --primary: #0078ff;
-            --bg-body: #f4f6f8;
-            --white: #ffffff;
-            --text: #222;
-            --gray: #666;
-            --shadow: 0 10px 30px rgba(0,0,0,0.1);
-            --ticket-bg: #fff9c4;
-            --private-header: #e91e63; 
+        :root{--primary:#0078ff;--bg:#f4f6f8;--white:#fff;--text:#222;--gray:#666;--shadow:0 10px 30px rgba(0,0,0,.1);--ticket-bg:#fff9c4;--private:#e91e63;--rooms:#9c27b0;--request:#ff9800;--success:#4caf50}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        body{background:var(--bg);color:var(--text);padding-bottom:40px;min-height:100vh}
+        a{text-decoration:none;color:inherit;transition:.3s;cursor:pointer}
+        img{width:100%;display:block;object-fit:cover}
+        header{background:var(--white);padding:15px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .header-container{max-width:1000px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+        .logo{font-size:1.5rem;font-weight:900;display:flex;align-items:center;gap:5px}.logo span{color:var(--primary)}
+        .search-bar{flex:1;margin:0 20px;display:none;position:relative}
+        @media(min-width:768px){.search-bar{display:block}}
+        .search-bar input{width:100%;padding:10px 40px 10px 15px;border-radius:20px;border:1px solid #ddd;background:#f9f9f9;outline:none}
+        .search-bar input:focus{border-color:var(--primary);background:#fff}
+        .search-bar i{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--gray)}
+        .sub-nav{background:var(--white);padding:8px 0;border-bottom:1px solid #eee;position:sticky;top:70px;z-index:90;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .nav-icons{max-width:1000px;margin:0 auto;display:flex;justify-content:center;gap:30px;list-style:none;padding:0 10px}
+        .nav-item{display:flex;flex-direction:column;align-items:center;color:var(--gray);font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
+        .nav-item i{font-size:1.15rem;margin-bottom:3px}
+        .nav-item:hover,.nav-item.active{color:var(--primary)}
+        .view-section{max-width:1000px;margin:0 auto;padding:20px;display:none;animation:fadeIn .4s ease}
+        .view-section.active{display:block}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+        /* Hero Slider */
+        .hero{height:400px;position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:30px}
+        .slide{position:absolute;inset:0;opacity:0;transition:.8s;background-size:cover;background-position:center}
+        .slide.active{opacity:1}
+        .slide::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),transparent)}
+        .slide-content{position:relative;z-index:2;padding:40px;color:#fff;max-width:60%}
+        .slide-content h2{font-size:2rem;font-weight:800;margin-bottom:10px;text-transform:uppercase}
+        .btn{background:var(--primary);color:#fff;border:none;padding:12px 30px;border-radius:50px;font-weight:700;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+        .btn:hover{background:#0056b3;transform:translateY(-2px)}
+
+        /* Movie Grid */
+        .section-header{font-size:1.5rem;font-weight:800;margin-bottom:20px;border-left:5px solid var(--primary);padding-left:15px}
+        .section-header.purple{border-color:var(--rooms)}
+        .section-header.orange{border-color:var(--request)}
+        .section-header.pink{border-color:var(--private)}
+        .movie-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:24px}
+        .movie-card{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:.3s;cursor:pointer;position:relative}
+        .movie-card:hover{transform:translateY(-5px)}
+        .poster{height:280px;position:relative;overflow:hidden}
+        .poster img{height:100%;transition:.5s}
+        .movie-card:hover .poster img{transform:scale(1.08)}
+        .type-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.75);color:#fff;font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;backdrop-filter:blur(4px)}
+        .type-badge.movie{background:rgba(0,120,255,.8)}
+        .type-badge.series{background:rgba(255,152,0,.8)}
+        .type-badge.ova{background:rgba(156,39,176,.8)}
+        .movie-info{padding:12px;text-align:center}
+        .movie-title{font-weight:800;margin-bottom:4px;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .movie-genre{font-size:.75rem;color:var(--gray);margin-bottom:8px}
+        .movie-btn{background:#eee;color:var(--text);border:none;padding:7px 16px;border-radius:20px;font-weight:700;cursor:pointer;width:100%;transition:.2s;font-family:'Inter',sans-serif;font-size:.82rem}
+        .movie-btn:hover{background:var(--primary);color:#fff}
+
+        /* Booking */
+        .booking-header{text-align:center;margin-bottom:30px}
+        .booking-header h2{color:var(--primary);font-size:1.8rem;margin-bottom:8px}
+        .booking-card{background:#fff;padding:35px;border-radius:20px;text-align:center;box-shadow:var(--shadow);max-width:560px;margin:0 auto}
+        .class-options{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:25px}
+        .class-btn{padding:25px;border:2px solid #eee;border-radius:16px;background:#fff;font-weight:800;font-size:1.1rem;cursor:pointer;transition:.3s;font-family:'Inter',sans-serif}
+        .class-btn:hover{border-color:var(--primary);background:#e3f2fd;color:var(--primary);transform:translateY(-3px)}
+        .time-input-group{margin-top:25px;text-align:left}
+        .time-input-group label{display:block;font-weight:700;margin-bottom:8px;color:var(--gray);font-size:.9rem}
+        .time-input-wrapper{display:flex;gap:10px;align-items:center}
+        .time-input-group input{width:100%;padding:14px;font-size:1.1rem;border:2px solid #ddd;border-radius:12px;outline:none;font-family:'Inter',sans-serif;flex:1}
+        .time-input-group input:focus{border-color:var(--primary)}
+        .back-link{display:inline-block;margin-top:18px;color:var(--gray);font-weight:600;cursor:pointer;font-size:.9rem}
+        .back-link:hover{color:var(--primary);text-decoration:underline}
+
+        /* Tickets */
+        .ticket-card{background:var(--ticket-bg);border-radius:14px;padding:18px;margin-bottom:18px;display:flex;align-items:center;box-shadow:var(--shadow);border:2px dashed #fbc02d;position:relative;overflow:hidden}
+        .ticket-card::before,.ticket-card::after{content:'';position:absolute;width:28px;height:28px;background:var(--bg);border-radius:50%;top:50%;transform:translateY(-50%)}
+        .ticket-card::before{left:-14px}.ticket-card::after{right:-14px}
+        .t-poster{width:70px;height:105px;border-radius:8px;overflow:hidden;margin-right:16px;flex-shrink:0}
+        .t-details{flex:1;min-width:0}
+        .t-title{font-size:1.1rem;font-weight:800;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .t-info{font-size:.85rem;color:#555;margin-bottom:2px}
+        .t-badge{display:inline-block;background:var(--primary);color:#fff;padding:2px 8px;border-radius:4px;font-size:.65rem;margin-top:4px;font-weight:700}
+        .t-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+        .t-actions .movie-btn{width:auto;padding:7px 14px;font-size:.78rem}
+        .btn-delete{background:transparent;color:#999;border:1px solid #ccc;padding:7px 14px;border-radius:20px;font-weight:600;cursor:pointer;transition:.2s;font-size:.78rem;font-family:'Inter',sans-serif}
+        .btn-delete:hover{background:#f44336;color:#fff;border-color:#f44336}
+
+        /* ===== ROOMS TAB ===== */
+        .room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+        .room-card{background:#fff;border-radius:16px;padding:20px;box-shadow:var(--shadow);border:1px solid #eee;transition:.3s;position:relative;overflow:hidden}
+        .room-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--rooms),var(--primary))}
+        .room-code{font-family:'JetBrains Mono',monospace;background:#f3e5f5;color:var(--rooms);padding:6px 12px;border-radius:8px;font-size:.85rem;font-weight:700;display:inline-block;margin-bottom:12px;letter-spacing:.5px}
+        .room-movie{font-weight:800;font-size:1.05rem;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .room-meta{display:flex;align-items:center;gap:12px;font-size:.8rem;color:var(--gray);margin-bottom:14px}
+        .room-meta i{color:var(--rooms)}
+        .room-status{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;padding:3px 8px;border-radius:20px;font-weight:600}
+        .room-status.playing{background:rgba(76,175,80,.1);color:#4caf50}
+        .room-status.waiting{background:rgba(255,152,0,.1);color:#ff9800}
+        .btn-join{background:var(--rooms);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;transition:.2s;font-family:'Inter',sans-serif;font-size:.88rem}
+        .btn-join:hover{background:#7b1fa2;transform:translateY(-1px)}
+        .rooms-empty{text-align:center;color:var(--gray);padding:50px 20px}
+        .rooms-empty i{font-size:3rem;color:#ddd;margin-bottom:12px;display:block}
+
+        /* ===== DETAIL PAGE (Series/Anime) ===== */
+        .detail-hero{position:relative;border-radius:20px;overflow:hidden;margin-bottom:24px;box-shadow:var(--shadow);display:flex;min-height:320px}
+        .detail-poster{width:220px;flex-shrink:0;position:relative;z-index:2}
+        .detail-poster img{width:100%;height:100%;object-fit:cover}
+        .detail-backdrop{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(20px) brightness(.4);transform:scale(1.1)}
+        .detail-info{position:relative;z-index:2;padding:28px;display:flex;flex-direction:column;justify-content:center;flex:1;color:#fff;min-width:0}
+        .detail-title{font-size:1.8rem;font-weight:800;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+        .detail-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+        .detail-meta .tag{background:rgba(255,255,255,.15);backdrop-filter:blur(4px);padding:4px 10px;border-radius:6px;font-size:.75rem;font-weight:600}
+        .detail-rating{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+        .detail-rating i{color:#ffc107;font-size:1rem}
+        .detail-rating span{font-size:.95rem;font-weight:700}
+        .detail-desc{font-size:.88rem;line-height:1.6;color:rgba(255,255,255,.85);max-height:100px;overflow-y:auto}
+        .ep-section{margin-top:24px}
+        .ep-section h3{font-size:1.2rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+        .ep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+        .ep-card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 4px 12px rgba(0,0,0,.06);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:12px;border:2px solid transparent}
+        .ep-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.1)}
+        .ep-num{width:40px;height:40px;border-radius:10px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;flex-shrink:0}
+        .ep-title{font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .ep-label{font-size:.72rem;color:var(--gray)}
+        .no-episodes{text-align:center;color:var(--gray);padding:40px;background:#fff;border-radius:16px;box-shadow:var(--shadow)}
+
+        /* ===== REQUEST FORM ===== */
+        .req-form{background:#fff;border-radius:20px;padding:35px;box-shadow:var(--shadow);max-width:700px;margin:0 auto}
+        .form-section{margin-bottom:28px}
+        .form-section h4{font-size:1rem;font-weight:800;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
+        .form-section h4 i{color:var(--request)}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-weight:600;margin-bottom:6px;font-size:.88rem;color:var(--gray)}
+        .form-input{width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:12px;outline:none;font-size:.95rem;font-family:'Inter',sans-serif;transition:.2s}
+        .form-input:focus{border-color:var(--primary);background:#f8fbff}
+        textarea.form-input{min-height:100px;resize:vertical}
+        .radio-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+        .radio-card{position:relative}
+        .radio-card input{position:absolute;opacity:0;pointer-events:none}
+        .radio-card label{display:block;padding:14px 12px;border:2px solid #e0e0e0;border-radius:12px;text-align:center;cursor:pointer;transition:.2s;font-weight:600;font-size:.88rem}
+        .radio-card input:checked+label{border-color:var(--primary);background:#e3f2fd;color:var(--primary)}
+        .radio-card label:hover{border-color:#bbb}
+        .tag-grid{display:flex;flex-wrap:wrap;gap:8px}
+        .tag-toggle{position:relative}
+        .tag-toggle input{position:absolute;opacity:0;pointer-events:none}
+        .tag-toggle label{display:inline-block;padding:8px 16px;border:2px solid #e0e0e0;border-radius:20px;cursor:pointer;transition:.2s;font-weight:600;font-size:.82rem}
+        .tag-toggle input:checked+label{border-color:var(--primary);background:var(--primary);color:#fff}
+        .tag-toggle label:hover{border-color:#bbb}
+        .conditional{display:none;animation:fadeIn .3s ease}
+        .conditional.show{display:block}
+        .btn-submit{background:var(--request);color:#fff;border:none;padding:14px 40px;border-radius:50px;font-weight:700;font-size:1rem;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif;width:100%;margin-top:10px}
+        .btn-submit:hover{background:#e68900;transform:translateY(-1px)}
+        .btn-submit:disabled{background:#ccc;cursor:not-allowed;transform:none}
+
+        /* Toast */
+        .toast-container{position:fixed;top:80px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+        .toast{background:#222;color:#fff;padding:14px 22px;border-radius:10px;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.3);border-left:4px solid var(--success);pointer-events:auto;transform:translateX(120%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);max-width:340px;display:flex;align-items:center;gap:10px}
+        .toast.show{transform:translateX(0)}
+        .toast.error{border-left-color:#f44336}
+        .toast i{font-size:1.1rem;flex-shrink:0}
+
+        /* Footer */
+        footer{background:#1a1a1a;color:#aaa;margin-top:80px;padding:60px 20px 30px}
+        .footer-container{max-width:1000px;margin:0 auto}
+        .footer-top{display:flex;align-items:center;justify-content:space-between;background:#252525;padding:30px;border-radius:16px;margin-bottom:50px;flex-wrap:wrap;gap:20px}
+        .app-info h3{color:#fff;font-size:1.4rem;margin-bottom:5px}
+        .store-btns{display:flex;gap:15px}
+        .store-btn{display:flex;align-items:center;gap:10px;background:#333;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;transition:.3s;font-weight:600;font-family:'Inter',sans-serif}
+        .footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px;margin-bottom:40px;border-bottom:1px solid #333;padding-bottom:40px}
+        .footer-col h4{color:#fff;margin-bottom:20px;font-size:1.1rem;text-transform:uppercase;letter-spacing:1px}
+        .footer-col ul{list-style:none}
+        .footer-col ul li{margin-bottom:12px}
+        .footer-col ul li a{color:#aaa;font-size:.9rem}
+        .social-icons{display:flex;gap:15px}
+        .social-icons a{width:40px;height:40px;background:#333;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:.3s;color:#fff}
+        .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;font-size:.8rem}
+        .lang-select{background:#333;color:#fff;border:none;padding:8px 15px;border-radius:20px;outline:none;cursor:pointer}
+
+        .text-center{text-align:center}
+        @media(max-width:640px){
+            .nav-icons{gap:18px}.nav-item{font-size:.68rem}.nav-item i{font-size:1rem}
+            .hero{height:250px}.slide-content{max-width:80%;padding:20px}.slide-content h2{font-size:1.3rem}
+            .movie-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+            .poster{height:220px}
+            .detail-hero{flex-direction:column;min-height:auto}
+            .detail-poster{width:100%;height:250px}
+            .detail-info{padding:20px}
+            .detail-title{font-size:1.3rem}
+            .room-grid{grid-template-columns:1fr}
+            .req-form{padding:20px}
+            .radio-cards{grid-template-columns:1fr 1fr}
+            .booking-card{padding:24px 18px}
+            .ticket-card{flex-direction:column;text-align:center}.t-poster{margin-right:0;margin-bottom:12px;width:90px;height:135px}
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg-body); color: var(--text); padding-bottom: 40px; min-height: 100vh; }
-        a { text-decoration: none; color: inherit; transition: 0.3s; cursor: pointer; }
-        img { width: 100%; display: block; object-fit: cover; }
-
-        /* HEADER */
-        header { background: var(--white); padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .header-container { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 1.5rem; font-weight: 900; color: var(--text); display: flex; align-items: center; gap: 5px; }
-        .logo span { color: var(--primary); }
-        
-        .search-bar { flex: 1; margin: 0 20px; display: none; position: relative; }
-        @media(min-width: 768px) { .search-bar { display: block; } }
-        .search-bar input { width: 100%; padding: 10px 40px 10px 15px; border-radius: 20px; border: 1px solid #ddd; background: #f9f9f9; outline: none; }
-        .search-bar input:focus { border-color: var(--primary); background: white; }
-        .search-bar i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--gray); }
-
-        /* NAV ICONS */
-        .sub-nav { background: var(--white); padding: 10px 0; border-bottom: 1px solid #eee; position: sticky; top: 70px; z-index: 90; }
-        .nav-icons { max-width: 1000px; margin: 0 auto; display: flex; justify-content: center; gap: 50px; list-style: none; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gray); font-size: 0.8rem; font-weight: 600; cursor: pointer; }
-        .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
-        .nav-item:hover, .nav-item.active { color: var(--primary); }
-
-        /* FULL PAGE VIEWS */
-        .view-section { max-width: 1000px; margin: 0 auto; padding: 20px; display: none; animation: fadeIn 0.4s ease; }
-        .view-section.active { display: block; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* HOME VIEW (Slider & List) */
-        .hero { height: 400px; position: relative; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 30px; }
-        .slide { position: absolute; inset: 0; opacity: 0; transition: 0.8s; background-size: cover; background-position: center; }
-        .slide.active { opacity: 1; }
-        .slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
-        .slide-content { position: relative; z-index: 2; padding: 40px; color: white; max-width: 60%; }
-        .slide-content h2 { font-size: 2rem; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; cursor: pointer; transition: 0.2s; font-family: 'Inter', sans-serif; }
-        .btn:hover { background: #0056b3; transform: translateY(-2px); }
-
-        /* MOVIE LIST */
-        .now-playing h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; border-left: 5px solid var(--primary); padding-left: 15px; }
-        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 30px; }
-        
-        .movie-card { background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); transition: 0.3s; cursor: pointer; }
-        .movie-card:hover { transform: translateY(-5px); }
-        .poster { height: 300px; position: relative; overflow: hidden; }
-        .poster img { height: 100%; transition: 0.5s; }
-        .movie-card:hover .poster img { transform: scale(1.1); }
-        .movie-info { padding: 15px; text-align: center; }
-        .movie-title { font-weight: 800; margin-bottom: 5px; font-size: 1rem; }
-        .movie-genre { font-size: 0.8rem; color: var(--gray); margin-bottom: 10px; }
-        .movie-btn { background: #eee; color: var(--text); border: none; padding: 8px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-family: 'Inter', sans-serif; }
-        .movie-btn:hover { background: var(--primary); color: white; }
-
-        /* SELECT CLASS VIEW */
-        .booking-header { text-align: center; margin-bottom: 40px; }
-        .booking-header h2 { color: var(--primary); font-size: 2rem; margin-bottom: 10px; }
-        .booking-card { background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: var(--shadow); max-width: 600px; margin: 0 auto; }
-        .class-options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
-        .class-btn { padding: 30px; border: 2px solid #eee; border-radius: 20px; background: white; font-weight: 800; font-size: 1.2rem; cursor: pointer; transition: 0.3s; font-family: 'Inter', sans-serif; }
-        .class-btn:hover { border-color: var(--primary); background: #e3f2fd; color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-
-        /* SELECT TIME VIEW */
-        .time-input-group { margin-top: 30px; text-align: left; }
-        .time-input-group label { display: block; font-weight: 700; margin-bottom: 10px; color: var(--gray); }
-        .time-input-wrapper { display: flex; gap: 10px; align-items: center; }
-        .time-input-group input { width: 100%; padding: 15px; font-size: 1.2rem; border: 2px solid #ddd; border-radius: 15px; outline: none; font-family: 'Inter', sans-serif; flex: 1; }
-        .time-input-group input:focus { border-color: var(--primary); }
-        .back-link { display: inline-block; margin-top: 20px; color: var(--gray); font-weight: 600; cursor: pointer; }
-        .back-link:hover { color: var(--primary); text-decoration: underline; }
-
-        /* TICKET HISTORY VIEW */
-        .ticket-card { background: var(--ticket-bg); border-radius: 15px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; box-shadow: var(--shadow); border: 2px dashed #fbc02d; position: relative; overflow: hidden; }
-        .ticket-card::before, .ticket-card::after { content: ''; position: absolute; width: 30px; height: 30px; background: var(--bg-body); border-radius: 50%; top: 50%; transform: translateY(-50%); }
-        .ticket-card::before { left: -15px; }
-        .ticket-card::after { right: -15px; }
-        .t-poster { width: 80px; height: 120px; border-radius: 10px; overflow: hidden; margin-right: 20px; flex-shrink: 0; }
-        .t-details { flex: 1; }
-        .t-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 5px; }
-        .t-info { font-size: 0.9rem; color: #555; margin-bottom: 2px; }
-        .t-badge { display: inline-block; background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-top: 5px; font-weight: bold; }
-        .t-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .t-actions .movie-btn { width: auto; padding: 8px 16px; font-size: 0.8rem; }
-
-        /* FIX #4: Tombol hapus tiket */
-        .btn-delete { 
-            background: transparent; color: #999; border: 1px solid #ccc; 
-            padding: 8px 16px; border-radius: 20px; font-weight: 600; 
-            cursor: pointer; transition: 0.2s; font-size: 0.8rem; 
-            font-family: 'Inter', sans-serif;
-        }
-        .btn-delete:hover { background: #f44336; color: white; border-color: #f44336; }
-
-        /* PRIVATE VIEW */
-        .private-header h3 { color: var(--private-header); border-left: 5px solid var(--private-header); font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; padding-left: 15px; }
-
-        /* FIX #3: Toast notification */
-        .toast-container {
-            position: fixed; top: 80px; right: 20px; z-index: 9999;
-            display: flex; flex-direction: column; gap: 8px; pointer-events: none;
-        }
-        .toast {
-            background: #222; color: white; padding: 14px 22px; border-radius: 10px;
-            font-size: 0.85rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            border-left: 4px solid #4caf50; pointer-events: auto;
-            transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-width: 340px; display: flex; align-items: center; gap: 10px;
-        }
-        .toast.show { transform: translateX(0); }
-        .toast.error { border-left-color: #f44336; }
-        .toast i { font-size: 1.1rem; flex-shrink: 0; }
-
-        /* FOOTER */
-        footer { background-color: #1a1a1a; color: #aaa; margin-top: 80px; padding: 60px 20px 30px; position: relative; }
-        .footer-container { max-width: 1000px; margin: 0 auto; }
-        .footer-top { display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 30px; border-radius: 16px; margin-bottom: 50px; flex-wrap: wrap; gap: 20px; }
-        .app-info h3 { color: white; font-size: 1.4rem; margin-bottom: 5px; }
-        .store-btns { display: flex; gap: 15px; }
-        .store-btn { display: flex; align-items: center; gap: 10px; background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: 600; font-family: 'Inter', sans-serif; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; border-bottom: 1px solid #333; padding-bottom: 40px; }
-        .footer-col h4 { color: white; margin-bottom: 20px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; }
-        .footer-col ul { list-style: none; }
-        .footer-col ul li { margin-bottom: 12px; }
-        .footer-col ul li a { color: #aaa; font-size: 0.9rem; }
-        .social-icons { display: flex; gap: 15px; }
-        .social-icons a { width: 40px; height: 40px; background: #333; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s; color: white; }
-        .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; font-size: 0.8rem; }
-        .lang-select { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 20px; outline: none; cursor: pointer; }
-
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
     </style>
 </head>
 <body>
-
-    <header>
-        <div class="header-container">
-            <a href="#" class="logo" onclick="switchView('home')"><i class="fas fa-play-circle" style="color:var(--primary)"></i> TMO <span>Cinemas</span></a>
-            <!-- FIX #5: Search auto-navigate ke home -->
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Cari film..." oninput="handleSearch()" onfocus="handleSearchFocus()">
-                <i class="fas fa-search"></i>
+<header>
+    <div class="header-container">
+        <a href="#" class="logo" onclick="switchView('home')"><i class="fas fa-play-circle" style="color:var(--primary)"></i> TMO <span>Cinemas</span></a>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Cari film..." oninput="handleSearch()" onfocus="handleSearchFocus()">
+            <i class="fas fa-search"></i>
+        </div>
+    </div>
+</header>
+<nav class="sub-nav">
+    <ul class="nav-icons">
+        <li class="nav-item active" onclick="switchView('home')" id="nav-movies"><i class="fas fa-film"></i>Movies</li>
+        <li class="nav-item" onclick="switchView('ticket')" id="nav-ticket"><i class="fas fa-receipt"></i>Ticket</li>
+        <li class="nav-item" onclick="switchView('rooms')" id="nav-rooms"><i class="fas fa-door-open"></i>Ruangan</li>
+        <li class="nav-item" onclick="switchView('private')" id="nav-private"><i class="fas fa-glass-cheers"></i>Private</li>
+        <li class="nav-item" onclick="switchView('request')" id="nav-request"><i class="fas fa-paper-plane"></i>Request</li>
+    </ul>
+</nav>
+<main>
+    <!-- HOME -->
+    <div id="view-home" class="view-section active">
+        <div class="hero" id="slider">
+            <div class="slide active" style="background-image:url('https://picsum.photos/seed/mandalorian/1000/400')">
+                <div class="slide-content"><h2>The Mandalorian</h2><p>Exclusively at TMO.</p><button class="btn">Lihat Jadwal</button></div>
+            </div>
+            <div class="slide" style="background-image:url('https://picsum.photos/seed/nature/1000/400')">
+                <div class="slide-content"><h2 style="color:#81c784">Bring Your Tumbler</h2><p>Diskon 30% setiap pembelian.</p><button class="btn" style="background:#4caf50">Cek Promo</button></div>
             </div>
         </div>
-    </header>
+        <section><h3 class="section-header">Now Playing</h3><div id="movies-container" class="movie-grid"><p class="text-center" style="grid-column:1/-1;color:#999">Memuat film...</p></div></section>
+    </div>
 
-    <nav class="sub-nav">
-        <ul class="nav-icons">
-            <li class="nav-item active" onclick="switchView('home')" id="nav-movies"><i class="fas fa-film"></i>Movies</li>
-            <li class="nav-item" onclick="switchView('ticket')" id="nav-ticket"><i class="fas fa-receipt"></i>Ticket</li>
-            <li class="nav-item" onclick="switchView('private')" id="nav-private"><i class="fas fa-glass-cheers"></i>Private</li>
-        </ul>
-    </nav>
-
-    <main>
-        <div id="view-home" class="view-section active">
-            <div class="hero" id="slider">
-                <div class="slide active" style="background-image: url('https://picsum.photos/seed/mandalorian/1000/400');">
-                    <div class="slide-content">
-                        <h2>The Mandalorian</h2>
-                        <p>Exclusively at TMO.</p>
-                        <button class="btn">Lihat Jadwal</button>
-                    </div>
-                </div>
-                <div class="slide" style="background-image: url('https://picsum.photos/seed/nature/1000/400');">
-                    <div class="slide-content">
-                        <h2 style="color: #81c784;">Bring Your Tumbler</h2>
-                        <p>Diskon 30% setiap pembelian.</p>
-                        <button class="btn" style="background: #4caf50;">Cek Promo</button>
-                    </div>
-                </div>
-                <div class="slide" style="background-image: url('https://picsum.photos/seed/drink/1000/400');">
-                    <div class="slide-content">
-                        <h2 style="color: #f48fb1;">Hibiscus Berry Tea</h2>
-                        <p>Minuman segar TMO m.food.</p>
-                        <button class="btn" style="background: #e91e63;">Pesan</button>
-                    </div>
-                </div>
+    <!-- CLASS SELECT -->
+    <div id="view-class" class="view-section">
+        <div class="booking-card">
+            <div class="booking-header"><h2>Pilih Kelas</h2><p>Menonton: <strong id="display-movie-name" style="color:var(--primary)">...</strong></p></div>
+            <div class="class-options">
+                <div class="class-btn" onclick="selectClassType('REGULAR')">REGULAR</div>
+                <div class="class-btn" onclick="selectClassType('PREMIERE')">PREMIERE</div>
             </div>
-
-            <section class="now-playing">
-                <h3>Now Playing</h3>
-                <div id="movies-container" class="movie-grid">
-                    <p class="text-center" style="grid-column: 1/-1; color: #999;">Memuat film dari Firebase...</p>
-                </div>
-            </section>
+            <div class="back-link" onclick="switchView('home')"><i class="fas fa-arrow-left"></i> Kembali</div>
         </div>
+    </div>
 
-        <div id="view-class" class="view-section">
-            <div class="booking-card">
-                <div class="booking-header">
-                    <h2>Pilih Kelas</h2>
-                    <p>Anda akan menonton: <strong id="display-movie-name" style="color:var(--primary)">...</strong></p>
+    <!-- TIME SELECT -->
+    <div id="view-time" class="view-section">
+        <div class="booking-card">
+            <div class="booking-header"><h2>Pilih Jam</h2><p><strong id="display-movie-time" style="color:var(--primary)">...</strong> — <strong id="display-class-time" style="color:var(--primary)">...</strong></p></div>
+            <div class="time-input-group">
+                <label for="user-time">Jam Tayang:</label>
+                <div class="time-input-wrapper">
+                    <input type="time" id="user-time" min="09:00" max="23:59">
+                    <button class="btn" onclick="setTimeNowPlus2()" style="padding:0 15px;font-size:.85rem;white-space:nowrap">+ 2 Menit</button>
                 </div>
-                <div class="class-options">
-                    <div class="class-btn" onclick="selectClassType('REGULAR')">REGULAR</div>
-                    <div class="class-btn" onclick="selectClassType('PREMIERE')">PREMIERE</div>
-                </div>
-                <div class="back-link" onclick="switchView('home')">
-                    <i class="fas fa-arrow-left"></i> Kembali ke Daftar Film
-                </div>
-            </div>
+            </div><br>
+            <button class="btn" onclick="confirmBooking()" style="width:100%;font-size:1.05rem">Konfirmasi Pesanan</button>
+            <div class="back-link" onclick="switchView('class')"><i class="fas fa-arrow-left"></i> Ganti Kelas</div>
         </div>
+    </div>
 
-        <div id="view-time" class="view-section">
-            <div class="booking-card">
-                <div class="booking-header">
-                    <h2>Pilih Jam</h2>
-                    <p>Anda menonton <strong id="display-movie-time" style="color:var(--primary)">...</strong> di kelas <strong id="display-class-time" style="color:var(--primary)">...</strong></p>
-                </div>
-                
-                <div class="time-input-group">
-                    <label for="user-time">Masukkan Jam Tayang:</label>
-                    <div class="time-input-wrapper">
-                        <input type="time" id="user-time" min="09:00" max="23:59">
-                        <button class="btn" onclick="setTimeNowPlus2()" style="padding: 0 15px; font-size: 0.9rem; white-space: nowrap;">+ 2 Menit</button>
+    <!-- TICKETS -->
+    <div id="view-ticket" class="view-section">
+        <div class="booking-header"><h2>Riwayat Tiket</h2></div>
+        <div id="ticket-list"></div>
+    </div>
+
+    <!-- ROOMS -->
+    <div id="view-rooms" class="view-section">
+        <h3 class="section-header purple">Ruangan Publik Aktif</h3>
+        <div id="rooms-container" class="room-grid"><div class="rooms-empty" style="grid-column:1/-1"><i class="fas fa-door-open"></i><p>Memuat ruangan...</p></div></div>
+    </div>
+
+    <!-- PRIVATE -->
+    <div id="view-private" class="view-section">
+        <h3 class="section-header pink">Private Screening</h3>
+        <div id="private-movies-container" class="movie-grid"><p class="text-center" style="grid-column:1/-1;color:#999">Memuat...</p></div>
+    </div>
+
+    <!-- REQUEST -->
+    <div id="view-request" class="view-section">
+        <h3 class="section-header orange">Request Film / Anime</h3>
+        <div class="req-form">
+            <div class="form-section">
+                <h4><i class="fas fa-info-circle"></i> Informasi Utama</h4>
+                <div class="form-group"><label>Judul Film / Anime</label><input type="text" class="form-input" id="req-title" placeholder="Contoh: Attack on Titan, Spy x Family"></div>
+                <div class="form-group"><label>Tipe Konten</label>
+                    <div class="radio-cards">
+                        <div class="radio-card"><input type="radio" name="req-type" id="rt-movie" value="movie" checked><label for="rt-movie"><i class="fas fa-film"></i><br>Movie</label></div>
+                        <div class="radio-card"><input type="radio" name="req-type" id="rt-series" value="series"><label for="rt-series"><i class="fas fa-tv"></i><br>Series / Anime</label></div>
+                        <div class="radio-card"><input type="radio" name="req-type" id="rt-ova" value="ova"><label for="rt-ova"><i class="fas fa-star"></i><br>OVA / Special</label></div>
                     </div>
-                    <small style="color:#999; display:block; margin-top:5px;">*Waktu akan otomatis dikonversi ke format AM/PM</small>
                 </div>
-
-                <br>
-                <button class="btn" onclick="confirmBooking()" style="width: 100%; font-size: 1.1rem;">Konfirmasi Pesanan</button>
-                <div class="back-link" onclick="switchView('class')">
-                    <i class="fas fa-arrow-left"></i> Ganti Kelas
+                <div class="form-group"><label>Tahun Rilis</label><input type="number" class="form-input" id="req-year" placeholder="2024" min="1950" max="2030"></div>
+                <div class="form-group"><label>Genre</label>
+                    <div class="tag-grid">
+                        <div class="tag-toggle"><input type="checkbox" id="g-action" value="Action"><label for="g-action">Action</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-comedy" value="Comedy"><label for="g-comedy">Comedy</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-drama" value="Drama"><label for="g-drama">Drama</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-horror" value="Horror"><label for="g-horror">Horror</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-sci" value="Sci-Fi"><label for="g-sci">Sci-Fi</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-romance" value="Romance"><label for="g-romance">Romance</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-psych" value="Psychological"><label for="g-psych">Psychological</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-fantasy" value="Fantasy"><label for="g-fantasy">Fantasy</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-thriller" value="Thriller"><label for="g-thriller">Thriller</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-sol" value="Slice of Life"><label for="g-sol">Slice of Life</label></div>
+                    </div>
                 </div>
             </div>
+            <div class="form-section conditional" id="sec-episodes">
+                <h4><i class="fas fa-list-ol"></i> Season & Episode</h4>
+                <div class="form-group"><label>Season</label><input type="number" class="form-input" id="req-season" placeholder="1" min="1"></div>
+                <div class="form-group"><label>Pilihan Episode</label>
+                    <div class="radio-cards">
+                        <div class="radio-card"><input type="radio" name="req-ep-type" id="ep-all" value="all" checked><label for="ep-all">Semua Episode</label></div>
+                        <div class="radio-card"><input type="radio" name="req-ep-type" id="ep-specific" value="specific"><label for="ep-specific">Episode Tertentu</label></div>
+                    </div>
+                </div>
+                <div class="form-group conditional" id="sec-ep-num"><label>Nomor Episode</label><input type="text" class="form-input" id="req-ep-num" placeholder="Contoh: 12 atau 1-5, 8, 10"></div>
+            </div>
+            <div class="form-section">
+                <h4><i class="fas fa-cog"></i> Preferensi Teknis</h4>
+                <div class="form-group"><label>Audio / Subtitle</label>
+                    <div class="tag-grid">
+                        <div class="tag-toggle"><input type="checkbox" id="a-subin" value="Sub Indo"><label for="a-subin">Sub Indo</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="a-eng" value="Eng Sub"><label for="a-eng">Eng Sub</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="a-dubin" value="Dub Indo"><label for="a-dubin">Dub Indo</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="a-duben" value="Dub Eng"><label for="a-duben">Dub Eng</label></div>
+                    </div>
+                </div>
+                <div class="form-group"><label>Resolusi</label>
+                    <div class="radio-cards">
+                        <div class="radio-card"><input type="radio" name="req-res" id="res-low" value="360p/480p"><label for="res-low">360p / 480p<br><small>Hemat Kuota</small></label></div>
+                        <div class="radio-card"><input type="radio" name="req-res" id="res-hd" value="720p" checked><label for="res-hd">720p<br><small>HD</small></label></div>
+                        <div class="radio-card"><input type="radio" name="req-res" id="res-fhd" value="1080p"><label for="res-fhd">1080p<br><small>Full HD</small></label></div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-section">
+                <h4><i class="fas fa-link"></i> Referensi & Catatan</h4>
+                <div class="form-group"><label>Link Referensi (MAL / IMDb / TMDB)</label><input type="url" class="form-input" id="req-link" placeholder="https://myanimelist.net/anime/..."></div>
+                <div class="form-group"><label>Catatan Tambahan</label><textarea class="form-input" id="req-notes" placeholder="Pesan khusus, misal: cariin yang versi uncensored"></textarea></div>
+            </div>
+            <button class="btn-submit" id="btnSubmitReq" onclick="submitRequest()"><i class="fas fa-paper-plane"></i> Kirim Request</button>
         </div>
+    </div>
 
-        <div id="view-ticket" class="view-section">
-            <div class="booking-header">
-                <h2>Riwayat Tiket</h2>
-            </div>
-            <div id="ticket-list"></div>
+    <!-- DETAIL (Series/Anime/OVA) -->
+    <div id="view-detail" class="view-section">
+        <div class="back-link" onclick="switchView('home')" style="margin-bottom:16px"><i class="fas fa-arrow-left"></i> Kembali ke Daftar Film</div>
+        <div id="detail-content"></div>
+    </div>
+</main>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<footer>
+    <div class="footer-container">
+        <div class="footer-top"><div class="app-info"><h3>Download TMO App</h3><p>Nikmati semua fitur dengan maksimal!</p></div><div class="store-btns"><button class="store-btn"><i class="fab fa-google-play"></i> Google Play</button><button class="store-btn"><i class="fab fa-apple"></i> App Store</button></div></div>
+        <div class="footer-grid">
+            <div class="footer-col"><h4>Perusahaan</h4><ul><li><a href="#">Tentang Kami</a></li><li><a href="#">Karir</a></li></ul></div>
+            <div class="footer-col"><h4>Bantuan</h4><ul><li><a href="#">Syarat & Ketentuan</a></li><li><a href="#">Hubungi Kami</a></li></ul></div>
+            <div class="footer-col"><h4>Ikuti Kami</h4><div class="social-icons"><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-twitter"></i></a></div></div>
         </div>
+        <div class="footer-bottom"><p>&copy; 2024 TMO Cinemas. All rights reserved.</p><select class="lang-select"><option>Bahasa Indonesia</option></select></div>
+    </div>
+</footer>
 
-        <div id="view-private" class="view-section">
-            <div class="now-playing">
-                <div class="private-header">
-                    <h3>Private Screening</h3>
-                </div>
-                <div id="private-movies-container" class="movie-grid">
-                    <p class="text-center" style="grid-column: 1/-1; color: #999;">Memuat daftar private...</p>
-                </div>
-            </div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getDatabase,ref,set,onValue,push,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig={apiKey:"AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",authDomain:"thmovie-3646f.firebaseapp.com",databaseURL:"https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"thmovie-3646f",storageBucket:"thmovie-3646f.firebasestorage.app",messagingSenderId:"1041137356432",appId:"1:1041137356432:web:96edbe3402937c82f09215",measurementId:"G-6SNE976L7G"};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+let tickets=JSON.parse(localStorage.getItem('tmoTickets')||'[]');
+let currentBooking={movie:'',type:'',time:'',roomType:'PUBLIC',videoSource:'',poster:''};
+let allMovies=[];
+let currentDetailMovie=null;
+let roomsUnsub=null;
+
+// Toast
+function showToast(msg,type='success'){const c=document.getElementById('toastContainer'),t=document.createElement('div');t.className=`toast ${type==='error'?'error':''}`;const ic=type==='error'?'fa-times-circle':'fa-check-circle';t.innerHTML=`<i class="fas ${ic}" style="color:${type==='error'?'#f44336':'#4caf50'}"></i><span>${msg}</span>`;c.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3000)}
+
+// Time helpers
+function timeToTs(t){if(!t)return null;const[h,m]=t.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d.getTime()}
+function toAMPM(t){if(!t)return t;let[h,m]=t.split(':');const ap=h>=12?'PM':'AM';h=h%12||12;return`${h}:${m} ${ap}`}
+
+// Load movies
+function loadMovies(){
+    onValue(ref(db,'movies/'),snap=>{
+        const c=document.getElementById('movies-container');c.innerHTML='';const data=snap.val();allMovies=[];
+        if(data){snap.forEach(cs=>{const m=cs.val();allMovies.push(m);
+            const ct=(m.contentType||'movie').toLowerCase();
+            const card=document.createElement('div');card.className='movie-card';card.dataset.title=m.title.toLowerCase();card.dataset.type=ct;
+            card.onclick=()=>handleMovieClick(m);
+            card.innerHTML=`<div class="poster"><img src="${m.poster}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'"><div class="type-badge ${ct}">${ct==='series'?'SERIES':ct==='ova'?'OVA':'MOVIE'}</div></div><div class="movie-info"><div class="movie-title">${m.title}</div><div class="movie-genre">${m.genre||''}</div><button class="movie-btn">${ct==='movie'?'Beli Tiket':'Lihat Detail'}</button></div>`;
+            c.appendChild(card)});
+            if(document.getElementById('view-private').classList.contains('active'))renderPrivate();
+        }else{c.innerHTML='<p class="text-center" style="grid-column:1/-1;color:#999">Belum ada film.</p>'}
+    });
+}
+
+// Handle movie click — Movie goes to booking, Series/OVA goes to detail
+function handleMovieClick(movie){
+    const ct=(movie.contentType||'movie').toLowerCase();
+    if(ct==='movie'){
+        currentBooking.videoSource=movie.videoSource;currentBooking.poster=movie.poster;
+        startBooking(movie.title,'PUBLIC');
+    }else{
+        showDetail(movie);
+    }
+}
+
+// Show detail page for Series/OVA
+function showDetail(movie){
+    currentDetailMovie=movie;
+    const ct=(movie.contentType||'ova').toUpperCase();
+    const rating=movie.rating?parseFloat(movie.rating):0;
+    const stars=Array.from({length:5},(_, i)=>i<Math.round(rating)?'<i class="fas fa-star"></i>':'<i class="far fa-star"></i>').join('');
+    const episodes=movie.episodes?Object.entries(movie.episodes).map(([k,v])=>({num:k,...v})):[];
+
+    let epHtml='';
+    if(episodes.length>0){
+        epHtml=`<div class="ep-section"><h3><i class="fas fa-list"></i> Daftar Episode (${episodes.length})</h3><div class="ep-grid">`;
+        episodes.forEach(ep=>{
+            epHtml+=`<div class="ep-card" onclick="selectEpisode(${JSON.stringify(ep).replace(/"/g,'&quot;')})"><div class="ep-num">${ep.num}</div><div><div class="ep-title">${ep.title||'Episode '+ep.num}</div><div class="ep-label">Episode ${ep.num}</div></div></div>`;
+        });
+        epHtml+='</div></div>';
+    }else{
+        epHtml='<div class="no-episodes"><i class="fas fa-film" style="font-size:2rem;color:#ddd;margin-bottom:10px;display:block"></i><p>Episode belum tersedia. Silakan request melalui tab Request.</p></div>';
+    }
+
+    document.getElementById('detail-content').innerHTML=`
+    <div class="detail-hero">
+        <div class="detail-backdrop" style="background-image:url('${movie.poster}')"></div>
+        <div class="detail-poster"><img src="${movie.poster}" onerror="this.src='https://picsum.photos/seed/fb/220/330'"></div>
+        <div class="detail-info">
+            <div class="detail-meta"><span class="tag">${ct}</span><span class="tag">${movie.year||'-'}</span>${(movie.genre||'').split(',').map(g=>`<span class="tag">${g.trim()}</span>`).join('')}</div>
+            <div class="detail-title">${movie.title}</div>
+            <div class="detail-rating">${stars} <span>${rating?rating.toFixed(1):'-'}/10</span></div>
+            <div class="detail-desc">${movie.description||'Tidak ada deskripsi.'}</div>
         </div>
-    </main>
+    </div>${epHtml}`;
+    switchView('detail');
+}
 
-    <!-- FIX #3: Toast container -->
-    <div class="toast-container" id="toastContainer"></div>
+// Select episode → go to booking
+function selectEpisode(ep){
+    if(!currentDetailMovie)return;
+    currentBooking.videoSource=ep.videoSource;currentBooking.poster=currentDetailMovie.poster;
+    startBooking(`${currentDetailMovie.title} - Ep.${ep.num}`,'PUBLIC');
+}
 
-    <footer>
-        <div class="footer-container">
-            <div class="footer-top">
-                <div class="app-info">
-                    <h3>Download TMO App</h3>
-                    <p>Nikmati semua fitur dengan maksimal!</p>
+// Load rooms
+function loadRooms(){
+    if(roomsUnsub)roomsUnsub();
+    roomsUnsub=onValue(ref(db,'sync_rooms'),snap=>{
+        const c=document.getElementById('rooms-container');c.innerHTML='';
+        const data=snap.val();const rooms=[];
+        if(data){Object.entries(data).forEach(([rid,room])=>{
+            const meta=room.meta;if(!meta||meta.isPrivate)return;
+            const age=Date.now()-(room.status?.lastUpdate||meta.createdAt||0);
+            if(age>3600000)return; // Skip rooms inactive > 1 hour
+            const viewers=room.viewers?Object.keys(room.viewers).length:0;
+            const isPlaying=room.status?.isPlaying;
+            rooms.push({id:rid,title:meta.title,poster:meta.posterSrc,viewers,isPlaying,createdAt:meta.createdAt,contentType:meta.contentType||'movie'});
+        })}
+        rooms.sort((a,b)=>b.createdAt-a.createdAt);
+        if(rooms.length===0){c.innerHTML='<div class="rooms-empty" style="grid-column:1/-1"><i class="fas fa-door-open"></i><p>Belum ada ruangan publik aktif.<br>Buat tiket dan mulai nonton untuk membuat ruangan.</p></div>';return}
+        rooms.forEach(r=>{
+            const ct=(r.contentType||'movie').toLowerCase();
+            c.innerHTML+=`<div class="room-card">
+                <div class="room-code"><i class="fas fa-key"></i> ${r.id.replace('room_','')}</div>
+                <div class="room-movie">${r.title}</div>
+                <div class="room-meta">
+                    <span><i class="fas fa-users"></i> ${r.viewers} penonton</span>
+                    <span class="type-badge ${ct}" style="position:static">${ct.toUpperCase()}</span>
+                    <span class="room-status ${r.isPlaying?'playing':'waiting'}"><i class="fas fa-${r.isPlaying?'play-circle':'hourglass-half'}"></i> ${r.isPlaying?'Sedang Tayang':'Menunggu'}</span>
                 </div>
-                <div class="store-btns">
-                    <button class="store-btn"><i class="fab fa-google-play"></i> Google Play</button>
-                    <button class="store-btn"><i class="fab fa-apple"></i> App Store</button>
-                </div>
-            </div>
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h4>Perusahaan</h4>
-                    <ul>
-                        <li><a href="#">Tentang Kami</a></li>
-                        <li><a href="#">Karir</a></li>
-                        <li><a href="#">TMO Premiere</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Bantuan</h4>
-                    <ul>
-                        <li><a href="#">Syarat & Ketentuan</a></li>
-                        <li><a href="#">Hubungi Kami</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Ikuti Kami</h4>
-                    <div class="social-icons">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2023 TMO Cinemas. All rights reserved.</p>
-                <select class="lang-select"><option>Bahasa Indonesia</option></select>
-            </div>
-        </div>
-    </footer>
+                <button class="btn-join" onclick="joinRoom('${r.id}')"><i class="fas fa-sign-in-alt"></i> Gabung Ruangan</button>
+            </div>`;
+        });
+    });
+}
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+function joinRoom(rid){window.location.href=`movie/index.html?room=${rid}`}
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
-            authDomain: "thmovie-3646f.firebaseapp.com",
-            databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "thmovie-3646f",
-            storageBucket: "thmovie-3646f.firebasestorage.app",
-            messagingSenderId: "1041137356432",
-            appId: "1:1041137356432:web:96edbe3402937c82f09215",
-            measurementId: "G-6SNE976L7G"
-        };
+// Request form logic
+document.querySelectorAll('input[name="req-type"]').forEach(r=>r.addEventListener('change',()=>{
+    document.getElementById('sec-episodes').classList.toggle('show',r.value==='series');
+}));
+document.querySelectorAll('input[name="req-ep-type"]').forEach(r=>r.addEventListener('change',()=>{
+    document.getElementById('sec-ep-num').classList.toggle('show',r.value==='specific');
+}));
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const moviesRef = ref(db, 'movies/');
+function submitRequest(){
+    const title=document.getElementById('req-title').value.trim();
+    if(!title){showToast('Judul wajib diisi!','error');return}
+    const type=document.querySelector('input[name="req-type"]:checked').value;
+    const year=document.getElementById('req-year').value;
+    const genres=[...document.querySelectorAll('.tag-grid input:checked')].map(i=>i.value);
+    const season=document.getElementById('req-season').value;
+    const epType=document.querySelector('input[name="req-ep-type"]:checked')?.value;
+    const epNum=document.getElementById('req-ep-num').value;
+    const audioSub=[...document.querySelectorAll('#sec-episodes ~ .form-section .tag-grid input:checked, .form-section:last-child .tag-grid input:checked')].map(i=>i.value);
+    // Fix: get audio/sub properly
+    const audioSubEls=document.querySelectorAll('#a-subin:checked,#a-eng:checked,#a-dubin:checked,#a-duben:checked');
+    const audioSubArr=[...audioSubEls].map(i=>i.value);
+    const res=document.querySelector('input[name="req-res"]:checked')?.value;
+    const link=document.getElementById('req-link').value.trim();
+    const notes=document.getElementById('req-notes').value.trim();
 
-        // --- GLOBAL STATE ---
-        let savedTickets = localStorage.getItem('tmoTickets');
-        let tickets = savedTickets ? JSON.parse(savedTickets) : [];
-        
-        let currentBooking = { movie: '', type: '', time: '', roomType: 'PUBLIC' };
-        let allMovies = []; 
+    const btn=document.getElementById('btnSubmitReq');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+    
+    push(ref(db,'requests'),{title,type,year:year||null,genres,season:season||null,episodeType:epType,specificEpisode:epNum||null,audioSub:audioSubArr,resolution:res,referenceLink:link,notes,requestedAt:Date.now(),status:'pending'})
+    .then(()=>{showToast('Request berhasil dikirim!');document.getElementById('req-title').value='';document.getElementById('req-year').value='';document.getElementById('req-link').value='';document.getElementById('req-notes').value='';document.querySelectorAll('.req-form input[type="checkbox"],.req-form input[type="radio"]').forEach(i=>{if(i.id==='rt-movie'||i.id==='ep-all'||i.id==='res-hd')i.checked=true;else i.checked=false});document.getElementById('sec-episodes').classList.remove('show');document.getElementById('sec-ep-num').classList.remove('show')})
+    .catch(()=>showToast('Gagal mengirim request!','error'))
+    .finally(()=>{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Kirim Request'});
+}
 
-        // === FIX #3: Toast System ===
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
-            const icon = type === 'error' ? 'fa-times-circle' : 'fa-check-circle';
-            toast.innerHTML = `<i class="fas ${icon}" style="color:${type === 'error' ? '#f44336' : '#4caf50'}"></i><span>${message}</span>`;
-            container.appendChild(toast);
-            
-            // Trigger animation
-            requestAnimationFrame(() => { toast.classList.add('show'); });
-            
-            // Auto-remove
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 400);
-            }, 3000);
-        }
+// View switching
+function switchView(v){
+    document.querySelectorAll('.view-section').forEach(e=>e.classList.remove('active'));
+    document.getElementById(`view-${v}`).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+    const navMap={home:'nav-movies',ticket:'nav-ticket',rooms:'nav-rooms',private:'nav-private',request:'nav-request'};
+    if(navMap[v])document.getElementById(navMap[v]).classList.add('active');
+    if(v==='ticket')renderTickets();
+    if(v==='private')renderPrivate();
+    if(v==='rooms')loadRooms();
+    if(v==='request'){} // Form already rendered
+    window.scrollTo(0,0);
+}
 
-        // === FIX #1 & #2: Konversi time input → Unix timestamp (ms) ===
-        function timeInputToTimestamp(time24) {
-            if (!time24) return null;
-            const [hours, minutes] = time24.split(':').map(Number);
-            const date = new Date();
-            date.setHours(hours, minutes, 0, 0);
-            return date.getTime();
-        }
+// Search
+function handleSearchFocus(){if(!document.getElementById('view-home').classList.contains('active'))switchView('home')}
+function handleSearch(){if(!document.getElementById('view-home').classList.contains('active'))switchView('home');const q=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('.movie-card').forEach(c=>c.style.display=c.dataset.title.includes(q)?'block':'none')}
 
-        function convertToAMPM(time24) {
-            if (!time24) return time24;
-            let [hours, minutes] = time24.split(':');
-            let ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            return `${hours}:${minutes} ${ampm}`;
-        }
+// Booking flow
+function startBooking(title,roomType='PUBLIC'){currentBooking.movie=title;currentBooking.roomType=roomType;document.getElementById('display-movie-name').innerText=title;switchView('class')}
+function selectClassType(type){currentBooking.type=type;document.getElementById('display-movie-time').innerText=currentBooking.movie;document.getElementById('display-class-time').innerText=type;document.getElementById('user-time').value='';switchView('time')}
+function setTimeNowPlus2(){const n=new Date();n.setMinutes(n.getMinutes()+2);document.getElementById('user-time').value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`}
 
-        // === LOAD MOVIES ===
-        function loadMovies() {
-            onValue(moviesRef, (snapshot) => {
-                const container = document.getElementById('movies-container');
-                container.innerHTML = ''; 
-                
-                const data = snapshot.val();
-                allMovies = []; 
+function confirmBooking(){
+    const ti=document.getElementById('user-time').value;
+    if(!ti){showToast('Pilih jam tayang!','error');return}
+    const ts=timeToTs(ti),disp=toAMPM(ti);
+    tickets.push({movie:currentBooking.movie,type:currentBooking.type,timeDisplay:disp,bookingTimestamp:ts,roomType:currentBooking.roomType,id:Date.now(),date:new Date().toLocaleDateString('id-ID'),videoSource:currentBooking.videoSource,poster:currentBooking.poster});
+    localStorage.setItem('tmoTickets',JSON.stringify(tickets));
+    showToast(`Tiket berhasil! ${currentBooking.movie} — ${disp}`);switchView('ticket');
+}
 
-                if (data) {
-                    snapshot.forEach((childSnapshot) => {
-                        const movie = childSnapshot.val();
-                        allMovies.push(movie);
+function renderTickets(){
+    const l=document.getElementById('ticket-list');l.innerHTML='';
+    if(!tickets.length){l.innerHTML='<div class="text-center" style="color:var(--gray);padding:40px">Belum ada tiket.</div>';return}
+    [...tickets].reverse().forEach(t=>{
+        const md=allMovies.find(m=>m.title===t.movie)||(currentDetailMovie&&t.movie.includes(currentDetailMovie.title)?currentDetailMovie:null);
+        const poster=md?md.poster:t.poster||"https://picsum.photos/seed/ticket/100/150";
+        const header=t.roomType==='PRIVATE'?`Private — ${t.movie}`:`Publik — ${t.movie}`;
+        l.innerHTML+=`<div class="ticket-card"><div class="t-poster"><img src="${poster}" style="width:100%;height:100%;object-fit:cover" onerror="this.src='https://picsum.photos/seed/ticket/100/150'"></div><div class="t-details"><div style="font-size:.72rem;color:var(--primary);font-weight:800;text-transform:uppercase;margin-bottom:2px">${header}</div><div class="t-title">${t.movie}</div><div class="t-info"><i class="far fa-calendar"></i> ${t.date}</div><div class="t-info"><i class="far fa-clock"></i> ${t.timeDisplay||'-'}</div><div class="t-badge" style="${t.roomType==='PRIVATE'?'background:var(--private)':''}">${t.type}</div><div class="t-actions"><button class="movie-btn" onclick="watchNow(${t.id})" style="background:var(--primary);color:#fff"><i class="fas fa-play"></i> Tonton</button><button class="btn-delete" onclick="deleteTicket(${t.id})"><i class="fas fa-trash-alt"></i> Hapus</button></div></div></div>`;
+    });
+}
 
-                        const card = document.createElement('div');
-                        card.className = 'movie-card';
-                        card.dataset.title = movie.title.toLowerCase(); 
-                        card.onclick = () => startBooking(movie.title, 'PUBLIC');
+function deleteTicket(id){if(!confirm('Hapus tiket ini?'))return;tickets=tickets.filter(t=>t.id!==id);localStorage.setItem('tmoTickets',JSON.stringify(tickets));renderTickets();showToast('Tiket dihapus')}
 
-                        card.innerHTML = `
-                            <div class="poster">
-                                <img src="${movie.poster}" alt="${movie.title}" onerror="this.src='https://picsum.photos/seed/fallback/200/300'">
-                            </div>
-                            <div class="movie-info">
-                                <div class="movie-title">${movie.title}</div>
-                                <div class="movie-genre">${movie.genre}</div>
-                                <button class="movie-btn">Beli Tiket</button>
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    });
-                    
-                    if (document.getElementById('view-private').classList.contains('active')) {
-                        renderPrivateMovies();
-                    }
+function watchNow(id){
+    const t=tickets.find(x=>x.id===id);if(!t){showToast('Tiket tidak ditemukan!','error');return}
+    const m=allMovies.find(x=>x.title===t.movie);if(!m){showToast('Film tidak ditemukan di database!','error');return}
+    sessionStorage.setItem('activeMovieTitle',t.movie);sessionStorage.setItem('activeVideoSource',t.videoSource||m.videoSource);sessionStorage.setItem('activePoster',t.poster||m.poster);sessionStorage.setItem('activeBookingTime',String(t.bookingTimestamp||0));sessionStorage.setItem('activeRoomType',t.roomType||'PUBLIC');sessionStorage.setItem('activeContentType',m.contentType||'movie');
+    window.location.href='movie/index.html';
+}
 
-                } else {
-                    container.innerHTML = '<p class="text-center" style="grid-column: 1/-1; color: #999;">Belum ada film. Gunakan Admin Panel untuk menambahkan.</p>';
-                }
-            });
-        }
+function renderPrivate(){
+    const c=document.getElementById('private-movies-container');c.innerHTML='';
+    if(!allMovies.length){c.innerHTML='<p class="text-center" style="grid-column:1/-1;color:#999">Tidak ada film.</p>';return}
+    allMovies.forEach(m=>{const card=document.createElement('div');card.className='movie-card';card.dataset.title=m.title.toLowerCase();card.onclick=()=>{currentBooking.videoSource=m.videoSource;currentBooking.poster=m.poster;startBooking(m.title,'PRIVATE')};card.innerHTML=`<div class="poster"><img src="${m.poster}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'"></div><div class="movie-info"><div class="movie-title">${m.title}</div><div class="movie-genre">${m.genre||''}</div><button class="movie-btn" style="background:var(--private);color:#fff">Beli Tiket Private</button></div>`;c.appendChild(card)});
+}
 
-        loadMovies();
+// Slider
+let slides=document.querySelectorAll('.slide'),si=0;
+setInterval(()=>{slides[si].classList.remove('active');si=(si+1)%slides.length;slides[si].classList.add('active')},5000);
 
-        // --- EXPORT KE WINDOW ---
-        window.switchView = switchView;
-        window.startBooking = startBooking;
-        window.selectClassType = selectClassType;
-        window.confirmBooking = confirmBooking;
-        window.handleSearch = handleSearch;
-        window.handleSearchFocus = handleSearchFocus;
-        window.setTimeNowPlus2 = setTimeNowPlus2;
-        window.watchNow = watchNow;
-        window.deleteTicket = deleteTicket;
+// Migrate old tickets
+(function(){let save=false;tickets.forEach(t=>{if(!t.bookingTimestamp&&t.time&&!t.timeDisplay){t.timeDisplay=t.time;t.bookingTimestamp=0;save=true}if(t.time&&!t.timeDisplay){t.timeDisplay=t.time;save=true}});if(save)localStorage.setItem('tmoTickets',JSON.stringify(tickets))})();
 
-        // --- VIEW SWITCHING ---
-        function switchView(viewName) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${viewName}`).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
-            if (viewName === 'home') document.getElementById('nav-movies').classList.add('active');
-            if (viewName === 'ticket') {
-                document.getElementById('nav-ticket').classList.add('active');
-                renderTickets();
-            }
-            if (viewName === 'private') {
-                document.getElementById('nav-private').classList.add('active');
-                renderPrivateMovies(); 
-            }
-            window.scrollTo(0, 0);
-        }
-
-        // --- FIX #5: Search otomatis navigate ke home ---
-        function handleSearchFocus() {
-            if (!document.getElementById('view-home').classList.contains('active')) {
-                switchView('home');
-            }
-        }
-
-        function handleSearch() {
-            if (!document.getElementById('view-home').classList.contains('active')) {
-                switchView('home');
-            }
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.querySelectorAll('.movie-card');
-            cards.forEach(card => {
-                card.style.display = card.dataset.title.includes(input) ? 'block' : 'none';
-            });
-        }
-
-        // --- BOOKING FLOW ---
-        function startBooking(movieTitle, typeOfRoom = 'PUBLIC') {
-            currentBooking = { movie: movieTitle, type: '', time: '', roomType: typeOfRoom };
-            document.getElementById('display-movie-name').innerText = movieTitle;
-            switchView('class');
-        }
-
-        function selectClassType(type) {
-            currentBooking.type = type;
-            document.getElementById('display-movie-time').innerText = currentBooking.movie;
-            document.getElementById('display-class-time').innerText = type;
-            document.getElementById('user-time').value = '';
-            switchView('time');
-        }
-
-        function setTimeNowPlus2() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() + 2);
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('user-time').value = `${hours}:${minutes}`;
-        }
-
-        // === FIX #1: confirmBooking menyimpan TIMESTAMP, bukan string ===
-        function confirmBooking() {
-            const timeInput = document.getElementById('user-time').value;
-            if (!timeInput) {
-                showToast('Mohon pilih jam tayang terlebih dahulu!', 'error');
-                return;
-            }
-
-            // Konversi ke Unix timestamp (ms) — inilah yang dibutuhkan player
-            const bookingTimestamp = timeInputToTimestamp(timeInput);
-            // Simpan display string terpisah untuk rendering tiket
-            const displayTime = convertToAMPM(timeInput);
-
-            const movieData = allMovies.find(m => m.title === currentBooking.movie);
-            const videoUrl = movieData ? movieData.videoSource : '';
-            
-            tickets.push({
-                movie: currentBooking.movie,
-                type: currentBooking.type,
-                timeDisplay: displayTime,           // "2:30 PM" — untuk tampilan tiket
-                bookingTimestamp: bookingTimestamp,   // 1718234400000 — untuk player
-                roomType: currentBooking.roomType,
-                id: Date.now(),
-                date: new Date().toLocaleDateString('id-ID'),
-                videoSource: videoUrl
-            });
-
-            localStorage.setItem('tmoTickets', JSON.stringify(tickets));
-
-            // FIX #3: Toast instead of alert
-            showToast(`Tiket berhasil! ${currentBooking.movie} — ${displayTime}`);
-            switchView('ticket');
-        }
-
-        // --- RENDER TICKETS ---
-        function renderTickets() {
-            const list = document.getElementById('ticket-list');
-            list.innerHTML = '';
-            
-            if (tickets.length === 0) {
-                list.innerHTML = '<div class="text-center" style="color:var(--gray); padding:40px;">Belum ada tiket yang dipesan.</div>';
-                return;
-            }
-
-            const defaultPoster = "https://picsum.photos/seed/ticket/100/150";
-
-            // Tampilkan terbaru di atas
-            const sorted = [...tickets].reverse();
-
-            sorted.forEach(t => {
-                const movieData = allMovies.find(m => m.title === t.movie);
-                const posterUrl = movieData ? movieData.poster : defaultPoster;
-
-                const roomHeaderTitle = t.roomType === 'PUBLIC' ? `Ruangan Tersedia - ${t.movie}` : `Private Screening - ${t.movie}`;
-                
-                // FIX #6: Gunakan t.id bukan t.movie di onclick untuk menghindari crash
-                // FIX #1: Tampilkan timeDisplay bukan t.time
-                const html = `
-                <div class="ticket-card">
-                    <div class="t-poster">
-                        <img src="${posterUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='${defaultPoster}'">
-                    </div>
-                    <div class="t-details">
-                        <div style="font-size:0.75rem; color:var(--primary); font-weight:800; text-transform:uppercase; margin-bottom:2px;">${roomHeaderTitle}</div>
-                        <div class="t-title">${t.movie}</div>
-                        <div class="t-info"><i class="far fa-calendar"></i> ${t.date}</div>
-                        <div class="t-info"><i class="far fa-clock"></i> ${t.timeDisplay || t.time || '-'}</div>
-                        <div class="t-badge" style="${t.roomType === 'PRIVATE' ? 'background:var(--private-header);' : ''}">${t.type}</div>
-                        <div class="t-actions">
-                            <button class="movie-btn" onclick="watchNow(${t.id})" style="background:var(--primary); color:white;">
-                                <i class="fas fa-play"></i> Tonton Sekarang
-                            </button>
-                            <button class="btn-delete" onclick="deleteTicket(${t.id})">
-                                <i class="fas fa-trash-alt"></i> Hapus
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
-                list.innerHTML += html;
-            });
-        }
-
-        // === FIX #4: Hapus tiket ===
-        function deleteTicket(ticketId) {
-            if (!confirm('Hapus tiket ini?')) return; // Satu-satunya confirm yang wajar
-            tickets = tickets.filter(t => t.id !== ticketId);
-            localStorage.setItem('tmoTickets', JSON.stringify(tickets));
-            renderTickets();
-            showToast('Tiket berhasil dihapus');
-        }
-
-        // === FIX #2 & #1: watchNow pakai ID tiket, kirim timestamp yang benar ===
-        function watchNow(ticketId) {
-            // Cari tiket berdasarkan ID (bukan judul)
-            const ticket = tickets.find(t => t.id === ticketId);
-            
-            if (!ticket) {
-                showToast('Tiket tidak ditemukan!', 'error');
-                return;
-            }
-
-            const movie = allMovies.find(m => m.title === ticket.movie);
-            if (!movie) {
-                showToast('Data film tidak ditemukan di database!', 'error');
-                return;
-            }
-
-            sessionStorage.setItem('activeMovieTitle', movie.title);
-            sessionStorage.setItem('activeVideoSource', movie.videoSource);
-            sessionStorage.setItem('activePoster', movie.poster);
-
-            // FIX #1: Kirim TIMESTAMP yang benar ke player
-            // Prioritaskan bookingTimestamp dari tiket (yang sudah benar), fallback ke 0 (langsung mulai)
-            const ts = ticket.bookingTimestamp || 0;
-            sessionStorage.setItem('activeBookingTime', String(ts));
-
-            window.location.href = 'movie/index.html';
-        }
-        
-        function renderPrivateMovies() {
-            const container = document.getElementById('private-movies-container');
-            container.innerHTML = '';
-            
-            if (allMovies.length === 0) {
-                container.innerHTML = '<p class="text-center" style="grid-column: 1/-1; color: #999;">Tidak ada film.</p>';
-                return;
-            }
-
-            allMovies.forEach(movie => {
-                const card = document.createElement('div');
-                card.className = 'movie-card';
-                card.dataset.title = movie.title.toLowerCase(); 
-                card.onclick = () => startBooking(movie.title, 'PRIVATE');
-
-                card.innerHTML = `
-                    <div class="poster">
-                        <img src="${movie.poster}" alt="${movie.title}" onerror="this.src='https://picsum.photos/seed/fallback/200/300'">
-                    </div>
-                    <div class="movie-info">
-                        <div class="movie-title">${movie.title}</div>
-                        <div class="movie-genre">${movie.genre}</div>
-                        <button class="movie-btn" style="background:var(--private-header); color:white;">Beli Tiket Private</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // Slider
-        let slides = document.querySelectorAll('.slide');
-        let idx = 0;
-        function nextSlide() {
-            slides[idx].classList.remove('active');
-            idx = (idx + 1) % slides.length;
-            slides[idx].classList.add('active');
-        }
-        setInterval(nextSlide, 5000);
-
-        // === MIGRASI: Perbaiki tiket lama yang masih pakai format string ===
-        // Jalankan sekali saat load untuk memperbaiki data lama di localStorage
-        (function migrateOldTickets() {
-            let needsSave = false;
-            tickets.forEach(t => {
-                // Jika tiket lama tidak punya bookingTimestamp tapi punya time (string AM/PM)
-                if (!t.bookingTimestamp && t.time && !t.timeDisplay) {
-                    // Coba parse balik — tidak bisa konversi AM/PM → timestamp tanpa tanggal,
-                    // jadi set ke 0 (film langsung bisa ditonton)
-                    t.timeDisplay = t.time;
-                    t.bookingTimestamp = 0;
-                    needsSave = true;
-                }
-                // Jika punya time tapi belum punya timeDisplay
-                if (t.time && !t.timeDisplay) {
-                    t.timeDisplay = t.time;
-                    needsSave = true;
-                }
-            });
-            if (needsSave) {
-                localStorage.setItem('tmoTickets', JSON.stringify(tickets));
-            }
-        })();
-    </script>
+// Exports
+window.switchView=switchView;window.startBooking=startBooking;window.selectClassType=selectClassType;window.confirmBooking=confirmBooking;window.handleSearch=handleSearch;window.handleSearchFocus=handleSearchFocus;window.setTimeNowPlus2=setTimeNowPlus2;window.watchNow=watchNow;window.deleteTicket=deleteTicket;window.selectEpisode=selectEpisode;window.joinRoom=joinRoom;window.submitRequest=submitRequest;
+loadMovies();
+</script>
 </body>
 </html>
