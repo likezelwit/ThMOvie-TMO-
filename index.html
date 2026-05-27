@@ -16,7 +16,7 @@
             --gray: #666;
             --shadow: 0 10px 30px rgba(0,0,0,0.1);
             --ticket-bg: #fff9c4;
-            --private-header: #e91e63; /* Warna khusus Private */
+            --private-header: #e91e63; 
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -306,7 +306,7 @@
         let savedTickets = localStorage.getItem('tmoTickets');
         let tickets = savedTickets ? JSON.parse(savedTickets) : [];
         
-        let currentBooking = { movie: '', type: '', time: '' };
+        let currentBooking = { movie: '', type: '', time: '', roomType: 'PUBLIC' };
         let allMovies = []; 
 
         // --- FETCH MOVIES FROM FIREBASE ---
@@ -327,7 +327,7 @@
                         const card = document.createElement('div');
                         card.className = 'movie-card';
                         card.dataset.title = movie.title.toLowerCase(); 
-                        card.onclick = () => startBooking(movie.title);
+                        card.onclick = () => startBooking(movie.title, 'PUBLIC');
 
                         card.innerHTML = `
                             <div class="poster">
@@ -342,7 +342,6 @@
                         container.appendChild(card);
                     });
                     
-                    // Jika tampilan Private terbuka, render ulang ke sana
                     if(document.getElementById('view-private').classList.contains('active')) {
                         renderPrivateMovies();
                     }
@@ -395,8 +394,9 @@
             });
         }
 
-        function startBooking(movieTitle) {
-            currentBooking = { movie: movieTitle, type: '', time: '' };
+        // Modifikasi startBooking untuk menangkap asal tipe room
+        function startBooking(movieTitle, typeOfRoom = 'PUBLIC') {
+            currentBooking = { movie: movieTitle, type: '', time: '', roomType: typeOfRoom };
             document.getElementById('display-movie-name').innerText = movieTitle;
             switchView('class');
         }
@@ -445,7 +445,7 @@
 
             localStorage.setItem('tmoTickets', JSON.stringify(tickets));
 
-            alert(`Tiket Berhasil!\nFilm: ${currentBooking.movie}\nKelas: ${currentBooking.type}\nJam: ${currentBooking.time}`);
+            alert(`Tiket Berhasil!\nFilm: ${currentBooking.movie}\nKelas: ${currentBooking.type}\nJam: ${currentBooking.time}\nKategori: ${currentBooking.roomType}`);
             switchView('ticket');
         }
 
@@ -462,16 +462,20 @@
                 const movieData = allMovies.find(m => m.title === t.movie);
                 const posterUrl = movieData ? movieData.poster : defaultPoster;
 
+                // Mengubah judul header jika tiket dibuat dari luar menu Private
+                const roomHeaderTitle = t.roomType === 'PUBLIC' ? `Ruangan Tersedia - ${t.movie}` : `Private Screening - ${t.movie}`;
+
                 const html = `
                 <div class="ticket-card">
                     <div class="t-poster">
                         <img src="${posterUrl}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div class="t-details">
+                        <div style="font-size:0.75rem; color:var(--primary); font-weight:800; text-transform:uppercase; margin-bottom:2px;">${roomHeaderTitle}</div>
                         <div class="t-title">${t.movie}</div>
                         <div class="t-info"><i class="far fa-calendar"></i> ${t.date}</div>
                         <div class="t-info"><i class="far fa-clock"></i> ${t.time}</div>
-                        <div class="t-badge">${t.type}</div>
+                        <div class="t-badge" style="${t.roomType === 'PRIVATE' ? 'background:var(--private-header);' : ''}">${t.type}</div>
                         <br>
                         <button class="movie-btn" onclick="watchNow('${t.movie}')" style="background:var(--primary); color:white; margin-top:10px;">
                             <i class="fas fa-play"></i> Tonton Sekarang
@@ -495,7 +499,8 @@
                 const card = document.createElement('div');
                 card.className = 'movie-card';
                 card.dataset.title = movie.title.toLowerCase(); 
-                card.onclick = () => startBooking(movie.title);
+                // Set parameter 'PRIVATE' ketika diklik dari halaman private screening
+                card.onclick = () => startBooking(movie.title, 'PRIVATE');
 
                 card.innerHTML = `
                     <div class="poster">
@@ -504,7 +509,7 @@
                     <div class="movie-info">
                         <div class="movie-title">${movie.title}</div>
                         <div class="movie-genre">${movie.genre}</div>
-                        <button class="movie-btn">Beli Tiket</button>
+                        <button class="movie-btn" style="background:var(--private-header); color:white;">Beli Tiket Private</button>
                     </div>
                 `;
                 container.appendChild(card);
