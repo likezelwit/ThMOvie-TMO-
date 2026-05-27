@@ -38,7 +38,7 @@
 
         /* NAV ICONS */
         .sub-nav { background: var(--white); padding: 10px 0; border-bottom: 1px solid #eee; position: sticky; top: 70px; z-index: 90; }
-        .nav-icons { max-width: 1000px; margin: 0 auto; display: flex; justify-content: center; gap: 50px; }
+        .nav-icons { max-width: 1000px; margin: 0 auto; display: flex; justify-content: center; gap: 50px; list-style: none; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gray); font-size: 0.8rem; font-weight: 600; cursor: pointer; }
         .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
         .nav-item:hover, .nav-item.active { color: var(--primary); }
@@ -59,7 +59,7 @@
         .btn { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .btn:hover { background: #0056b3; transform: translateY(-2px); }
 
-        /* MOVIE LIST (DYNAMIC FROM FIREBASE) */
+        /* MOVIE LIST */
         .now-playing h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; border-left: 5px solid var(--primary); padding-left: 15px; }
         .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 30px; }
         
@@ -102,8 +102,8 @@
         .t-info { font-size: 0.9rem; color: #555; margin-bottom: 2px; }
         .t-badge { display: inline-block; background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-top: 5px; font-weight: bold; }
 
-        /* PRIVATE VIEW (Reuse Styles) */
-        .private-header h2 { color: var(--private-header); border-left: 5px solid var(--private-header); }
+        /* PRIVATE VIEW */
+        .private-header h3 { color: var(--private-header); border-left: 5px solid var(--private-header); font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; padding-left: 15px; }
 
         /* FOOTER */
         footer { background-color: #1a1a1a; color: #aaa; margin-top: 80px; padding: 60px 20px 30px; position: relative; }
@@ -142,13 +142,11 @@
         <ul class="nav-icons">
             <li class="nav-item" onclick="switchView('home')" id="nav-movies"><i class="fas fa-film"></i>Movies</li>
             <li class="nav-item" onclick="switchView('ticket')" id="nav-ticket"><i class="fas fa-receipt"></i>Ticket</li>
-            <!-- Menu Private Sekarang Bisa Diklik -->
             <li class="nav-item" onclick="switchView('private')" id="nav-private"><i class="fas fa-glass-cheers"></i>Private</li>
         </ul>
     </nav>
 
     <main>
-        <!-- VIEW 1: HOME -->
         <div id="view-home" class="view-section active">
             <div class="hero" id="slider">
                 <div class="slide active" style="background-image: url('https://picsum.photos/seed/mandalorian/1000/400');">
@@ -176,14 +174,12 @@
 
             <section class="now-playing">
                 <h3>Now Playing</h3>
-                <!-- Tempat Film Akan Muncul dari Firebase -->
                 <div id="movies-container" class="movie-grid">
                     <p class="text-center" style="grid-column: 1/-1; color: #999;">Memuat film dari Firebase...</p>
                 </div>
             </section>
         </div>
 
-        <!-- VIEW 2: SELECT CLASS -->
         <div id="view-class" class="view-section">
             <div class="booking-card">
                 <div class="booking-header">
@@ -200,7 +196,6 @@
             </div>
         </div>
 
-        <!-- VIEW 3: SELECT TIME -->
         <div id="view-time" class="view-section">
             <div class="booking-card">
                 <div class="booking-header">
@@ -212,7 +207,6 @@
                     <label for="user-time">Masukkan Jam Tayang:</label>
                     <div class="time-input-wrapper">
                         <input type="time" id="user-time" min="09:00" max="23:59">
-                        <!-- TOMBOL BARU: + 2 Menit -->
                         <button class="btn" onclick="setTimeNowPlus2()" style="padding: 0 15px; font-size: 0.9rem; white-space: nowrap;">+ 2 Menit</button>
                     </div>
                     <small style="color:#999; display:block; margin-top:5px;">*Format jam otomatis (AM/PM)</small>
@@ -226,7 +220,6 @@
             </div>
         </div>
 
-        <!-- VIEW 4: TICKET HISTORY -->
         <div id="view-ticket" class="view-section">
             <div class="booking-header">
                 <h2>Riwayat Tiket</h2>
@@ -234,17 +227,15 @@
             <div id="ticket-list"></div>
         </div>
 
-        <!-- VIEW 5: PRIVATE LIST (BARU) -->
         <div id="view-private" class="view-section">
             <div class="now-playing">
                 <div class="private-header">
                     <h3>Private Screening</h3>
                 </div>
-                <!-- Tempat Film Muncul (Sama sumber datanya dengan Home) -->
                 <div id="private-movies-container" class="movie-grid">
                     <p class="text-center" style="grid-column: 1/-1; color: #999;">Memuat daftar private...</p>
                 </div>
-            </section>
+            </div>
         </div>
     </main>
 
@@ -297,15 +288,15 @@
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
-              apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
-              authDomain: "thmovie-3646f.firebaseapp.com",
-              databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
-              projectId: "thmovie-3646f",
-              storageBucket: "thmovie-3646f.firebasestorage.app",
-              messagingSenderId: "1041137356432",
-              appId: "1:1041137356432:web:96edbe3402937c82f09215",
-              measurementId: "G-6SNE976L7G"
-         };
+            apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
+            authDomain: "thmovie-3646f.firebaseapp.com",
+            databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "thmovie-3646f",
+            storageBucket: "thmovie-3646f.firebasestorage.app",
+            messagingSenderId: "1041137356432",
+            appId: "1:1041137356432:web:96edbe3402937c82f09215",
+            measurementId: "G-6SNE976L7G"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -352,7 +343,6 @@
                     });
                     
                     // Jika tampilan Private terbuka, render ulang ke sana
-                    const privateContainer = document.getElementById('private-movies-container');
                     if(document.getElementById('view-private').classList.contains('active')) {
                         renderPrivateMovies();
                     }
@@ -387,7 +377,7 @@
             }
             if(viewName === 'private') {
                 document.getElementById('nav-private').classList.add('active');
-                renderPrivateMovies(); // Render list film private
+                renderPrivateMovies(); 
             }
             window.scrollTo(0, 0);
         }
@@ -395,12 +385,10 @@
         function searchMovie() {
             const input = document.getElementById('searchInput').value.toLowerCase();
             const cards = document.querySelectorAll('.movie-card');
-            let found = false;
             
             cards.forEach(card => {
                 if(card.dataset.title.includes(input)) {
                     card.style.display = 'block';
-                    found = true;
                 } else {
                     card.style.display = 'none';
                 }
@@ -445,7 +433,6 @@
             const displayTime = convertToAMPM(timeInput);
             currentBooking.time = displayTime;
             
-            // Cari videoSource dari data film
             const movieData = allMovies.find(m => m.title === currentBooking.movie);
             const videoUrl = movieData ? movieData.videoSource : '';
             
@@ -485,8 +472,6 @@
                         <div class="t-info"><i class="far fa-calendar"></i> ${t.date}</div>
                         <div class="t-info"><i class="far fa-clock"></i> ${t.time}</div>
                         <div class="t-badge">${t.type}</div>
-                        
-                        <!-- TOMBOL TONTON SEKARANG -->
                         <br>
                         <button class="movie-btn" onclick="watchNow('${t.movie}')" style="background:var(--primary); color:white; margin-top:10px;">
                             <i class="fas fa-play"></i> Tonton Sekarang
@@ -497,7 +482,6 @@
             });
         }
         
-        // --- FUNGSI RENDER PRIVATE (BARU) ---
         function renderPrivateMovies() {
             const container = document.getElementById('private-movies-container');
             container.innerHTML = '';
@@ -508,11 +492,10 @@
             }
 
             allMovies.forEach(movie => {
-                // Gunakan struktur kartu yang sama dengan Home
                 const card = document.createElement('div');
                 card.className = 'movie-card';
                 card.dataset.title = movie.title.toLowerCase(); 
-                card.onclick = () => startBooking(movie.title); // Bisa memesan tiket dari sini juga
+                card.onclick = () => startBooking(movie.title);
 
                 card.innerHTML = `
                     <div class="poster">
@@ -538,7 +521,6 @@
         }
         setInterval(nextSlide, 5000);
 
-        // --- FUNGSI BARU: WATCH NOW ---
         function watchNow(movieTitle) {
             const movie = allMovies.find(m => m.title === movieTitle);
             
@@ -547,15 +529,12 @@
                 return;
             }
 
-            // Simpan data ke SessionStorage
             sessionStorage.setItem('activeMovieTitle', movie.title);
             sessionStorage.setItem('activeVideoSource', movie.videoSource);
             sessionStorage.setItem('activePoster', movie.poster);
 
-            // Pindah ke halaman movie/index.html
             window.location.href = 'movie/index.html';
         }
-
     </script>
 </body>
 </html>
