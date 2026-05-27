@@ -217,35 +217,114 @@ let unreadCount=0,ctrlHideTimer=null,contentType='movie',roomCleaned=false;
 const CTRL_DELAY=3500;
 
 // Utils
-function showToast(m,d=2500){if(toastTo)clearTimeout(toastTo);toastEl.textContent=m;toastEl.classList.remove('show');void toastEl.offsetWidth;toastEl.classList.add('show');toastTo=setTimeout(()=>toastEl.classList.remove('show'),d)}
-function showModal(){if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});mainModal.classList.add('active');modalActive=true;contentArea.classList.add('modal-open');showCtrlBar()}
-function hideModal(){mainModal.classList.remove('active');modalActive=false;contentArea.classList.remove('modal-open');resetCtrlTimer()}
-function showMode(n){Object.values(modes).forEach(e=>e.style.display='none');currentMode=n;if(modes[n])modes[n].style.display='block'}
-function setSyncStatus(on){if(on){syncDot.classList.remove('off');syncLabel.textContent='Sync: ON';syncBadge.className='badge badge-sync';syncBadge.innerHTML='<i class="fas fa-check-circle"></i> ON'}else{syncDot.classList.add('off');syncLabel.textContent='Sync: OFF';syncBadge.className='badge badge-sync err';syncBadge.innerHTML='<i class="fas fa-times-circle"></i> OFFLINE'}}
-function fmtCd(ms){if(ms<=0)return'00:00:00';const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`}
-function fmtTime(ts){return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}
-function setPoster(src){if(src&&src!=='null'&&src!=='undefined'){posterEl.src=src;posterEl.onerror=()=>posterEl.remove()}else posterEl.remove()}
-function flashSync(){syncSeekOv.classList.add('show');setTimeout(()=>syncSeekOv.classList.remove('show'),700)}
-function setSyncFlag(v){isSyncing=v;if(syncSeekTo){clearTimeout(syncSeekTo);syncSeekTo=null}if(v)syncSeekTo=setTimeout(()=>{isSyncing=false;syncSeekTo=null},3000)}
+function showToast(m,d=2500){
+    if(toastTo)clearTimeout(toastTo);
+    toastEl.textContent=m;
+    toastEl.classList.remove('show');
+    void toastEl.offsetWidth;
+    toastEl.classList.add('show');
+    toastTo=setTimeout(()=>toastEl.classList.remove('show'),d);
+}
+function showModal(){
+    if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+    mainModal.classList.add('active');
+    modalActive=true;
+    contentArea.classList.add('modal-open');
+    showCtrlBar();
+}
+function hideModal(){
+    mainModal.classList.remove('active');
+    modalActive=false;
+    contentArea.classList.remove('modal-open');
+    resetCtrlTimer();
+}
+function showMode(n){
+    Object.values(modes).forEach(e=>e.style.display='none');
+    currentMode=n;
+    if(modes[n])modes[n].style.display='block';
+}
+function setSyncStatus(on){
+    if(on){
+        syncDot.classList.remove('off');
+        syncLabel.textContent='Sync: ON';
+        syncBadge.className='badge badge-sync';
+        syncBadge.innerHTML='<i class="fas fa-check-circle"></i> ON';
+    }else{
+        syncDot.classList.add('off');
+        syncLabel.textContent='Sync: OFF';
+        syncBadge.className='badge badge-sync err';
+        syncBadge.innerHTML='<i class="fas fa-times-circle"></i> OFFLINE';
+    }
+}
+function fmtCd(ms){
+    if(ms<=0)return'00:00:00';
+    const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;
+    return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+}
+function fmtTime(ts){
+    return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+}
+function setPoster(src){
+    if(src&&src!=='null'&&src!=='undefined'){
+        posterEl.src=src;
+        posterEl.onerror=()=>posterEl.remove();
+    }else{
+        posterEl.remove();
+    }
+}
+function flashSync(){
+    syncSeekOv.classList.add('show');
+    setTimeout(()=>syncSeekOv.classList.remove('show'),700);
+}
+function setSyncFlag(v){
+    isSyncing=v;
+    if(syncSeekTo){
+        clearTimeout(syncSeekTo);
+        syncSeekTo=null;
+    }
+    if(v)syncSeekTo=setTimeout(()=>{isSyncing=false;syncSeekTo=null},3000);
+}
 
 // Control bar
-function showCtrlBar(){controlBar.classList.remove('bar-hidden');resetCtrlTimer()}
-function hideCtrlBar(){if(!chatOpen&&!video.paused&&!modalActive)controlBar.classList.add('bar-hidden')}
-function resetCtrlTimer(){clearTimeout(ctrlHideTimer);if(!video.paused&&!chatOpen&&!modalActive&&document.activeElement!==msgInput)ctrlHideTimer=setTimeout(hideCtrlBar,CTRL_DELAY)}
-contentArea.addEventListener('mousemove',showCtrlBar);contentArea.addEventListener('touchstart',showCtrlBar,{passive:true});
-video.addEventListener('play',resetCtrlTimer);video.addEventListener('pause',showCtrlBar);
+function showCtrlBar(){
+    controlBar.classList.remove('bar-hidden');
+    resetCtrlTimer();
+}
+function hideCtrlBar(){
+    if(!chatOpen&&!video.paused&&!modalActive)controlBar.classList.add('bar-hidden');
+}
+function resetCtrlTimer(){
+    clearTimeout(ctrlHideTimer);
+    if(!video.paused&&!chatOpen&&!modalActive&&document.activeElement!==msgInput){
+        ctrlHideTimer=setTimeout(hideCtrlBar,CTRL_DELAY);
+    }
+}
+contentArea.addEventListener('mousemove',showCtrlBar);
+contentArea.addEventListener('touchstart',showCtrlBar,{passive:true});
+video.addEventListener('play',resetCtrlTimer);
+video.addEventListener('pause',showCtrlBar);
 
 // Fullscreen
 const fsBtn=document.getElementById('fsBtn');
-fsBtn.addEventListener('click',()=>{if(!document.fullscreenElement&&!document.webkitFullscreenElement){(contentArea.requestFullscreen||contentArea.webkitRequestFullscreen).call(contentArea).catch(()=>showToast('Fullscreen tidak didukung'))}else{(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{})}});
-function onFsCh(){fsBtn.querySelector('i').className=!!(document.fullscreenElement||document.webkitFullscreenElement)?'fas fa-compress':'fas fa-expand'}
-document.addEventListener('fullscreenchange',onFsCh);document.addEventListener('webkitfullscreenchange',onFsCh);
+fsBtn.addEventListener('click',()=>{
+    if(!document.fullscreenElement&&!document.webkitFullscreenElement){
+        (contentArea.requestFullscreen||contentArea.webkitRequestFullscreen).call(contentArea).catch(()=>showToast('Fullscreen tidak didukung'));
+    }else{
+        (document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{});
+    }
+});
+function onFsCh(){
+    fsBtn.querySelector('i').className=!!(document.fullscreenElement||document.webkitFullscreenElement)?'fas fa-compress':'fas fa-expand';
+}
+document.addEventListener('fullscreenchange',onFsCh);
+document.addEventListener('webkitfullscreenchange',onFsCh);
 
 document.getElementById('shareToggle').addEventListener('click',()=>shareArea.classList.toggle('mobile-open'));
 
 // ===== ROOM CLEANUP saat video selesai =====
 function cleanupRoom(){
-    if(roomCleaned)return;roomCleaned=true;
+    if(roomCleaned)return;
+    roomCleaned=true;
     endScreen.classList.add('show');
     if(isHost){
         remove(ref(db,'sync_rooms/'+roomId)).catch(()=>{});
@@ -269,17 +348,27 @@ function initHost(){
     isHost=true;
     roomId='room_'+Math.random().toString(36).substring(2,8)+Date.now().toString(36);
     window.history.replaceState({},'',`${location.pathname}?room=${roomId}`);
-    shareArea.style.display='flex';shareInput.value=location.href;
+    shareArea.style.display='flex';
+    shareInput.value=location.href;
 
-    const t=sessionStorage.getItem('activeMovieTitle'),v=sessionStorage.getItem('activeVideoSource'),p=sessionStorage.getItem('activePoster'),bt=sessionStorage.getItem('activeBookingTime'),rt=sessionStorage.getItem('activeRoomType')||'PUBLIC';
-    if(!v||!t){showErr('Data Film Tidak Ditemukan','Kembali ke halaman Tiket.');return}
+    const t=sessionStorage.getItem('activeMovieTitle');
+    const v=sessionStorage.getItem('activeVideoSource');
+    const p=sessionStorage.getItem('activePoster');
+    const bt=sessionStorage.getItem('activeBookingTime');
+    const rt=sessionStorage.getItem('activeRoomType')||'PUBLIC';
+    
+    if(!v||!t){
+        showErr('Data Film Tidak Ditemukan','Kembali ke halaman Tiket.');
+        return;
+    }
     
     titleEl.textContent=t;
     setPoster(p);
     video.src=v;
     videoReady=true;
     
-    bookingTimestamp=bt?parseInt(bt,10):null;if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
+    bookingTimestamp=bt?parseInt(bt,10):null;
+    if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
 
     // Tampilkan Badge Tipe (Series/OVA) jika bukan Movie
     if(contentType!=='movie'){
@@ -302,20 +391,28 @@ function initHost(){
     onDisconnect(ref(db,'sync_rooms/'+roomId)).remove();
     
     registerViewer();
-    setupSync();setupSender();decideMode();
+    setupSync();
+    setupSender();
+    decideMode();
 }
 
 // ===== GUEST =====
 function initGuest(){
-    isHost=false;shareArea.style.display='flex';shareInput.value=location.href;
+    isHost=false;
+    shareArea.style.display='flex';
+    shareInput.value=location.href;
     viewerBadge.style.display='inline-flex';
-    showMode('loading');showModal();
+    showMode('loading');
+    showModal();
 
-    // PERBAIKAN: Menghapus argumen error callback (ke-3) pada onValue
-    // Karena modular SDK v9 tidak mendukung itu.
-    onValue(ref(db,'sync_rooms/'+roomId+'/meta'),snap=>{
+    // PERBAIKAN: Menggunakan onValue dengan benar (tanpa error callback argumen ke-3)
+    onValue(ref(db,'sync_rooms/'+roomId+'/meta'),(snap)=>{
         const m=snap.val();
-        if(!m){showErr('Room Tidak Ditemukan','Kamar ini mungkin sudah dihapus.');setSyncStatus(false);return}
+        if(!m){
+            showErr('Room Tidak Ditemukan','Kamar ini mungkin sudah dihapus.');
+            setSyncStatus(false);
+            return;
+        }
         titleEl.textContent=m.title||'Unknown';
         setPoster(m.posterSrc);
         
@@ -330,14 +427,27 @@ function initGuest(){
             typeBadge.style.display='none';
         }
 
-        if(m.videoSrc){video.src=m.videoSrc;videoReady=true}else{showErr('Video Tidak Tersedia','Sumber video tidak ditemukan.');return}
-        bookingTimestamp=m.targetTime?parseInt(m.targetTime,10):null;if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
-        setSyncStatus(true);registerViewer();setupSync();checkGuestInit();
+        if(m.videoSrc){
+            video.src=m.videoSrc;
+            videoReady=true;
+        }else{
+            showErr('Video Tidak Tersedia','Sumber video tidak ditemukan.');
+            return;
+        }
+        bookingTimestamp=m.targetTime?parseInt(m.targetTime,10):null;
+        if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
+        setSyncStatus(true);
+        registerViewer();
+        setupSync();
+        checkGuestInit();
     }); 
 }
 
 function registerViewer(){
-    if(!chatUserId){chatUserId='u_'+Math.random().toString(36).substring(2,7);sessionStorage.setItem('tmo_uid',chatUserId)}
+    if(!chatUserId){
+        chatUserId='u_'+Math.random().toString(36).substring(2,7);
+        sessionStorage.setItem('tmo_uid',chatUserId);
+    }
     chatName=sessionStorage.getItem('tmo_name')||null;
     const vRef=ref(db,'sync_rooms/'+roomId+'/viewers/'+chatUserId);
     set(vRef,{name:chatName||'Anonim',joinedAt:Date.now()}).catch(()=>{});
@@ -345,18 +455,35 @@ function registerViewer(){
 }
 
 function checkGuestInit(){
-    onValue(ref(db,'sync_rooms/'+roomId+'/status'),snap=>{
+    onValue(ref(db,'sync_rooms/'+roomId+'/status'),(snap)=>{
         const s=snap.val();
-        if(s&&s.isPlaying){setSyncFlag(true);video.currentTime=s.currentTime;const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300)};video.addEventListener('seeked',h);showJoinMode();return}
+        if(s&&s.isPlaying){
+            setSyncFlag(true);
+            video.currentTime=s.currentTime;
+            const h=()=>{
+                video.removeEventListener('seeked',h);
+                setTimeout(()=>setSyncFlag(false),300);
+            };
+            video.addEventListener('seeked',h);
+            showJoinMode();
+            return;
+        }
         if(bookingTimestamp&&bookingTimestamp>Date.now())startCd(bookingTimestamp);else showWaitMode();
     },{onlyOnce:true});
 }
 
 // ===== MODES =====
-function decideMode(){if(!videoReady){showErr('Video Tidak Tersedia','Sumber video tidak valid.');return}if(bookingTimestamp&&bookingTimestamp>Date.now())startCd(bookingTimestamp);else showReadyMode()}
+function decideMode(){
+    if(!videoReady){
+        showErr('Video Tidak Tersedia','Sumber video tidak valid.');
+        return;
+    }
+    if(bookingTimestamp&&bookingTimestamp>Date.now())startCd(bookingTimestamp);else showReadyMode();
+}
 
 function startCd(ts){
-    showMode('countdown');showModal();
+    showMode('countdown');
+    showModal();
     document.getElementById('cdTarget').textContent=fmtTime(ts);
     const interactBtn=document.getElementById('btnInteract');
     interactBtn.style.display='inline-flex';
@@ -365,25 +492,58 @@ function startCd(ts){
         const d=ts-Date.now();
         document.getElementById('cdTimer').textContent=fmtCd(d);
         if(d<=0){
-            clearInterval(cdInterval);cdInterval=null;
+            clearInterval(cdInterval);
+            cdInterval=null;
             document.getElementById('cdTimer').textContent='00:00:00';
             interactBtn.style.display='none';
             hideModal();
-            video.play().then(()=>{console.log('Auto-play berhasil setelah countdown')}).catch(()=>showToast('Klik video untuk memulai')});
+            video.play().then(()=>{console.log('Auto-play berhasil setelah countdown')}).catch(()=>showToast('Klik video untuk memulai'));
             if(isHost)sendSync();
         }
     }
-    tick();cdInterval=setInterval(tick,1000);
+    tick();
+    cdInterval=setInterval(tick,1000);
 }
 
-function showReadyMode(){document.getElementById('readyTitle').textContent='Siap Menonton';document.getElementById('readySub').textContent='Bagikan link ke teman, lalu klik tombol di bawah.';showMode('ready');showModal()}
-function showWaitMode(){showMode('waiting');showModal()}
-function showJoinMode(){showMode('join');showModal()}
-function showErr(t,m){document.getElementById('errTitle').textContent=t;document.getElementById('errMsg').textContent=m;showMode('error');showModal();setSyncStatus(false)}
+function showReadyMode(){
+    document.getElementById('readyTitle').textContent='Siap Menonton';
+    document.getElementById('readySub').textContent='Bagikan link ke teman, lalu klik tombol di bawah.';
+    showMode('ready');
+    showModal();
+}
+function showWaitMode(){
+    showMode('waiting');
+    showModal();
+}
+function showJoinMode(){
+    showMode('join');
+    showModal();
+}
+function showErr(t,m){
+    document.getElementById('errTitle').textContent=t;
+    document.getElementById('errMsg').textContent=m;
+    showMode('error');
+    showModal();
+    setSyncStatus(false);
+}
 
 // ===== PLAYBACK =====
-function startPlay(){hasInteracted=true;if(cdInterval){clearInterval(cdInterval);cdInterval=null}hideModal();video.play().catch(()=>showToast('Klik video untuk memulai'));if(isHost)sendSync()}
-function joinPlay(){hasInteracted=true;setSyncFlag(false);hideModal();video.play().catch(()=>showToast('Klik video untuk memulai'))}
+function startPlay(){
+    hasInteracted=true;
+    if(cdInterval){
+        clearInterval(cdInterval);
+        cdInterval=null;
+    }
+    hideModal();
+    video.play().catch(()=>showToast('Klik video untuk memulai'));
+    if(isHost)sendSync();
+}
+function joinPlay(){
+    hasInteracted=true;
+    setSyncFlag(false);
+    hideModal();
+    video.play().catch(()=>showToast('Klik video untuk memulai'));
+}
 
 document.getElementById('btnInteract').addEventListener('click',function(){
     hasInteracted=true;
@@ -395,68 +555,237 @@ document.getElementById('btnInteract').addEventListener('click',function(){
     showToast('Pemutaran otomatis diizinkan!');
 });
 
-document.getElementById('btnCdStart').addEventListener('click',function(){if(!this.disabled)startPlay()});
+document.getElementById('btnCdStart').addEventListener('click',function(){
+    if(!this.disabled)startPlay();
+});
 document.getElementById('btnReady').addEventListener('click',startPlay);
 document.getElementById('btnJoin').addEventListener('click',joinPlay);
-document.getElementById('btnErrBack').addEventListener('click',()=>{location.href='../index.html'});
-document.getElementById('exitBtn').addEventListener('click',()=>{location.href='../index.html'});
+document.getElementById('btnErrBack').addEventListener('click',()=>{
+    location.href='../index.html';
+});
+document.getElementById('exitBtn').addEventListener('click',()=>{
+    location.href='../index.html';
+});
 
 // Video events
-video.addEventListener('waiting',()=>{if(!video.paused)bufferOv.classList.add('show')});
+video.addEventListener('waiting',()=>{
+    if(!video.paused)bufferOv.classList.add('show');
+});
 video.addEventListener('canplay',()=>bufferOv.classList.remove('show'));
-video.addEventListener('playing',()=>bufferOv.classList.remove('show'});
-video.addEventListener('pause',()=>{if(!isHost&&!isSyncing&&hasInteracted&&!modalActive)showToast('Hanya Host yang dapat mengontrol')});
-video.addEventListener('error',function(){const e=video.error;let m='Sumber video tidak dapat dimuat.';if(e)switch(e.code){case 2:m='Error jaringan.';break;case 3:m='Dekode gagal.';break;case 4:m='Sumber tidak valid atau kedaluwarsa.';break}showErr('Gagal Memuat Video',m)});
+video.addEventListener('playing',()=>bufferOv.classList.remove('show'));
+video.addEventListener('pause',()=>{
+    if(!isHost&&!isSyncing&&hasInteracted&&!modalActive)showToast('Hanya Host yang dapat mengontrol');
+});
+video.addEventListener('error',function(){
+    const e=video.error;
+    let m='Sumber video tidak dapat dimuat.';
+    if(e){
+        switch(e.code){
+            case 2:m='Error jaringan.';break;
+            case 3:m='Dekode gagal.';break;
+            case 4:m='Sumber tidak valid atau kedaluwarsa.';break;
+        }
+    }
+    showErr('Gagal Memuat Video',m);
+});
 
 // ===== SYNC SENDER =====
-function sendSync(){if(!isHost||!videoReady)return;const n=Date.now();lastSentTs=n;set(ref(db,'sync_rooms/'+roomId+'/status'),{currentTime:video.currentTime,isPlaying:!video.paused,lastUpdate:n}).catch(()=>setSyncStatus(false))}
-function setupSender(){sendInterval=setInterval(()=>{if(isHost&&!video.paused&&!isSyncing&&videoReady)sendSync()},1500);video.addEventListener('play',()=>{if(isHost&&!isSyncing)sendSync()});video.addEventListener('pause',()=>{if(isHost&&!isSyncing)sendSync()});video.addEventListener('seeked',()=>{if(isHost&&!isSyncing)sendSync()})}
+function sendSync(){
+    if(!isHost||!videoReady)return;
+    const n=Date.now();
+    lastSentTs=n;
+    set(ref(db,'sync_rooms/'+roomId+'/status'),{
+        currentTime:video.currentTime,
+        isPlaying:!video.paused,
+        lastUpdate:n
+    }).catch(()=>setSyncStatus(false));
+}
+function setupSender(){
+    sendInterval=setInterval(()=>{
+        if(isHost&&!video.paused&&!isSyncing&&videoReady)sendSync();
+    },1500);
+    video.addEventListener('play',()=>{
+        if(isHost&&!isSyncing)sendSync();
+    });
+    video.addEventListener('pause',()=>{
+        if(isHost&&!isSyncing)sendSync();
+    });
+    video.addEventListener('seeked',()=>{
+        if(isHost&&!isSyncing)sendSync();
+    });
+}
 
 // ===== SYNC LISTENER =====
 function setupSync(){
-    if(syncListenerOn)return;syncListenerOn=true;
-    onValue(ref(db,'sync_rooms/'+roomId+'/status'),snap=>{
-        const d=snap.val();if(!d||!videoReady)return;
-        const age=Date.now()-d.lastUpdate;if(age>6000){setSyncStatus(false);return}setSyncStatus(true);
+    if(syncListenerOn)return;
+    syncListenerOn=true;
+    onValue(ref(db,'sync_rooms/'+roomId+'/status'),(snap)=>{
+        const d=snap.val();
+        if(!d||!videoReady)return;
+        const age=Date.now()-d.lastUpdate;
+        if(age>6000){
+            setSyncStatus(false);
+            return;
+        }
+        setSyncStatus(true);
         if(isHost&&Math.abs(d.lastUpdate-lastSentTs)<800)return;
+        
         if(!isHost&&modalActive){
             if((currentMode==='waiting'||currentMode==='countdown')&&d.isPlaying){
-                if(cdInterval){clearInterval(cdInterval);cdInterval=null}
-                setSyncFlag(true);video.currentTime=d.currentTime;const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300)};video.addEventListener('seeked',h);showJoinMode();return}
-            return}
-        if(Math.abs(video.currentTime-d.currentTime)>2){if(!isHost)flashSync();setSyncFlag(true);video.currentTime=d.currentTime;const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300)};video.addEventListener('seeked',h)}
-        if(d.isPlaying&&video.paused){if(hasInteracted&&!modalActive)video.play().catch(()=>showToast('Klik video untuk melanjutkan'))}else if(!d.isPlaying&&!video.paused)video.pause();
+                if(cdInterval){
+                    clearInterval(cdInterval);
+                    cdInterval=null;
+                }
+                setSyncFlag(true);
+                video.currentTime=d.currentTime;
+                const h=()=>{
+                    video.removeEventListener('seeked',h);
+                    setTimeout(()=>setSyncFlag(false),300);
+                };
+                video.addEventListener('seeked',h);
+                showJoinMode();
+                return;
+            }
+            return;
+        }
+        if(Math.abs(video.currentTime-d.currentTime)>2){
+            if(!isHost)flashSync();
+            setSyncFlag(true);
+            video.currentTime=d.currentTime;
+            const h=()=>{
+                video.removeEventListener('seeked',h);
+                setTimeout(()=>setSyncFlag(false),300);
+            };
+            video.addEventListener('seeked',h);
+        }
+        if(d.isPlaying&&video.paused){
+            if(hasInteracted&&!modalActive)video.play().catch(()=>showToast('Klik video untuk melanjutkan'));
+        }else if(!d.isPlaying&&!video.paused){
+            video.pause();
+        }
     });
 }
 
 // ===== CHAT =====
-function initChatUI(){if(chatName){nameSetup.style.display='none';chatBody.style.display='flex';chatInputArea.style.display='flex';loadChatMessages()}}
-function loadChatMessages(){const cr=query(ref(db,'sync_rooms/'+roomId+'/chat'),limitToLast(60));onChildAdded(cr,snap=>{const m=snap.val();if(!m)return;if(chatEmpty)chatEmpty.style.display='none';appendMsg(m);if(chatOpen)chatBody.scrollTop=chatBody.scrollHeight;else{unreadCount++;unreadDot.classList.add('show')}})}
-function appendMsg(m){const isSelf=m.uid===chatUserId;const div=document.createElement('div');div.className='msg '+(isSelf?'self':'other');const ts=new Date(m.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});div.innerHTML=`<span class="msg-name">${escH(m.name)}</span>${escH(m.text)}<span class="msg-time">${ts}</span>`;chatBody.appendChild(div)}
-function escH(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function sendMsg(){const txt=msgInput.value.trim();if(!txt||!chatName)return;msgInput.value='';push(ref(db,'sync_rooms/'+roomId+'/chat'),{uid:chatUserId,name:chatName,text:txt,ts:Date.now()}).catch(()=>showToast('Gagal mengirim'))}
+function initChatUI(){
+    if(chatName){
+        nameSetup.style.display='none';
+        chatBody.style.display='flex';
+        chatInputArea.style.display='flex';
+        loadChatMessages();
+    }
+}
+function loadChatMessages(){
+    const cr=query(ref(db,'sync_rooms/'+roomId+'/chat'),limitToLast(60));
+    onChildAdded(cr,(snap)=>{
+        const m=snap.val();
+        if(!m)return;
+        if(chatEmpty)chatEmpty.style.display='none';
+        appendMsg(m);
+        if(chatOpen)chatBody.scrollTop=chatBody.scrollHeight;else{
+            unreadCount++;
+            unreadDot.classList.add('show');
+        }
+    });
+}
+function appendMsg(m){
+    const isSelf=m.uid===chatUserId;
+    const div=document.createElement('div');
+    div.className='msg '+(isSelf?'self':'other');
+    const ts=new Date(m.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    div.innerHTML=`<span class="msg-name">${escH(m.name)}</span>${escH(m.text)}<span class="msg-time">${ts}</span>`;
+    chatBody.appendChild(div);
+}
+function escH(s){
+    const d=document.createElement('div');
+    d.textContent=s;
+    return d.innerHTML;
+}
+function sendMsg(){
+    const txt=msgInput.value.trim();
+    if(!txt||!chatName)return;
+    msgInput.value='';
+    push(ref(db,'sync_rooms/'+roomId+'/chat'),{
+        uid:chatUserId,
+        name:chatName,
+        text:txt,
+        ts:Date.now()
+    }).catch(()=>showToast('Gagal mengirim'));
+}
 
 document.getElementById('chatBtn').addEventListener('click',toggleChat);
 document.getElementById('chatClose').addEventListener('click',toggleChat);
-function toggleChat(){chatOpen=!chatOpen;chatPanel.classList.toggle('open',chatOpen);if(chatOpen){unreadCount=0;unreadDot.classList.remove('show');setTimeout(()=>chatBody.scrollTop=chatBody.scrollHeight,100);msgInput.focus();showCtrlBar()}else{resetCtrlTimer()}}
+function toggleChat(){
+    chatOpen=!chatOpen;
+    chatPanel.classList.toggle('open',chatOpen);
+    if(chatOpen){
+        unreadCount=0;
+        unreadDot.classList.remove('show');
+        setTimeout(()=>chatBody.scrollTop=chatBody.scrollHeight,100);
+        msgInput.focus();
+        showCtrlBar();
+    }else{
+        resetCtrlTimer();
+    }
+}
 
 document.getElementById('nameSubmit').addEventListener('click',submitName);
-nameInput.addEventListener('keydown',e=>{if(e.key==='Enter')submitName()});
-function submitName(){const n=nameInput.value.trim();if(!n){nameInput.style.borderColor='#f44336';setTimeout(()=>nameInput.style.borderColor='',1500);return}chatName=n;sessionStorage.setItem('tmo_name',n);initChatUI()}
+nameInput.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter')submitName();
+});
+function submitName(){
+    const n=nameInput.value.trim();
+    if(!n){
+        nameInput.style.borderColor='#f44336';
+        setTimeout(()=>nameInput.style.borderColor='',1500);
+        return;
+    }
+    chatName=n;
+    sessionStorage.setItem('tmo_name',n);
+    initChatUI();
+}
 
 document.getElementById('sendBtn').addEventListener('click',sendMsg);
-msgInput.addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg()});
+msgInput.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter')sendMsg();
+});
 msgInput.addEventListener('focus',showCtrlBar);
 
 // Copy
-document.getElementById('btnCopy').addEventListener('click',function(){const l=shareInput.value;if(!l)return;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(l).then(onCopyOk).catch(fbCopy);else fbCopy()});
-function fbCopy(){shareInput.select();shareInput.setSelectionRange(0,99999);try{document.execCommand('copy');onCopyOk()}catch(e){showToast('Gagal menyalin')}}
-function onCopyOk(){const b=document.getElementById('btnCopy'),o=b.innerHTML;b.innerHTML='<i class="fas fa-check"></i> OK';b.style.background='#4caf50';setTimeout(()=>{b.innerHTML=o;b.style.background=''},1800)}
+document.getElementById('btnCopy').addEventListener('click',function(){
+    const l=shareInput.value;
+    if(!l)return;
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(l).then(onCopyOk).catch(fbCopy);
+    }else{
+        fbCopy();
+    }
+});
+function fbCopy(){
+    shareInput.select();
+    shareInput.setSelectionRange(0,99999);
+    try{
+        document.execCommand('copy');
+        onCopyOk();
+    }catch(e){
+        showToast('Gagal menyalin');
+    }
+}
+function onCopyOk(){
+    const b=document.getElementById('btnCopy');
+    const o=b.innerHTML;
+    b.innerHTML='<i class="fas fa-check"></i> OK';
+    b.style.background='#4caf50';
+    setTimeout(()=>{b.innerHTML=o;b.style.background=''},1800);
+}
 
 // Cleanup
 window.addEventListener('beforeunload',()=>{
-    if(cdInterval)clearInterval(cdInterval);if(sendInterval)clearInterval(sendInterval);
-    if(syncSeekTo)clearTimeout(syncSeekTo);if(toastTo)clearTimeout(toastTo);if(ctrlHideTimer)clearTimeout(ctrlHideTimer);
+    if(cdInterval)clearInterval(cdInterval);
+    if(sendInterval)clearInterval(sendInterval);
+    if(syncSeekTo)clearTimeout(syncSeekTo);
+    if(toastTo)clearTimeout(toastTo);
+    if(ctrlHideTimer)clearTimeout(ctrlHideTimer);
 });
 
 setTimeout(initChatUI,100);
