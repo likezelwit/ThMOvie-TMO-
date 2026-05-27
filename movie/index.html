@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TMO Player - Watch Together</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; }
         body { 
             margin: 0; 
             background: #000; 
@@ -18,10 +19,9 @@
             overflow: hidden; 
         }
         
-        /* Header Player */
         .player-header {
             padding: 10px 20px;
-            background: rgba(20,20,20,0.9);
+            background: rgba(20,20,20,0.95);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -29,6 +29,7 @@
             z-index: 10;
             flex-wrap: wrap;
             gap: 10px;
+            min-height: 56px;
         }
         
         .header-left {
@@ -39,11 +40,27 @@
         }
 
         .movie-info { display: flex; align-items: center; gap: 12px; }
-        .movie-thumb { width: 35px; height: 35px; border-radius: 5px; object-fit: cover; background: #222; }
-        .movie-title { font-weight: 600; font-size: 1rem; }
-        .sync-status { font-size: 0.75rem; color: #4caf50; background: rgba(76, 175, 80, 0.1); padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+        .movie-thumb { 
+            width: 35px; height: 35px; border-radius: 5px; 
+            object-fit: cover; background: #222; flex-shrink: 0;
+        }
+        .movie-title { font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
         
-        .exit-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .badge {
+            font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; 
+            white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+            transition: all 0.3s;
+        }
+        .badge-sync { color: #4caf50; background: rgba(76, 175, 80, 0.1); }
+        .badge-sync.error { color: #f44336; background: rgba(244, 67, 54, 0.1); }
+        .badge-viewer { color: #ff9800; background: rgba(255, 152, 0, 0.1); }
+        
+        .exit-btn { 
+            background: #333; color: white; border: none; 
+            padding: 8px 15px; border-radius: 5px; cursor: pointer; 
+            font-weight: 600; font-size: 0.9rem; transition: 0.2s; 
+            flex-shrink: 0;
+        }
         .exit-btn:hover { background: #555; }
 
         .video-wrapper {
@@ -54,59 +71,109 @@
             background: #000;
             position: relative;
             overflow: hidden;
-            max-height: calc(100vh - 70px);
         }
+        .video-wrapper.modal-open video { pointer-events: none; }
 
         video {
             width: 100%;
             height: 100%;
             object-fit: contain;
             outline: none;
+            transition: none;
         }
 
-        /* Start Up Modal Styles */
+        /* === MODAL === */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.88);
+            backdrop-filter: blur(6px);
             z-index: 2000;
             display: flex;
             justify-content: center;
             align-items: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s;
+            transition: opacity 0.35s ease;
         }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
 
-        .modal-content {
-            background: #222;
-            padding: 30px;
-            border-radius: 12px;
+        .modal-card {
+            background: linear-gradient(145deg, #1e1e1e, #181818);
+            padding: 35px 30px;
+            border-radius: 16px;
             text-align: center;
-            max-width: 400px;
-            width: 90%;
-            border: 1px solid #444;
-            transform: scale(0.9);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 420px;
+            width: 92%;
+            border: 1px solid #333;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            transform: scale(0.92) translateY(15px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-overlay.active .modal-card { transform: scale(1) translateY(0); }
 
-        .countdown-circle {
-            width: 80px; height: 80px;
+        .modal-icon {
+            width: 90px; height: 90px;
             border-radius: 50%;
-            border: 4px solid #0078ff;
+            border: 3px solid #0078ff;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            margin: 0 auto 15px;
+            margin: 0 auto 18px;
+            background: rgba(0, 120, 255, 0.06);
+            position: relative;
         }
+        /* FIX #5: Spin border hanya aktif dengan class .spin */
+        .modal-icon::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: inherit;
+            display: none;
+        }
+        .modal-icon.spin::before {
+            display: block;
+            animation: spinBorder 2s linear infinite;
+        }
+        @keyframes spinBorder { to { transform: rotate(360deg); } }
 
-        .time-display { font-size: 1.1rem; font-weight: 800; }
+        .time-display { font-size: 1.15rem; font-weight: 800; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; }
+        .modal-title { font-size: 1.6rem; color: white; margin: 0 0 8px; }
+        .modal-subtitle { color: #999; margin: 0 0 20px; font-size: 0.9rem; line-height: 1.5; }
+        .modal-target-time { font-size: 1.3rem; color: #0078ff; font-weight: 800; margin-bottom: 22px; font-family: 'JetBrains Mono', monospace; }
 
-        /* SHARE BOX */
+        .btn-primary {
+            background: #0078ff; color: white; border: none;
+            padding: 14px 36px; border-radius: 50px; cursor: pointer;
+            font-weight: 700; font-size: 1rem; transition: 0.25s;
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-primary:hover:not(:disabled) { background: #0062cc; transform: translateY(-1px); }
+        .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
+        
+        /* FIX #12: Pulse effect saat tombol countdown aktif */
+        .btn-primary.pulse { animation: btnPulse 1.2s ease-in-out infinite; }
+        @keyframes btnPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 120, 255, 0.5); }
+            50% { box-shadow: 0 0 0 14px rgba(0, 120, 255, 0); }
+        }
+        .btn-primary.orange { background: #ff9800; }
+        .btn-primary.orange:hover:not(:disabled) { background: #e68900; }
+
+        .btn-secondary {
+            background: transparent; color: #aaa; border: 1px solid #444;
+            padding: 10px 24px; border-radius: 50px; cursor: pointer;
+            font-weight: 600; font-size: 0.85rem; transition: 0.2s;
+            margin-top: 12px; display: inline-block;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-secondary:hover { border-color: #888; color: #fff; }
+
+        /* === SHARE BOX === */
         .share-box {
             background: #111;
             padding: 8px 12px;
@@ -115,10 +182,9 @@
             align-items: center;
             gap: 10px;
             border: 1px solid #333;
-            animation: slideDown 0.5s ease;
+            animation: slideDown 0.4s ease;
         }
-
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
         .share-label { font-size: 0.75rem; color: #aaa; white-space: nowrap; font-weight: 600; }
         
@@ -129,68 +195,121 @@
             border: 1px solid #444;
             border-radius: 4px;
             padding: 3px 8px;
-            width: 200px;
+            width: 220px;
         }
-
+        /* FIX #11: Monospace yang benar untuk URL */
         .url-input-group input {
             background: transparent;
             border: none;
             color: #0078ff;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             width: 100%;
             outline: none;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .copy-btn {
-            background: #333;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            transition: 0.2s;
+            background: #333; color: white; border: none;
+            padding: 4px 10px; border-radius: 4px; cursor: pointer;
+            font-size: 0.75rem; white-space: nowrap; transition: 0.2s;
+            font-family: 'Inter', sans-serif;
         }
-        .copy-btn:hover:not(:disabled) { background: #0078ff; }
-        .copy-btn:disabled { background: #555; cursor: not-allowed; opacity: 0.6; }
+        .copy-btn:hover { background: #0078ff; }
 
-        /* SYNC INDICATOR */
+        /* === SYNC INDICATOR === */
         .sync-indicator {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.7);
-            padding: 8px 12px;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(0,0,0,0.75);
+            padding: 7px 12px;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             display: flex;
             align-items: center;
             gap: 6px;
             pointer-events: none;
             z-index: 5;
+            border: 1px solid rgba(255,255,255,0.08);
         }
-        .dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; animation: pulse 2s infinite; }
-        
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .dot { 
+            width: 8px; height: 8px; background: #4caf50; border-radius: 50%; 
+            animation: pulse 2s infinite; flex-shrink: 0;
+        }
+        .dot.disconnected { background: #f44336; animation: none; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
 
-        /* Disabled Video Overlay */
-        .video-controls-overlay {
+        /* FIX #8: Overlay sinkronisasi seek */
+        .sync-seek-overlay {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 50;
-            display: none;
-            justify-content: center;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: flex;
             align-items: center;
+            justify-content: center;
+            z-index: 4;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
         }
-        .video-controls-overlay.modal-active { display: flex; }
+        .sync-seek-overlay.show { opacity: 1; }
+        .sync-seek-overlay i { font-size: 1.5rem; color: #0078ff; }
+        .sync-seek-overlay span { display: block; margin-top: 8px; font-size: 0.82rem; color: #ccc; }
 
-        .error-msg {
-            text-align: center;
+        /* FIX #10: Overlay buffering */
+        .buffering-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .buffering-overlay.show { opacity: 1; }
+        .buffering-overlay i { font-size: 2rem; color: rgba(255,255,255,0.8); }
+
+        /* FIX #7: Toast dengan anti-tumpuk */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #222;
             color: #fff;
-            padding: 20px;
-            width: 100%;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            z-index: 9999;
+            border: 1px solid #444;
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            max-width: 90vw;
+            text-align: center;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Waiting dots animation */
+        .waiting-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+        }
+
+        @media (max-width: 600px) {
+            .url-input-group { width: 130px; }
+            .modal-card { padding: 25px 20px; }
+            .modal-title { font-size: 1.3rem; }
+            .btn-primary { padding: 12px 28px; font-size: 0.9rem; }
+            .movie-title { max-width: 120px; }
         }
     </style>
 </head>
@@ -209,63 +328,129 @@
             </div>
 
             <div class="movie-info">
-                <img id="m-poster" class="movie-thumb" src="">
+                <img id="m-poster" class="movie-thumb" src="" alt="">
                 <div>
-                    <div id="m-title" class="movie-title">Loading...</div>
-                    <div class="sync-status"><i class="fas fa-sync-alt fa-spin"></i> SINKRONISASI AKTIF</div>
+                    <div id="m-title" class="movie-title">Memuat...</div>
+                    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                        <span id="syncStatusBadge" class="badge badge-sync">
+                            <i class="fas fa-circle-notch fa-spin"></i> Menghubungkan...
+                        </span>
+                        <span id="viewerBadge" class="badge badge-viewer" style="display:none;">
+                            <i class="fas fa-eye"></i> Penonton
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <button class="exit-btn" onclick="window.location.href='../index.html'">
+        <button class="exit-btn" id="exitBtn">
             <i class="fas fa-sign-out-alt"></i> Keluar
         </button>
     </div>
 
     <div class="video-wrapper" id="content-area">
-        <video id="mainVideo" controls>
+        <video id="mainVideo" preload="auto" playsinline>
             Browser Anda tidak mendukung tag video.
         </video>
-        <div class="sync-indicator">
-            <div class="dot"></div>
-            Live Sync Mode: ON
+
+        <!-- FIX #10: Buffering indicator -->
+        <div class="buffering-overlay" id="bufferingOverlay">
+            <i class="fas fa-circle-notch fa-spin"></i>
         </div>
-        
-        <div class="video-controls-overlay" id="controlsOverlay">
-            <div style="text-align: center; padding: 40px;">
-                <div class="countdown-circle">
-                    <i class="fas fa-clock" style="font-size: 1.2rem; color: #0078ff; margin-bottom: 2px;"></i>
+
+        <!-- FIX #8: Sync seek indicator -->
+        <div class="sync-seek-overlay" id="syncSeekOverlay">
+            <div style="text-align:center;">
+                <i class="fas fa-sync-alt fa-spin"></i>
+                <span>Menyinkronkan...</span>
+            </div>
+        </div>
+
+        <div class="sync-indicator" id="syncIndicator">
+            <div class="dot" id="syncDot"></div>
+            <span id="syncLabel">Menghubungkan...</span>
+        </div>
+    </div>
+
+    <!-- Modal tunggal -->
+    <div class="modal-overlay" id="mainModal">
+        <div class="modal-card">
+            <!-- Mode: Loading -->
+            <div id="modeLoading" style="display:none;">
+                <div class="modal-icon spin" style="border-color:#0078ff;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:1.4rem; color:#0078ff;"></i>
+                </div>
+                <h2 class="modal-title">Menghubungkan...</h2>
+                <p class="modal-subtitle">Mengambil data film dari server.</p>
+            </div>
+
+            <!-- Mode: Countdown -->
+            <div id="modeCountdown" style="display:none;">
+                <div class="modal-icon spin" style="border-color:#0078ff;">
+                    <i class="fas fa-clock" style="font-size:1.3rem; color:#0078ff; margin-bottom:2px;"></i>
                     <div class="time-display" id="countdownTimer">00:00:00</div>
                 </div>
-                <h2 style="font-size: 2rem; color: white; margin-bottom: 10px;">FILM BELUM MULAI!</h2>
-                <p style="color: #ccc; margin-bottom: 25px;">Film dapat diputar pada jam tayang:</p>
-                <p id="targetTimeDisplay" style="font-size: 1.2rem; color: #0078ff; font-weight: 800; margin-bottom: 20px;"></p>
-                
-                <button id="btnStartNowMain" class="copy-btn" style="padding: 15px 40px; background: #0078ff; font-weight: bold; border-radius: 50px; font-size: 1.1rem;">
-                    OKE, MULAI NONTON!
+                <h2 class="modal-title">Film Belum Mulai</h2>
+                <p class="modal-subtitle">Film dapat diputar pada jam tayang:</p>
+                <div class="modal-target-time" id="targetTimeDisplay">--:--</div>
+                <button id="btnStartCountdown" class="btn-primary" disabled>
+                    <i class="fas fa-hourglass-half"></i> Menunggu Jam Tayang...
+                </button>
+            </div>
+
+            <!-- Mode: Ready (Host) -->
+            <div id="modeReady" style="display:none;">
+                <div class="modal-icon" style="border-color:#4caf50;">
+                    <i class="fas fa-play" style="font-size:1.4rem; color:#4caf50;"></i>
+                </div>
+                <h2 class="modal-title" id="readyTitle">Siap Menonton</h2>
+                <p class="modal-subtitle" id="readySubtitle">Bagikan link ke teman, lalu klik tombol di bawah untuk mulai.</p>
+                <button id="btnStartReady" class="btn-primary">
+                    <i class="fas fa-play"></i> Mulai Nonton
+                </button>
+            </div>
+
+            <!-- FIX #2: Mode: Waiting for Host (Guest) -->
+            <div id="modeWaiting" style="display:none;">
+                <div class="modal-icon spin" style="border-color:#ff9800;">
+                    <i class="fas fa-hourglass-half" style="font-size:1.3rem; color:#ff9800;"></i>
+                </div>
+                <h2 class="modal-title">Menunggu Host<span class="waiting-dots"></span></h2>
+                <p class="modal-subtitle">Host belum memulai film. Silakan tunggu, film akan otomatis dimulai saat Host menekan play.</p>
+            </div>
+
+            <!-- FIX #1: Mode: Join (Guest saat film sudah berjalan) -->
+            <div id="modeJoin" style="display:none;">
+                <div class="modal-icon" style="border-color:#ff9800;">
+                    <i class="fas fa-user-plus" style="font-size:1.3rem; color:#ff9800;"></i>
+                </div>
+                <h2 class="modal-title">Film Sedang Berjalan</h2>
+                <p class="modal-subtitle">Host sedang menonton. Klik tombol di bawah untuk langsung bergabung di posisi yang sama.</p>
+                <button id="btnJoin" class="btn-primary orange pulse">
+                    <i class="fas fa-sign-in-alt"></i> Bergabung Sekarang
+                </button>
+            </div>
+
+            <!-- Mode: Error -->
+            <div id="modeError" style="display:none;">
+                <div class="modal-icon" style="border-color:#f44336;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:1.4rem; color:#f44336;"></i>
+                </div>
+                <h2 class="modal-title" id="errorTitle">Terjadi Kesalahan</h2>
+                <p class="modal-subtitle" id="errorMsg">Deskripsi error.</p>
+                <button class="btn-secondary" id="btnErrorBack">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Beranda
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="startUpModal">
-        <div class="modal-content">
-            <i class="fas fa-clock" style="font-size: 2rem; color: #0078ff; margin-bottom: 15px;"></i>
-            <h2 style="color: white; margin-top: 0;">Belum Saatnya!</h2>
-            <p style="color: #ccc; margin-bottom: 20px;">Film ini belum bisa diputar. Menunggu sampai jam tayang.</p>
-            <div class="countdown-circle" style="width: 100px; height: 100px;">
-                <div class="time-display" id="modalCountdown" style="font-size: 1.3rem;">00:00:00</div>
-            </div>
-            <p id="modalTargetTime" style="font-size: 1.2rem; color: #4caf50; font-weight: bold; margin-top: 10px; margin-bottom: 20px;">00:00</p>
-            <button id="btnStartNowModal" class="copy-btn" style="padding: 15px 40px; background: #0078ff; font-weight: bold; border-radius: 50px; font-size: 1.1rem;">
-                OKE, MULAI NONTON!
-            </button>
-        </div>
-    </div>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
@@ -281,223 +466,546 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Video Elements
+    // === DOM ===
     const video = document.getElementById('mainVideo');
     const titleEl = document.getElementById('m-title');
     const posterEl = document.getElementById('m-poster');
     const contentArea = document.getElementById('content-area');
     const shareArea = document.getElementById('share-area');
     const shareInput = document.getElementById('shareLinkInput');
-    
-    const startUpModal = document.getElementById('startUpModal');
-    const controlsOverlay = document.getElementById('controlsOverlay');
+    const mainModal = document.getElementById('mainModal');
+    const syncDot = document.getElementById('syncDot');
+    const syncLabel = document.getElementById('syncLabel');
+    const syncStatusBadge = document.getElementById('syncStatusBadge');
+    const viewerBadge = document.getElementById('viewerBadge');
+    const toastEl = document.getElementById('toast');
+    const bufferingOverlay = document.getElementById('bufferingOverlay');
+    const syncSeekOverlay = document.getElementById('syncSeekOverlay');
+
+    const modeLoading = document.getElementById('modeLoading');
+    const modeCountdown = document.getElementById('modeCountdown');
+    const modeReady = document.getElementById('modeReady');
+    const modeWaiting = document.getElementById('modeWaiting');
+    const modeJoin = document.getElementById('modeJoin');
+    const modeError = document.getElementById('modeError');
+
     const countdownTimer = document.getElementById('countdownTimer');
-    const modalCountdown = document.getElementById('modalCountdown');
-    const targetTimeEl = document.getElementById('targetTimeDisplay');
-    const modalTargetTime = document.getElementById('modalTargetTime');
-    
-    const btnStartNowMain = document.getElementById('btnStartNowMain');
-    const btnStartNowModal = document.getElementById('btnStartNowModal');
+    const targetTimeDisplay = document.getElementById('targetTimeDisplay');
+    const btnStartCountdown = document.getElementById('btnStartCountdown');
+    const btnStartReady = document.getElementById('btnStartReady');
+    const btnJoin = document.getElementById('btnJoin');
 
-    // Ambil parameter room dari URL
-    const urlParams = new URLSearchParams(window.location.search);
-    let roomId = urlParams.get('room');
+    // === State ===
+    let roomId = null;
     let isHost = false;
-
     let bookingTimestamp = null;
+    let isSyncing = false;
+    let lastSentTimestamp = 0;
+    let countdownInterval = null;
+    let syncSendInterval = null;
+    let hasInteracted = false;
+    let videoReady = false;
+    let syncConnected = false;
+    let modalActive = false;
+    let currentMode = null;        // FIX #13: Track mode aktif untuk transisi otomatis
+    let syncSeekTimeout = null;    // FIX #14: Timeout cleanup untuk isSyncing
+    let toastTimeout = null;       // FIX #7: Anti tumpuk toast
+    let syncListenerActive = false;
+
+    // === Utilities ===
+    function showToast(msg, duration = 2500) {
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastEl.textContent = msg;
+        toastEl.classList.remove('show');
+        // Force reflow agar transisi berjalan ulang
+        void toastEl.offsetWidth;
+        toastEl.classList.add('show');
+        toastTimeout = setTimeout(() => toastEl.classList.remove('show'), duration);
+    }
+
+    function showModal() { 
+        mainModal.classList.add('active'); 
+        modalActive = true;
+        contentArea.classList.add('modal-open'); // FIX #6: Blokir video controls
+    }
+    function hideModal() { 
+        mainModal.classList.remove('active'); 
+        modalActive = false;
+        contentArea.classList.remove('modal-open');
+    }
+
+    function showMode(modeName) {
+        const allModes = { loading: modeLoading, countdown: modeCountdown, ready: modeReady, waiting: modeWaiting, join: modeJoin, error: modeError };
+        Object.values(allModes).forEach(el => el.style.display = 'none');
+        currentMode = modeName;
+        if (allModes[modeName]) allModes[modeName].style.display = 'block';
+    }
+
+    // FIX #4: Stop spin saat connected, gunakan icon yang tepat
+    function setSyncStatus(connected) {
+        syncConnected = connected;
+        if (connected) {
+            syncDot.classList.remove('disconnected');
+            syncLabel.textContent = 'Live Sync: ON';
+            syncStatusBadge.className = 'badge badge-sync';
+            syncStatusBadge.innerHTML = '<i class="fas fa-check-circle"></i> SINKRONISASI AKTIF';
+        } else {
+            syncDot.classList.add('disconnected');
+            syncLabel.textContent = 'Live Sync: OFF';
+            syncStatusBadge.className = 'badge badge-sync error';
+            syncStatusBadge.innerHTML = '<i class="fas fa-times-circle"></i> TIDAK TERHUBUNG';
+        }
+    }
+
+    function formatCountdown(ms) {
+        if (ms <= 0) return '00:00:00';
+        const totalSec = Math.floor(ms / 1000);
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        const s = totalSec % 60;
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function formatTime(ts) {
+        return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // FIX #15: Hapus poster elemen jika gagal, bukan sembunyikan
+    function setPoster(src) {
+        if (src && src !== 'null' && src !== 'undefined') {
+            posterEl.src = src;
+            posterEl.style.display = '';
+            posterEl.onerror = () => { posterEl.remove(); };
+        } else {
+            posterEl.remove();
+        }
+    }
+
+    // FIX #8: Tampilkan overlay saat sync seek
+    function flashSyncSeek() {
+        syncSeekOverlay.classList.add('show');
+        setTimeout(() => syncSeekOverlay.classList.remove('show'), 800);
+    }
+
+    // FIX #14: Set isSyncing dengan cleanup yang lebih robust
+    function setSyncingFlag(value) {
+        isSyncing = value;
+        if (syncSeekTimeout) { clearTimeout(syncSeekTimeout); syncSeekTimeout = null; }
+        if (value) {
+            // Fallback: pastikan flag reset maksimal 3 detik
+            syncSeekTimeout = setTimeout(() => { isSyncing = false; syncSeekTimeout = null; }, 3000);
+        }
+    }
+
+    // === Inisialisasi Room ===
+    const urlParams = new URLSearchParams(window.location.search);
+    roomId = urlParams.get('room');
 
     if (!roomId) {
+        initHost();
+    } else {
+        initGuest();
+    }
+
+    // === HOST PATH ===
+    function initHost() {
         isHost = true;
-        roomId = 'room_' + Math.random().toString(36).substring(2, 8);
+        roomId = 'room_' + Math.random().toString(36).substring(2, 8) + Date.now().toString(36);
+
         const newUrl = `${window.location.pathname}?room=${roomId}`;
-        window.history.replaceState({path: newUrl}, '', newUrl);
-        
-        // Ambil data film dari sessionStorage Host
+        window.history.replaceState({ path: newUrl }, '', newUrl);
+
+        shareArea.style.display = 'flex';
+        shareInput.value = window.location.href;
+
         const movieTitle = sessionStorage.getItem('activeMovieTitle');
         const videoSource = sessionStorage.getItem('activeVideoSource');
         const posterSource = sessionStorage.getItem('activePoster');
-        const activeBookingTime = sessionStorage.getItem('activeBookingTime'); 
+        const activeBookingTime = sessionStorage.getItem('activeBookingTime');
 
         if (!videoSource || !movieTitle) {
-            contentArea.innerHTML = '<div class="error-msg"><h2>Data Film Tidak Ditemukan.</h2><p>Silakan kembali ke halaman Tiket.</p></div>';
-        } else {
-            titleEl.innerText = movieTitle;
-            if(posterSource) posterEl.src = posterSource;
-            video.src = videoSource;
-
-            bookingTimestamp = activeBookingTime ? parseInt(activeBookingTime, 10) : null;
-
-            // Simpan metadata film + waktu tayang ke Firebase agar Guest bisa sinkronisasi
-            set(ref(db, 'sync_rooms/' + roomId + '/meta'), {
-                title: movieTitle,
-                videoSrc: videoSource,
-                posterSrc: posterSource || "",
-                targetTime: bookingTimestamp || 0
-            });
-        }
-    } else {
-        isHost = false;
-        console.log("Joined Room sebagai Guest:", roomId);
-    }
-
-    shareArea.style.display = 'flex';
-    shareInput.value = window.location.href;
-
-    const syncRef = ref(db, 'sync_rooms/' + roomId + '/status');
-    const metaRef = ref(db, 'sync_rooms/' + roomId + '/meta');
-    
-    let isSyncing = false;
-    let startUpInterval = null;
-
-    // Jika Guest, tarik metadata film dari Firebase terlebih dahulu
-    if (!isHost) {
-        onValue(metaRef, (snapshot) => {
-            const meta = snapshot.val();
-            if (meta) {
-                titleEl.innerText = meta.title;
-                if(meta.posterSrc) posterEl.src = meta.posterSrc;
-                if(video.src !== meta.videoSrc) video.src = meta.videoSrc;
-                
-                bookingTimestamp = meta.targetTime ? parseInt(meta.targetTime, 10) : null;
-                checkStartUp();
-            } else {
-                contentArea.innerHTML = '<div class="error-msg"><h2>Kamar Tidak Valid atau Telah Dihapus.</h2><p>Minta Host untuk membagikan ulang link.</p></div>';
-            }
-        }, { onlyOnce: true });
-    } else {
-        // Jika Host langsung cek waktu muat
-        checkStartUp();
-    }
-
-    // Fungsi Pengendali Waktu Mulai Film
-    function checkStartUp() {
-        if (!bookingTimestamp || bookingTimestamp <= 0) {
-            startVideo(); 
+            showError('Data Film Tidak Ditemukan', 'Silakan kembali ke halaman Tiket dan pilih film terlebih dahulu.');
             return;
         }
 
-        const now = Date.now();
-        const diffMs = bookingTimestamp - now;
+        titleEl.textContent = movieTitle;
+        setPoster(posterSource);
 
-        if (diffMs > 0) {
-            // Belum waktunya tayang
-            controlsOverlay.classList.add('modal-active');
-            startUpModal.classList.add('active');
-            if (!video.paused) video.pause();
-            
-            // Aktifkan hitung mundur per detik
-            if (startUpInterval) clearInterval(startUpInterval);
-            updateCountdown(bookingTimestamp);
-            startUpInterval = setInterval(() => updateCountdown(bookingTimestamp), 1000);
-        } else {
-            // Sudah masuk waktu tayang
-            startVideo();
-        }
-    }
+        video.src = videoSource;
+        videoReady = true;
 
-    function updateCountdown(targetTs) {
-        const now = Date.now();
-        let diff = targetTs - now;
+        bookingTimestamp = activeBookingTime ? parseInt(activeBookingTime, 10) : null;
+        if (isNaN(bookingTimestamp) || bookingTimestamp <= 0) bookingTimestamp = null;
 
-        if (diff <= 0) {
-            clearInterval(startUpInterval);
-            countdownTimer.innerText = "00:00:00";
-            modalCountdown.innerText = "00:00:00";
-            
-            btnStartNowMain.disabled = false;
-            btnStartNowModal.disabled = false;
-            btnStartNowMain.innerText = "OKE, MULAI NONTON!";
-            btnStartNowModal.innerText = "MULAI NONTON!";
-        } else {
-            // Perbaikan rumus hitung waktu real jam:menit:detik
-            const h = Math.floor(diff / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-            const hStr = h.toString().padStart(2, '0');
-            const mStr = m.toString().padStart(2, '0');
-            const sStr = s.toString().padStart(2, '0');
-            
-            const timeStr = `${hStr}:${mStr}:${sStr}`;
-            countdownTimer.innerText = timeStr;
-            modalCountdown.innerText = timeStr;
-
-            const timeFormatted = new Date(targetTs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            targetTimeEl.innerText = timeFormatted;
-            modalTargetTime.innerText = timeFormatted;
-
-            // Kunci tombol jika belum saatnya
-            btnStartNowMain.disabled = true;
-            btnStartNowModal.disabled = true;
-            btnStartNowMain.innerText = "MENUNGGU JAM TAYANG...";
-            btnStartNowModal.innerText = "BELUM MULAI";
-        }
-    }
-
-    function startVideo() {
-        if (startUpInterval) clearInterval(startUpInterval);
-        controlsOverlay.classList.remove('modal-active');
-        startUpModal.classList.remove('active');
-        
-        video.play().catch(e => console.log("Autoplay dicegah oleh kebijakan browser. Butuh klik dari user."));
-    }
-
-    // Hubungkan fungsi tombol start ke Event Listener agar bisa diklik saat countdown beres
-    btnStartNowMain.addEventListener('click', startVideo);
-    btnStartNowModal.addEventListener('click', startVideo);
-
-    // --- REALTIME SYNC PLAYBACK LOGIC ---
-    setInterval(() => {
-        if (!isSyncing && !video.paused) {
-            set(syncRef, {
-                currentTime: video.currentTime,
-                isPlaying: !video.paused,
-                lastUpdate: Date.now()
-            });
-        }
-    }, 1000);
-
-    video.onplay = () => {
-        if (!isSyncing) set(syncRef, { currentTime: video.currentTime, isPlaying: true, lastUpdate: Date.now() });
-    };
-    video.onpause = () => {
-        if (!isSyncing) set(syncRef, { currentTime: video.currentTime, isPlaying: false, lastUpdate: Date.now() });
-    };
-    video.onseeked = () => {
-        if (!isSyncing) set(syncRef, { currentTime: video.currentTime, isPlaying: !video.paused, lastUpdate: Date.now() });
-    };
-
-    onValue(syncRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-
-        const now = Date.now();
-        if (now - data.lastUpdate > 5000) return;
-
-        if (Math.abs(video.currentTime - data.currentTime) > 2) {
-            isSyncing = true;
-            video.currentTime = data.currentTime;
-            setTimeout(() => { isSyncing = false; }, 500);
-        }
-
-        if (data.isPlaying && video.paused) {
-            video.play().catch(e => console.log("Gagal memutar otomatis. Menunggu interaksi klik."));
-        } else if (!data.isPlaying && !video.paused) {
-            video.pause();
-        }
-    });
-
-    // Copy Link Clipboard Action
-    document.getElementById('btnCopyAction').addEventListener('click', function() {
-        shareInput.select();
-        shareInput.setSelectionRange(0, 99999); 
-        navigator.clipboard.writeText(shareInput.value).then(() => {
-            const btn = document.getElementById('btnCopyAction');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+        // Tulis metadata ke Firebase
+        set(ref(db, 'sync_rooms/' + roomId + '/meta'), {
+            title: movieTitle,
+            videoSrc: videoSource,
+            posterSrc: posterSource || '',
+            targetTime: bookingTimestamp || 0,
+            createdAt: Date.now()
+        }).then(() => {
+            setSyncStatus(true);
+        }).catch(err => {
+            console.error('Gagal menulis metadata:', err);
+            setSyncStatus(false);
         });
+
+        // Cleanup saat tab ditutup
+        onDisconnect(ref(db, 'sync_rooms/' + roomId)).remove();
+
+        // FIX #3: Daftar sync listener setelah semua siap
+        setupSyncListener();
+        setupSyncSender();
+        decideStartMode();
+    }
+
+    // === GUEST PATH ===
+    function initGuest() {
+        isHost = false;
+        shareArea.style.display = 'flex';
+        shareInput.value = window.location.href;
+
+        // FIX #9: Tampilkan badge penonton
+        viewerBadge.style.display = 'inline-flex';
+
+        showMode('loading');
+        showModal();
+
+        const metaRef = ref(db, 'sync_rooms/' + roomId + '/meta');
+        const unsub = onValue(metaRef, (snapshot) => {
+            unsub(); // Baca sekali lalu berhenti
+
+            const meta = snapshot.val();
+            if (!meta) {
+                showError('Room Tidak Ditemukan', 'Kamar ini mungkin sudah dihapus atau link tidak valid. Minta Host untuk membagikan ulang link.');
+                setSyncStatus(false);
+                return;
+            }
+
+            titleEl.textContent = meta.title || 'Unknown';
+            setPoster(meta.posterSrc);
+
+            if (meta.videoSrc) {
+                video.src = meta.videoSrc;
+                videoReady = true;
+            } else {
+                showError('Video Tidak Tersedia', 'Sumber video tidak ditemukan di room ini.');
+                return;
+            }
+
+            bookingTimestamp = meta.targetTime ? parseInt(meta.targetTime, 10) : null;
+            if (isNaN(bookingTimestamp) || bookingTimestamp <= 0) bookingTimestamp = null;
+
+            setSyncStatus(true);
+
+            // FIX #3 & #1: Daftar sync listener dulu, lalu cek status untuk tentukan modal
+            setupSyncListener();
+            checkGuestInitialState();
+        }, (error) => {
+            showError('Gagal Terhubung', 'Tidak dapat menghubungi server. Periksa koneksi internet Anda.');
+            setSyncStatus(false);
+        });
+    }
+
+    // FIX #1: Guest cek status awal — apakah Host sudah bermain atau belum
+    function checkGuestInitialState() {
+        const syncRef = ref(db, 'sync_rooms/' + roomId + '/status');
+        onValue(syncRef, (snapshot) => {
+            const status = snapshot.val();
+
+            // Jika Host sudah bermain → tampilkan mode Join (seek dulu)
+            if (status && status.isPlaying) {
+                setSyncingFlag(true);
+                video.currentTime = status.currentTime;
+                const onSeeked = () => {
+                    video.removeEventListener('seeked', onSeeked);
+                    setTimeout(() => setSyncingFlag(false), 300);
+                };
+                video.addEventListener('seeked', onSeeked);
+                showJoinMode();
+                return;
+            }
+
+            // Jika belum bermain → cek countdown atau waiting
+            if (bookingTimestamp && bookingTimestamp > Date.now()) {
+                startCountdown(bookingTimestamp);
+            } else {
+                showWaitingMode();
+            }
+        }, { onlyOnce: true });
+    }
+
+    // === Modal Modes ===
+    function decideStartMode() {
+        if (!videoReady) {
+            showError('Video Tidak Tersedia', 'Sumber video tidak ditemukan atau tidak valid.');
+            return;
+        }
+        if (bookingTimestamp && bookingTimestamp > Date.now()) {
+            startCountdown(bookingTimestamp);
+        } else {
+            showReadyMode();
+        }
+    }
+
+    function startCountdown(targetTs) {
+        showMode('countdown');
+        showModal();
+        targetTimeDisplay.textContent = formatTime(targetTs);
+
+        function tick() {
+            const diff = targetTs - Date.now();
+            countdownTimer.textContent = formatCountdown(diff);
+
+            if (diff <= 0) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+                countdownTimer.textContent = '00:00:00';
+                // FIX #12: Aktifkan tombol dengan efek pulse
+                btnStartCountdown.disabled = false;
+                btnStartCountdown.innerHTML = '<i class="fas fa-play"></i> OKE, MULAI NONTON!';
+                btnStartCountdown.classList.add('pulse');
+            } else {
+                btnStartCountdown.disabled = true;
+                btnStartCountdown.innerHTML = '<i class="fas fa-hourglass-half"></i> Menunggu Jam Tayang...';
+                btnStartCountdown.classList.remove('pulse');
+            }
+        }
+        tick();
+        countdownInterval = setInterval(tick, 1000);
+    }
+
+    function showReadyMode() {
+        document.getElementById('readyTitle').textContent = 'Siap Menonton';
+        document.getElementById('readySubtitle').textContent = 'Bagikan link ke teman, lalu klik tombol di bawah untuk mulai.';
+        showMode('ready');
+        showModal();
+    }
+
+    // FIX #2: Mode menunggu Host
+    function showWaitingMode() {
+        showMode('waiting');
+        showModal();
+    }
+
+    // FIX #1: Mode bergabung ke film yang sudah berjalan
+    function showJoinMode() {
+        showMode('join');
+        showModal();
+    }
+
+    function showError(title, msg) {
+        document.getElementById('errorTitle').textContent = title;
+        document.getElementById('errorMsg').textContent = msg;
+        showMode('error');
+        showModal();
+        setSyncStatus(false);
+    }
+
+    // === Playback Start ===
+    function startPlayback() {
+        hasInteracted = true;
+
+        if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+
+        hideModal();
+
+        video.play().then(() => {
+            console.log('Video diputar');
+        }).catch(err => {
+            console.warn('Autoplay ditolak:', err);
+            showToast('Klik video untuk memulai pemutaran');
+        });
+
+        if (isHost) sendSyncState();
+    }
+
+    // FIX #1: Guest bergabung — sudah di-seek sebelumnya, langsung play
+    function joinPlayback() {
+        hasInteracted = true;
+        setSyncingFlag(false); // Pastikan flag sudah reset
+        hideModal();
+
+        video.play().then(() => {
+            console.log('Guest bergabung dan video diputar');
+        }).catch(err => {
+            console.warn('Autoplay ditolak setelah join:', err);
+            showToast('Klik video untuk memulai pemutaran');
+        });
+    }
+
+    btnStartCountdown.addEventListener('click', () => { if (!btnStartCountdown.disabled) startPlayback(); });
+    btnStartReady.addEventListener('click', startPlayback);
+    btnJoin.addEventListener('click', joinPlayback);
+    document.getElementById('btnErrorBack').addEventListener('click', () => { window.location.href = '../index.html'; });
+    document.getElementById('exitBtn').addEventListener('click', () => { window.location.href = '../index.html'; });
+
+    // === Video Events ===
+    // FIX #10: Buffering indicator
+    video.addEventListener('waiting', () => { if (!video.paused) bufferingOverlay.classList.add('show'); });
+    video.addEventListener('canplay', () => bufferingOverlay.classList.remove('show'));
+    video.addEventListener('playing', () => bufferingOverlay.classList.remove('show'));
+
+    // FIX #9: Guest mencoba kontrol — beri tahu
+    video.addEventListener('pause', () => {
+        if (!isHost && !isSyncing && hasInteracted && !modalActive) {
+            showToast('Hanya Host yang dapat mengontrol pemutaran');
+            // Re-sync: akan di-handle oleh onValue listener
+        }
     });
+
+    video.addEventListener('error', function() {
+        const err = video.error;
+        let msg = 'Sumber video tidak dapat dimuat.';
+        if (err) {
+            switch (err.code) {
+                case 1: msg = 'Pemuatan video dibatalkan.'; break;
+                case 2: msg = 'Error jaringan saat memuat video.'; break;
+                case 3: msg = 'Dekode video gagal. Format tidak didukung.'; break;
+                case 4: msg = 'Sumber video tidak valid atau sudah kedaluwarsa.'; break;
+            }
+        }
+        showError('Gagal Memuat Video', msg);
+    });
+
+    // === SYNC: Sender (Host only) ===
+    function sendSyncState() {
+        if (!isHost || !videoReady) return;
+        const now = Date.now();
+        lastSentTimestamp = now;
+        set(ref(db, 'sync_rooms/' + roomId + '/status'), {
+            currentTime: video.currentTime,
+            isPlaying: !video.paused,
+            lastUpdate: now
+        }).catch(err => {
+            console.warn('Gagal mengirim sync:', err);
+            setSyncStatus(false);
+        });
+    }
+
+    function setupSyncSender() {
+        syncSendInterval = setInterval(() => {
+            if (isHost && !video.paused && !isSyncing && videoReady) {
+                sendSyncState();
+            }
+        }, 1500);
+
+        video.addEventListener('play', () => { if (isHost && !isSyncing) sendSyncState(); });
+        video.addEventListener('pause', () => { if (isHost && !isSyncing) sendSyncState(); });
+        video.addEventListener('seeked', () => { if (isHost && !isSyncing) sendSyncState(); });
+    }
+
+    // === SYNC: Listener (FIX #3: Terdaftar di tempat yang benar) ===
+    function setupSyncListener() {
+        if (syncListenerActive) return;
+        syncListenerActive = true;
+
+        const syncRef = ref(db, 'sync_rooms/' + roomId + '/status');
+
+        onValue(syncRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data || !videoReady) return;
+
+            // Cek koneksi
+            const age = Date.now() - data.lastUpdate;
+            if (age > 6000) { setSyncStatus(false); return; }
+            setSyncStatus(true);
+
+            // Host: abaikan echo sendiri
+            if (isHost && Math.abs(data.lastUpdate - lastSentTimestamp) < 800) return;
+
+            // FIX #13: Guest transisi otomatis dari "waiting" ke "join" saat Host mulai
+            if (!isHost && modalActive) {
+                if (currentMode === 'waiting' && data.isPlaying) {
+                    setSyncingFlag(true);
+                    video.currentTime = data.currentTime;
+                    const onSeeked = () => {
+                        video.removeEventListener('seeked', onSeeked);
+                        setTimeout(() => setSyncingFlag(false), 300);
+                    };
+                    video.addEventListener('seeked', onSeeked);
+                    showJoinMode();
+                    return;
+                }
+                if (currentMode === 'countdown' && data.isPlaying) {
+                    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+                    setSyncingFlag(true);
+                    video.currentTime = data.currentTime;
+                    const onSeeked = () => {
+                        video.removeEventListener('seeked', onSeeked);
+                        setTimeout(() => setSyncingFlag(false), 300);
+                    };
+                    video.addEventListener('seeked', onSeeked);
+                    showJoinMode();
+                    return;
+                }
+                // Jika modal masih aktif di mode lain, jangan sinkron play/pause
+                return;
+            }
+
+            // Sinkronisasi posisi jika selisih > 2 detik
+            if (Math.abs(video.currentTime - data.currentTime) > 2) {
+                if (!isHost) flashSyncSeek(); // FIX #8: Indikator visual
+                setSyncingFlag(true);
+                video.currentTime = data.currentTime;
+                const onSeeked = () => {
+                    video.removeEventListener('seeked', onSeeked);
+                    setTimeout(() => setSyncingFlag(false), 300);
+                };
+                video.addEventListener('seeked', onSeeked);
+            }
+
+            // Sinkronisasi play/pause
+            if (data.isPlaying && video.paused) {
+                if (hasInteracted && !modalActive) {
+                    video.play().catch(() => showToast('Klik video untuk melanjutkan'));
+                }
+            } else if (!data.isPlaying && !video.paused) {
+                video.pause();
+            }
+        });
+    }
+
+    // === Copy Link ===
+    document.getElementById('btnCopyAction').addEventListener('click', function() {
+        const link = shareInput.value;
+        if (!link) return;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(onCopySuccess).catch(fallbackCopy);
+        } else {
+            fallbackCopy();
+        }
+    });
+
+    function fallbackCopy() {
+        shareInput.select();
+        shareInput.setSelectionRange(0, 99999);
+        try {
+            document.execCommand('copy');
+            onCopySuccess();
+        } catch (e) {
+            showToast('Gagal menyalin link');
+        }
+    }
+
+    function onCopySuccess() {
+        const btn = document.getElementById('btnCopyAction');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        btn.style.background = '#4caf50';
+        setTimeout(() => { btn.innerHTML = original; btn.style.background = ''; }, 2000);
+    }
+
+    // === Cleanup ===
+    window.addEventListener('beforeunload', () => {
+        if (countdownInterval) clearInterval(countdownInterval);
+        if (syncSendInterval) clearInterval(syncSendInterval);
+        if (syncSeekTimeout) clearTimeout(syncSeekTimeout);
+        if (toastTimeout) clearTimeout(toastTimeout);
+    });
+
     </script>
 </body>
 </html>
