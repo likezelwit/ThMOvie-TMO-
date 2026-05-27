@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TMO Player</title>
+    <title>TMO Player - Watch Together</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -53,6 +53,53 @@
             outline: none;
         }
 
+        /* SHARE ROOM UI (NEW) */
+        .share-box {
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            display: none; /* Hidden by default until room loaded */
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #444;
+            margin-bottom: 10px;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .share-label { font-size: 0.8rem; color: #aaa; white-space: nowrap; }
+        
+        .url-input-group {
+            display: flex;
+            flex: 1;
+            background: #111;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 5px 10px;
+        }
+
+        .url-input-group input {
+            background: transparent;
+            border: none;
+            color: #0078ff;
+            font-size: 0.9rem;
+            width: 100%;
+            outline: none;
+        }
+
+        .copy-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        .copy-btn:hover { background: #0078ff; }
+
         /* Sync Indicator */
         .sync-indicator {
             position: absolute;
@@ -81,14 +128,28 @@
 <body>
 
     <div class="player-header">
-        <div class="movie-info">
-            <img id="m-poster" class="movie-thumb" src="">
-            <div>
-                <div id="m-title" class="movie-title">Loading...</div>
-                <div class="sync-status"><i class="fas fa-sync-alt fa-spin"></i> SINKRONISASI AKTIF</div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <!-- SHARE BOX AREA (NEW) -->
+            <div id="share-area" class="share-box">
+                <div class="share-label"><i class="fas fa-users"></i> Room Code</div>
+                <div class="url-input-group">
+                    <input type="text" id="shareLinkInput" readonly>
+                    <button class="copy-btn" onclick="copyLink()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <div class="movie-info">
+                <img id="m-poster" class="movie-thumb" src="">
+                <div>
+                    <div id="m-title" class="movie-title">Loading...</div>
+                    <div class="sync-status"><i class="fas fa-sync-alt fa-spin"></i> SINKRONISASI AKTIF</div>
+                </div>
             </div>
         </div>
-        <button class="exit-btn" onclick="window.location.href='index.html'">
+
+        <button class="exit-btn" onclick="window.location.href='../index.html'">
             <i class="fas fa-sign-out-alt"></i> Keluar
         </button>
     </div>
@@ -103,7 +164,7 @@
         </div>
     </div>
 
-<script type="module">
+    <script type="module">
     // --- FIREBASE CONFIG ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -122,7 +183,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // 1. AMBIL DATA MOVIE DARI SESSIONSTORAGE
+    // 1. AMBIL DATA MOVIE
     const movieTitle = sessionStorage.getItem('activeMovieTitle');
     const videoSource = sessionStorage.getItem('activeVideoSource');
     const posterSource = sessionStorage.getItem('activePoster');
@@ -130,6 +191,8 @@
     const video = document.getElementById('mainVideo');
     const titleEl = document.getElementById('m-title');
     const posterEl = document.getElementById('m-poster');
+    const shareArea = document.getElementById('share-area');
+    const shareInput = document.getElementById('shareLinkInput');
 
     if (!videoSource || !movieTitle) {
         document.querySelector('.video-wrapper').innerHTML = '<div class="error-msg"><h2>Data Film Tidak Ditemukan.</h2><p>Silakan kembali ke halaman Tiket.</p></div>';
@@ -139,24 +202,42 @@
         video.src = videoSource;
     }
 
-    // 2. LOGIKA SINCRONISASI (SYNC LOGIC)
-    // Buat referensi unik berdasarkan Judul Film (ganti spasi dengan underscore agar aman untuk URL DB)
-    const cleanTitle = movieTitle.replace(/\s+/g, '_').toLowerCase();
-    const syncRef = ref(db, 'sync_rooms/' + cleanTitle);
+    // 2. LOGIKA ROOM & URL (BARU)
+    // Cek apakah ada parameter 'room' di URL
+    const urlParams = new URLSearchParams(window.location.search);
+    let roomId = urlParams.get('room');
+
+    if (!roomId) {
+        // JIKA TIDAK ADA ROOM ID -> JADILAH HOST
+        // Buat Room ID Unik (Contoh: room_abc123)
+        roomId = 'room_' + Math.random().toString(36).substring(2, 8);
+        
+        // Update URL tanpa reload halaman
+        const newUrl = `${window.location.pathname}?room=${roomId}`;
+        window.history.replaceState({path: newUrl}, '', newUrl);
+        
+        console.log("Room Created:", roomId);
+    } else {
+        // JIKA ADA ROOM ID -> JADILAH GUEST
+        console.log("Joined Room:", roomId);
+    }
+
+    // Tampilkan UI Share Link dan masukkan URL ke input
+    shareArea.style.display = 'flex';
+    shareInput.value = window.location.href;
+
+    // 3. LOGIKA SINCRONISASI (SYNC LOGIC)
+    // Menggunakan Room ID sebagai kunci database, bukan Judul Film
+    const syncRef = ref(db, 'sync_rooms/' + roomId);
 
     // Fungsi update status ke Firebase (Setiap 1 detik)
     let isSyncing = false;
     setInterval(() => {
-        if (video.paused) {
+        // Jika video sedang tidak disinkronkan manual oleh user lain
+        if (!isSyncing) {
             set(syncRef, {
                 currentTime: video.currentTime,
-                isPlaying: false,
-                lastUpdate: Date.now()
-            });
-        } else {
-            set(syncRef, {
-                currentTime: video.currentTime,
-                isPlaying: true,
+                isPlaying: !video.paused,
                 lastUpdate: Date.now()
             });
         }
@@ -167,9 +248,9 @@
         const data = snapshot.val();
         if (!data) return;
 
-        // Cek apakah update ini masih baru (bukan data lama 10 detik yang lalu)
+        // Cek apakah update ini masih baru (bukan data lama)
         const now = Date.now();
-        if (now - data.lastUpdate > 5000) return; // Abaikan data stp
+        if (now - data.lastUpdate > 5000) return; // Abaikan data expired
 
         // LOGIKA ANTAR USER:
         // Jika perbedaan waktu > 2 detik, sinkronkan waktu video
@@ -181,15 +262,29 @@
 
         // Sinkronisasi Play/Pause
         if (data.isPlaying && video.paused) {
-            // Jika user lain play, kita play
-            // Perlu interaksi user untuk autoplay di Chrome, jadi kita coba play, jika gagal biarkan user klik
             video.play().catch(e => console.log("Autoplay blocked, need user interaction"));
         } else if (!data.isPlaying && !video.paused) {
-            // Jika user lain pause, kita pause
             video.pause();
         }
     });
 
-</script>
+    // --- FUNGSI COPY LINK ---
+    window.copyLink = function() {
+        shareInput.select();
+        shareInput.setSelectionRange(0, 99999); // Untuk mobile
+        navigator.clipboard.writeText(shareInput.value).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 2000);
+        });
+    }
+
+    // Export fungsi copy ke window agar bisa dipanggil HTML inline
+    window.copyLink = copyLink;
+
+    </script>
 </body>
 </html>
