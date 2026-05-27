@@ -7,151 +7,160 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root{--bg:#0d0d14;--surface:#161622;--card:#1c1c2e;--border:#2a2a40;--text:#e0e0e8;--text2:#8888a0;--accent:#0078ff;--accent2:#5c6bc0;--success:#4caf50;--warn:#ff9800;--danger:#f44336;--purple:#9c27b0;--radius:12px}
+        :root{
+            --bg:#f0f2f8;
+            --surface:#ffffff;
+            --card:#ffffff;
+            --border:#e2e6f0;
+            --text:#1a1d2e;
+            --text2:#6b7294;
+            --accent:#2563eb;
+            --accent-light:#dbeafe;
+            --success:#16a34a;
+            --success-light:#dcfce7;
+            --warn:#ea580c;
+            --warn-light:#fff7ed;
+            --danger:#dc2626;
+            --danger-light:#fee2e2;
+            --purple:#7c3aed;
+            --purple-light:#ede9fe;
+            --radius:14px;
+            --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+            --shadow-lg:0 4px 16px rgba(0,0,0,.08);
+        }
         *{margin:0;padding:0;box-sizing:border-box}
         body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;display:flex;min-height:100vh;overflow-x:hidden}
-        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#c7cce0;border-radius:3px}
 
-        /* SIDEBAR */
-        .sidebar{width:250px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s}
-        .sidebar-logo{padding:20px 24px;font-size:1.6rem;font-weight:900;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+        .sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s;box-shadow:2px 0 8px rgba(0,0,0,.04)}
+        .sidebar-logo{padding:22px 24px;font-size:1.5rem;font-weight:900;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#eff6ff,#fff)}
+        .sidebar-logo i{color:var(--accent)}
         .sidebar-logo span{color:var(--accent)}
-        .sidebar-nav{flex:1;padding:12px;display:flex;flex-direction:column;gap:4px}
-        .sidebar-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;color:var(--text2);cursor:pointer;transition:.2s;font-weight:600;font-size:.9rem;position:relative;text-decoration:none}
-        .sidebar-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
-        .sidebar-item.active{background:rgba(0,120,255,.12);color:var(--accent)}
-        .sidebar-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 3px 3px 0}
-        .sidebar-item i{width:20px;text-align:center;font-size:1rem}
-        .sidebar-badge{background:var(--danger);color:#fff;font-size:.65rem;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center;font-weight:700}
-        .sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+        .sidebar-nav{flex:1;padding:14px;display:flex;flex-direction:column;gap:4px}
+        .sidebar-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:10px;color:var(--text2);cursor:pointer;transition:.2s;font-weight:600;font-size:.88rem;position:relative;text-decoration:none}
+        .sidebar-item:hover{background:var(--accent-light);color:var(--accent)}
+        .sidebar-item.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+        .sidebar-item.active::before{display:none}
+        .sidebar-item i{width:20px;text-align:center;font-size:.95rem}
+        .sidebar-badge{background:var(--danger);color:#fff;font-size:.62rem;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center;font-weight:800}
+        .sidebar-footer{padding:14px;border-top:1px solid var(--border)}
 
-        /* MAIN */
-        .main{margin-left:250px;flex:1;min-height:100vh;display:flex;flex-direction:column}
-        .top-bar{padding:16px 28px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:50}
-        .hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.2rem;cursor:pointer;padding:4px 8px;border-radius:6px}
-        .hamburger:hover{background:var(--card)}
-        .top-bar h1{font-size:1.2rem;font-weight:800;flex:1}
+        .main{margin-left:260px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+        .top-bar{padding:14px 28px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+        .hamburger{display:none;background:none;border:1px solid var(--border);color:var(--text);font-size:1.1rem;cursor:pointer;padding:6px 10px;border-radius:8px}
+        .hamburger:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+        .top-bar h1{font-size:1.15rem;font-weight:800;flex:1}
         .top-actions{display:flex;gap:8px}
         .content-body{padding:28px;flex:1}
 
-        /* SECTIONS */
         .section{display:none;animation:fadeIn .3s ease}
         .section.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-        /* STATS */
-        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
-        .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;align-items:center;gap:16px;transition:.2s}
-        .stat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-        .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
-        .stat-icon.blue{background:rgba(0,120,255,.12);color:var(--accent)}
-        .stat-icon.orange{background:rgba(255,152,0,.12);color:var(--warn)}
-        .stat-icon.green{background:rgba(76,175,80,.12);color:var(--success)}
-        .stat-icon.purple{background:rgba(156,39,176,.12);color:var(--purple)}
-        .stat-num{font-size:1.6rem;font-weight:800;line-height:1}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:28px}
+        .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;align-items:center;gap:16px;transition:.25s;box-shadow:var(--shadow)}
+        .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+        .stat-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+        .stat-icon.blue{background:var(--accent-light);color:var(--accent)}
+        .stat-icon.orange{background:var(--warn-light);color:var(--warn)}
+        .stat-icon.green{background:var(--success-light);color:var(--success)}
+        .stat-icon.purple{background:var(--purple-light);color:var(--purple)}
+        .stat-num{font-size:1.7rem;font-weight:800;line-height:1}
         .stat-label{font-size:.8rem;color:var(--text2);margin-top:2px}
 
-        /* CARDS */
-        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;transition:.2s}
-        .card:hover{border-color:rgba(255,255,255,.1)}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;transition:.2s;box-shadow:var(--shadow)}
+        .card:hover{box-shadow:var(--shadow-lg)}
         .card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-        .card-title{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-        .type-tag{font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
-        .type-tag.movie{background:rgba(0,120,255,.15);color:var(--accent)}
-        .type-tag.series{background:rgba(255,152,0,.15);color:var(--warn)}
-        .type-tag.ova{background:rgba(156,39,176,.15);color:var(--purple)}
-        .status-tag{font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
-        .status-tag.pending{background:rgba(255,152,0,.12);color:var(--warn)}
-        .status-tag.published{background:rgba(76,175,80,.12);color:var(--success)}
-        .status-tag.rejected{background:rgba(244,67,54,.12);color:var(--danger)}
-        .card-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-        .meta-chip{font-size:.75rem;color:var(--text2);background:rgba(255,255,255,.04);padding:4px 10px;border-radius:6px}
-        .card-details{font-size:.85rem;color:var(--text2);line-height:1.6;margin-bottom:14px}
+        .card-title{font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px;flex:1;min-width:0;color:var(--text)}
+        .type-tag{font-size:.6rem;font-weight:800;padding:3px 9px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+        .type-tag.movie{background:var(--accent-light);color:var(--accent)}
+        .type-tag.series{background:var(--warn-light);color:var(--warn)}
+        .type-tag.ova{background:var(--purple-light);color:var(--purple)}
+        .status-tag{font-size:.65rem;font-weight:700;padding:4px 12px;border-radius:20px;flex-shrink:0}
+        .status-tag.pending{background:var(--warn-light);color:var(--warn)}
+        .status-tag.published{background:var(--success-light);color:var(--success)}
+        .status-tag.rejected{background:var(--danger-light);color:var(--danger)}
+        .card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+        .meta-chip{font-size:.73rem;color:var(--text2);background:var(--bg);padding:4px 10px;border-radius:6px;font-weight:500}
+        .card-details{font-size:.84rem;color:var(--text2);line-height:1.7;margin-bottom:14px}
         .card-details strong{color:var(--text);font-weight:600}
         .card-footer{display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)}
 
-        /* BUTTONS */
         .btn{border:none;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif;font-size:.82rem;display:inline-flex;align-items:center;gap:6px}
-        .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#0062cc}
-        .btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#388e3c}
-        .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#c62828}
-        .btn-warn{background:var(--warn);color:#fff}.btn-warn:hover{background:#e68900}
-        .btn-purple{background:var(--purple);color:#fff}.btn-purple:hover{background:#7b1fa2}
-        .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--text2);color:var(--text)}
+        .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#1d4ed8;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+        .btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#15803d;box-shadow:0 2px 8px rgba(22,163,74,.3)}
+        .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b91c1c;box-shadow:0 2px 8px rgba(220,38,38,.3)}
+        .btn-warn{background:var(--warn);color:#fff}.btn-warn:hover{background:#c2410c;box-shadow:0 2px 8px rgba(234,88,12,.3)}
+        .btn-purple{background:var(--purple);color:#fff}.btn-purple:hover{background:#6d28d9;box-shadow:0 2px 8px rgba(124,58,237,.3)}
+        .btn-ghost{background:var(--surface);color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--text2);color:var(--text);background:var(--bg)}
         .btn-sm{padding:6px 12px;font-size:.75rem;border-radius:6px}
         .btn-lg{padding:12px 28px;font-size:.95rem;border-radius:10px}
-        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
 
-        /* FORM */
         .form-group{margin-bottom:18px}
-        .form-label{display:block;font-weight:600;margin-bottom:6px;font-size:.85rem;color:var(--text2)}
-        .form-input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none;font-size:.9rem;font-family:'Inter',sans-serif;transition:.2s}
-        .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,120,255,.1)}
+        .form-label{display:block;font-weight:600;margin-bottom:6px;font-size:.85rem;color:var(--text)}
+        .form-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none;font-size:.9rem;font-family:'Inter',sans-serif;transition:.2s}
+        .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+        .form-input[readonly]{background:var(--bg);color:var(--text2)}
         textarea.form-input{min-height:80px;resize:vertical}
         .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .form-hint{font-size:.72rem;color:var(--text2);margin-top:4px}
 
-        /* EPISODE LIST IN MODAL */
         .ep-list{max-height:400px;overflow-y:auto;padding-right:4px}
-        .ep-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;position:relative}
+        .ep-item{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
         .ep-item-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-        .ep-num{width:32px;height:32px;border-radius:8px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0}
-        .ep-num-input{width:50px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);text-align:center;font-weight:700;font-size:.85rem;font-family:'JetBrains Mono',monospace}
-        .ep-title-input{flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:.85rem;outline:none}
+        .ep-num{width:34px;height:34px;border-radius:8px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0}
+        .ep-num-input{width:52px;padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);text-align:center;font-weight:700;font-size:.85rem;font-family:'JetBrains Mono',monospace}
+        .ep-title-input{flex:1;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:.85rem;outline:none}
         .ep-title-input:focus{border-color:var(--accent)}
         .ep-remove{background:none;border:none;color:var(--text2);cursor:pointer;padding:4px 6px;border-radius:4px;font-size:.85rem;transition:.2s}
-        .ep-remove:hover{color:var(--danger);background:rgba(244,67,54,.1)}
-        .ep-url{font-family:'JetBrains Mono',monospace;font-size:.78rem;width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--accent);outline:none}
+        .ep-remove:hover{color:var(--danger);background:var(--danger-light)}
+        .ep-url{font-family:'JetBrains Mono',monospace;font-size:.76rem;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--accent);outline:none}
         .ep-url:focus{border-color:var(--accent)}
-        .ep-url.converted{color:var(--success);border-color:rgba(76,175,80,.3)}
+        .ep-url.converted{color:var(--success)!important;border-color:var(--success)!important;background:var(--success-light)!important}
+        .ep-url.already-converted{color:var(--success)!important;border-color:var(--success)!important;background:var(--success-light)!important;opacity:.7}
         .add-ep-btn{width:100%;padding:12px;border:2px dashed var(--border);border-radius:10px;background:transparent;color:var(--text2);cursor:pointer;font-weight:600;font-size:.85rem;transition:.2s;font-family:'Inter',sans-serif}
-        .add-ep-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,120,255,.04)}
+        .add-ep-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
 
-        /* MODAL */
-        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;justify-content:center;align-items:flex-start;padding:40px 20px;opacity:0;pointer-events:none;transition:opacity .3s;overflow-y:auto}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);z-index:200;display:flex;justify-content:center;align-items:flex-start;padding:40px 20px;opacity:0;pointer-events:none;transition:opacity .3s;overflow-y:auto}
         .modal-overlay.active{opacity:1;pointer-events:all}
-        .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:680px;transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(.175,.885,.32,1.275);margin-bottom:40px}
+        .modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:680px;transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(.175,.885,.32,1.275);margin-bottom:40px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
         .modal-overlay.active .modal{transform:translateY(0) scale(1)}
-        .modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--surface);z-index:2;border-radius:16px 16px 0 0}
-        .modal-head h3{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px}
-        .modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:1.1rem;padding:4px 8px;border-radius:6px;transition:.2s}
-        .modal-close:hover{color:var(--text);background:var(--card)}
+        .modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--surface);z-index:2;border-radius:18px 18px 0 0}
+        .modal-head h3{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px;color:var(--text)}
+        .modal-close{background:none;border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:1rem;padding:4px 8px;border-radius:6px;transition:.2s}
+        .modal-close:hover{color:var(--danger);border-color:var(--danger);background:var(--danger-light)}
         .modal-body{padding:24px}
-        .modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:var(--surface);border-radius:0 0 16px 16px}
+        .modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:var(--surface);border-radius:0 0 18px 18px}
         .modal-divider{border:none;border-top:1px solid var(--border);margin:20px 0}
 
-        /* EMPTY STATE */
         .empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
         .empty-state i{font-size:3rem;color:var(--border);margin-bottom:14px;display:block}
         .empty-state h3{font-size:1.1rem;color:var(--text);margin-bottom:6px}
 
-        /* FILTER BAR */
         .filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
-        .filter-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-weight:600;font-size:.8rem;transition:.2s;font-family:'Inter',sans-serif}
-        .filter-btn:hover{border-color:var(--text2)}
-        .filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+        .filter-btn{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-weight:600;font-size:.8rem;transition:.2s;font-family:'Inter',sans-serif}
+        .filter-btn:hover{border-color:var(--text2);color:var(--text)}
+        .filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(37,99,235,.25)}
 
-        /* TOAST */
         .toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-        .toast{background:var(--card);color:var(--text);padding:14px 20px;border-radius:10px;font-size:.85rem;box-shadow:0 8px 30px rgba(0,0,0,.4);border-left:4px solid var(--success);pointer-events:auto;transform:translateX(120%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);max-width:380px;display:flex;align-items:center;gap:10px}
+        .toast{background:var(--surface);color:var(--text);padding:14px 20px;border-radius:12px;font-size:.85rem;box-shadow:0 8px 30px rgba(0,0,0,.12);border-left:4px solid var(--success);pointer-events:auto;transform:translateX(120%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);max-width:380px;display:flex;align-items:center;gap:10px}
         .toast.show{transform:translateX(0)}
         .toast.error{border-left-color:var(--danger)}
         .toast i{font-size:1.1rem;flex-shrink:0}
 
-        /* PUBLISHED MOVIE CARD */
         .pub-card{display:flex;gap:16px;align-items:flex-start}
-        .pub-poster{width:80px;height:120px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--border)}
+        .pub-poster{width:80px;height:120px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--border)}
         .pub-poster img{width:100%;height:100%;object-fit:cover}
         .pub-info{flex:1;min-width:0}
         .pub-title{font-weight:800;font-size:1rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .pub-meta{font-size:.8rem;color:var(--text2);margin-bottom:8px}
-        .pub-ep-count{display:inline-flex;align-items:center;gap:4px;font-size:.75rem;color:var(--warn);background:rgba(255,152,0,.1);padding:3px 8px;border-radius:4px;font-weight:600}
+        .pub-meta{font-size:.8rem;color:var(--text2);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+        .pub-ep-count{display:inline-flex;align-items:center;gap:4px;font-size:.73rem;color:var(--warn);background:var(--warn-light);padding:3px 10px;border-radius:5px;font-weight:700}
+        .pub-ep-count.ok{color:var(--success);background:var(--success-light)}
 
-        /* RESPONSIVE */
         @media(max-width:768px){
             .sidebar{transform:translateX(-100%)}
             .sidebar.open{transform:translateX(0)}
-            .sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;display:none}
+            .sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:99;display:none}
             .sidebar-backdrop.show{display:block}
             .main{margin-left:0}
             .hamburger{display:block}
@@ -169,7 +178,7 @@
 <body>
 
 <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><i class="fas fa-play-circle" style="color:var(--accent)"></i> DTMO <span>Admin</span></div>
+    <div class="sidebar-logo"><i class="fas fa-play-circle"></i> DTMO <span>Admin</span></div>
     <nav class="sidebar-nav">
         <a class="sidebar-item active" data-section="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
         <a class="sidebar-item" data-section="requests"><i class="fas fa-inbox"></i> Permintaan <span class="sidebar-badge" id="pendingBadge" style="display:none">0</span></a>
@@ -191,7 +200,6 @@
     </header>
 
     <div class="content-body">
-        <!-- DASHBOARD -->
         <section id="sec-dashboard" class="section active">
             <div class="stats-grid">
                 <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-inbox"></i></div><div><div class="stat-num" id="statPending">0</div><div class="stat-label">Permintaan Pending</div></div></div>
@@ -199,11 +207,10 @@
                 <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-list-ol"></i></div><div><div class="stat-num" id="statEpisodes">0</div><div class="stat-label">Total Episode</div></div></div>
                 <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-ban"></i></div><div><div class="stat-num" id="statRejected">0</div><div class="stat-label">Ditolak</div></div></div>
             </div>
-            <h3 style="font-size:1rem;font-weight:800;margin-bottom:14px"><i class="fas fa-clock" style="color:var(--warn);margin-right:6px"></i>Permintaan Terbaru</h3>
+            <h3 style="font-size:1rem;font-weight:800;margin-bottom:14px;color:var(--warn)"><i class="fas fa-clock" style="margin-right:6px"></i>Permintaan Terbaru</h3>
             <div id="recentRequests"></div>
         </section>
 
-        <!-- REQUESTS -->
         <section id="sec-requests" class="section">
             <div class="filter-bar">
                 <button class="filter-btn active" data-filter="pending">Pending</button>
@@ -214,14 +221,12 @@
             <div id="requestsList"></div>
         </section>
 
-        <!-- PUBLISHED -->
         <section id="sec-published" class="section">
             <div id="publishedList"></div>
         </section>
     </div>
 </div>
 
-<!-- PUBLISH MODAL -->
 <div class="modal-overlay" id="publishModal">
     <div class="modal">
         <div class="modal-head">
@@ -231,22 +236,20 @@
         <div class="modal-body">
             <input type="hidden" id="pubRequestId">
             <div class="form-row">
-                <div class="form-group"><label class="form-label">Judul</label><input type="text" class="form-input" id="pubTitle" readonly style="color:var(--text2)"></div>
-                <div class="form-group"><label class="form-label">Tipe</label><input type="text" class="form-input" id="pubType" readonly style="color:var(--text2);text-transform:uppercase;font-weight:700"></div>
+                <div class="form-group"><label class="form-label">Judul</label><input type="text" class="form-input" id="pubTitle" readonly></div>
+                <div class="form-group"><label class="form-label">Tipe</label><input type="text" class="form-input" id="pubType" readonly style="text-transform:uppercase;font-weight:700;letter-spacing:1px"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label class="form-label">Tahun Rilis</label><input type="text" class="form-input" id="pubYear" readonly style="color:var(--text2)"></div>
+                <div class="form-group"><label class="form-label">Tahun Rilis</label><input type="text" class="form-input" id="pubYear" readonly></div>
                 <div class="form-group"><label class="form-label">Rating / 10</label><input type="number" class="form-input" id="pubRating" placeholder="8.5" min="0" max="10" step="0.1"></div>
             </div>
-            <div class="form-group"><label class="form-label">Genre</label><input type="text" class="form-input" id="pubGenre" readonly style="color:var(--text2)"></div>
+            <div class="form-group"><label class="form-label">Genre</label><input type="text" class="form-input" id="pubGenre" readonly></div>
             <div class="form-group"><label class="form-label">URL Poster</label><input type="url" class="form-input" id="pubPoster" placeholder="https://..."></div>
             <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-input" id="pubDesc" placeholder="Sinopsis atau deskripsi singkat..."></textarea></div>
-
-            <!-- SERIES/EPISODE SECTION -->
             <div id="pubEpSection" style="display:none">
                 <hr class="modal-divider">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-                    <h4 style="font-size:.95rem;font-weight:800;display:flex;align-items:center;gap:6px"><i class="fas fa-list-ol" style="color:var(--warn)"></i> Episode</h4>
+                    <h4 style="font-size:.95rem;font-weight:800;display:flex;align-items:center;gap:6px;color:var(--warn)"><i class="fas fa-list-ol"></i> Episode</h4>
                     <div style="display:flex;gap:8px;align-items:center">
                         <label class="form-label" style="margin:0;white-space:nowrap">Jumlah:</label>
                         <input type="number" class="form-input" id="pubEpCount" style="width:70px;padding:6px 10px;text-align:center" min="1" value="1">
@@ -259,8 +262,6 @@
                     <button class="btn btn-ghost btn-sm" onclick="convertAllEpUrls()" id="btnConvertAll" style="display:none"><i class="fas fa-magic"></i> Konversi Semua URL Dropbox</button>
                 </div>
             </div>
-
-            <!-- MOVIE VIDEO SECTION -->
             <div id="pubVideoSection" style="display:none">
                 <hr class="modal-divider">
                 <div class="form-group"><label class="form-label">URL Video (Dropbox)</label><input type="url" class="form-input" id="pubVideoUrl" placeholder="https://www.dropbox.com/scl/fi/..." style="font-family:'JetBrains Mono',monospace;font-size:.82rem"></div>
@@ -274,7 +275,6 @@
     </div>
 </div>
 
-<!-- EPISODES MANAGEMENT MODAL -->
 <div class="modal-overlay" id="episodesModal">
     <div class="modal">
         <div class="modal-head">
@@ -300,29 +300,49 @@
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getDatabase,ref,set,update,remove,onValue,push,get}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,update,remove,onValue,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig={apiKey:"AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",authDomain:"thmovie-3646f.firebaseapp.com",databaseURL:"https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"thmovie-3646f",storageBucket:"thmovie-3646f.firebasestorage.app",messagingSenderId:"1041137356432",appId:"1:1041137356432:web:96edbe3402937c82f09215",measurementId:"G-6SNE976L7G"};
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
-// === STATE ===
-let allRequests=[];
-let allPublished=[];
-let currentFilter='pending';
-let epFieldCounter=0;
-let manageEpCounter=0;
+let allRequests=[],allPublished=[],currentFilter='pending',epFieldCounter=0,manageEpCounter=0;
 
-// === UTILITIES ===
-function showToast(msg,type='success'){const c=document.getElementById('toastContainer'),t=document.createElement('div');t.className=`toast ${type==='error'?'error':''}`;t.innerHTML=`<i class="fas ${type==='error'?'fa-times-circle':'fa-check-circle'}" style="color:${type==='error'?'var(--danger)':'var(--success)'}"></i><span>${msg}</span>`;c.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3500)}
+function showToast(msg,type='success'){
+    const c=document.getElementById('toastContainer'),t=document.createElement('div');
+    t.className=`toast ${type==='error'?'error':''}`;
+    t.innerHTML=`<i class="fas ${type==='error'?'fa-times-circle':'fa-check-circle'}" style="color:${type==='error'?'var(--danger)':'var(--success)'}"></i><span>${msg}</span>`;
+    c.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));
+    setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3500);
+}
 
+// === DROPBOX URL: dl=0 → raw=1, deteksi duplikat raw=1 ===
 function convertDropboxUrl(url){
     if(!url)return'';
     url=url.trim();
+
+    // 1. Hapus parameter dl berapa pun nilainya (dl=0, dl=1, dll)
     url=url.replace(/[?&]dl=[^&]*/g,'');
+
+    // 2. Hapus juga raw=0 kalau ada (akan diganti raw=1)
+    url=url.replace(/[?&]raw=0[^&]*/g,'');
+
+    // 3. Bersihkan sisa ?/& yang kosong
     url=url.replace(/\?&/g,'?').replace(/&&/g,'&').replace(/[?&]$/,'');
-    url+=(url.includes('?')?'&dl=1':'?dl=1');
+
+    // 4. Cek apakah raw=1 sudah ada
+    if(/[?&]raw=1(?:&|$)/.test(url)){
+        return url; // Sudah ada raw=1, kembalikan apa adanya
+    }
+
+    // 5. Tambahkan raw=1
+    url+=(url.includes('?')?'&raw=1':'?raw=1');
     return url;
+}
+
+// Cek visual apakah URL sudah mengandung raw=1 (untuk styling)
+function hasRaw(url){
+    return url&&/[?&]raw=1(?:&|$)/.test(url);
 }
 
 function parseEpisodeNumbers(text){
@@ -333,10 +353,9 @@ function parseEpisodeNumbers(text){
 }
 
 function formatDate(ts){if(!ts)return'-';return new Date(ts).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
-
 function escH(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 
-// === NAVIGATION ===
+// === NAV ===
 document.querySelectorAll('.sidebar-item[data-section]').forEach(item=>{
     item.addEventListener('click',()=>{
         document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
@@ -348,7 +367,6 @@ document.querySelectorAll('.sidebar-item[data-section]').forEach(item=>{
     });
 });
 
-// Filter buttons
 document.querySelectorAll('.filter-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
         document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -358,7 +376,6 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
     });
 });
 
-// Sidebar mobile
 const sidebar=document.getElementById('sidebar'),backdrop=document.getElementById('sidebarBackdrop');
 document.getElementById('hamburger').addEventListener('click',()=>{sidebar.classList.toggle('open');backdrop.classList.toggle('show')});
 backdrop.addEventListener('click',closeSidebar);
@@ -382,7 +399,6 @@ function loadAllData(){
     });
 }
 
-// === STATS ===
 function updateStats(){
     const pending=allRequests.filter(r=>r.status==='pending'||!r.status).length;
     const published=allPublished.length;
@@ -409,10 +425,8 @@ function renderRequests(){
         const status=r.status||'pending';
         const isPending=status==='pending';
         let epInfo='';
-        if(ct==='series'){
-            if(r.episodeType==='specific')epInfo=`Ep. ${r.specificEpisode||'?'}`;
-            else epInfo=r.season?`Season ${r.season} — Semua Episode`:'Semua Episode';
-        }else if(ct==='ova'){epInfo=r.season?`Season ${r.season}`:'OVA / Special'}
+        if(ct==='series'){if(r.episodeType==='specific')epInfo=`Ep. ${r.specificEpisode||'?'}`;else epInfo=r.season?`Season ${r.season} — Semua Episode`:'Semua Episode'}
+        else if(ct==='ova'){epInfo=r.season?`Season ${r.season}`:'OVA / Special'}
         const refLink=r.referenceLink?`<a href="${escH(r.referenceLink)}" target="_blank" style="color:var(--accent);word-break:break-all">${escH(r.referenceLink)}</a>`:'-';
         const audioSub=Array.isArray(r.audioSub)?r.audioSub.join(', '):(r.audioSub||'-');
         return`<div class="card">
@@ -453,10 +467,9 @@ function renderRecentRequests(){
     </div>`).join('');
 }
 
-// === RENDER PUBLISHED ===
 function renderPublished(){
     const c=document.getElementById('publishedList');
-    if(!allPublished.length){c.innerHTML='<div class="empty-state"><i class="fas fa-film"></i><h3>Belum Ada Film</h3><p>Setujui permintaan atau gunakan Publikasi Manual untuk menambahkan film.</p></div>';return}
+    if(!allPublished.length){c.innerHTML='<div class="empty-state"><i class="fas fa-film"></i><h3>Belum Ada Film</h3><p>Setujui permintaan atau gunakan Publikasi Manual.</p></div>';return}
     c.innerHTML=allPublished.map(m=>{
         const ct=(m.contentType||'movie').toLowerCase();
         const epCount=m.episodes?Object.keys(m.episodes).length:0;
@@ -468,11 +481,11 @@ function renderPublished(){
                     <div class="pub-title">${escH(m.title)}</div>
                     <div class="pub-meta">
                         <span class="type-tag ${ct}" style="position:static">${ct}</span>
-                        ${m.rating?`<span style="color:#ffc107">⭐ ${m.rating}/10</span>`:''}
+                        ${m.rating?`<span style="color:#f59e0b">⭐ ${m.rating}/10</span>`:''}
                         ${m.year?`<span>• ${m.year}</span>`:''}
                         ${m.genre?`<span>• ${m.genre}</span>`:''}
                     </div>
-                    ${ct!=='movie'?`<div class="pub-ep-count"><i class="fas fa-list-ol"></i> ${filledEps}/${epCount} Episode ${filledEps<epCount?'(ada yang belum diisi)':''}</div>`:'<div class="pub-ep-count" style="color:var(--success)"><i class="fas fa-check"></i> Video tersedia</div>'}
+                    ${ct!=='movie'?`<div class="pub-ep-count ${filledEps>=epCount?'ok':''}"><i class="fas fa-list-ol"></i> ${filledEps}/${epCount} Episode ${filledEps<epCount?'(belum lengkap)':''}</div>`:'<div class="pub-ep-count ok"><i class="fas fa-check"></i> Video tersedia</div>'}
                     <div class="card-footer" style="margin-top:10px;padding-top:10px;border:none">
                         ${ct!=='movie'?`<button class="btn btn-warn btn-sm" onclick="openEpModal('${m.id}')"><i class="fas fa-list-ol"></i> Kelola Episode</button>`:''}
                         <button class="btn btn-danger btn-sm" onclick="deleteMovie('${m.id}','${escH(m.title)}')"><i class="fas fa-trash-alt"></i> Hapus</button>
@@ -483,7 +496,6 @@ function renderPublished(){
     }).join('');
 }
 
-// === REJECT REQUEST ===
 function rejectRequest(id){
     if(!confirm('Tolak permintaan ini?'))return;
     update(ref(db,'requests/'+id),{status:'rejected'}).then(()=>showToast('Permintaan ditolak')).catch(()=>showToast('Gagal menolak','error'));
@@ -492,12 +504,14 @@ window.rejectRequest=rejectRequest;
 
 // === PUBLISH MODAL ===
 function openPublishModal(requestId){
-    const modal=document.getElementById('publishModal');
-    modal.classList.add('active');
+    document.getElementById('publishModal').classList.add('active');
     document.body.style.overflow='hidden';
     epFieldCounter=0;
     document.getElementById('pubEpList').innerHTML='';
     document.getElementById('btnConvertAll').style.display='none';
+    // Reset video url styling
+    const vidInput=document.getElementById('pubVideoUrl');
+    vidInput.style.color='';vidInput.style.borderColor='';vidInput.classList.remove('converted');
 
     const ctInput=document.getElementById('pubType');
     const epSec=document.getElementById('pubEpSection');
@@ -515,22 +529,18 @@ function openPublishModal(requestId){
         document.getElementById('pubGenre').value=Array.isArray(r.genres)?r.genres.join(', '):(r.genres||'');
         document.getElementById('pubPoster').value='';
         document.getElementById('pubDesc').value='';
-        document.getElementById('pubVideoUrl').value='';
+        vidInput.value='';
 
         const ct=(r.type||'movie').toLowerCase();
-        if(ct==='movie'){
-            epSec.style.display='none';vidSec.style.display='block';
-        }else{
+        if(ct==='movie'){epSec.style.display='none';vidSec.style.display='block'}
+        else{
             epSec.style.display='block';vidSec.style.display='none';
             let epNums=[];
-            if(r.episodeType==='specific'&&r.specificEpisode){
-                epNums=parseEpisodeNumbers(r.specificEpisode);
-            }
+            if(r.episodeType==='specific'&&r.specificEpisode)epNums=parseEpisodeNumbers(r.specificEpisode);
             document.getElementById('pubEpCount').value=epNums.length||12;
             generateEpFields(epNums);
         }
     }else{
-        // Manual publish
         document.getElementById('publishModalTitle').textContent='Publikasi Manual';
         document.getElementById('pubRequestId').value='';
         document.getElementById('pubTitle').value='';
@@ -540,26 +550,17 @@ function openPublishModal(requestId){
         document.getElementById('pubGenre').value='';
         document.getElementById('pubPoster').value='';
         document.getElementById('pubDesc').value='';
-        document.getElementById('pubVideoUrl').value='';
+        vidInput.value='';
         epSec.style.display='none';vidSec.style.display='block';
     }
-
-    // Type change handler
-    ctInput.addEventListener('change',function(){
-        const ct=this.value.toLowerCase();
-        if(ct==='movie'){epSec.style.display='none';vidSec.style.display='block'}
-        else{epSec.style.display='block';vidSec.style.display='none';if(!document.getElementById('pubEpList').children.length)generateEpFields()}
-    },{once:false});
 }
 window.openPublishModal=openPublishModal;
 
 function closePublishModal(){document.getElementById('publishModal').classList.remove('active');document.body.style.overflow=''}
 window.closePublishModal=closePublishModal;
 
-// Generate episode fields
 function generateEpFields(predefinedNums){
-    const list=document.getElementById('pubEpList');
-    list.innerHTML='';epFieldCounter=0;
+    const list=document.getElementById('pubEpList');list.innerHTML='';epFieldCounter=0;
     const count=parseInt(document.getElementById('pubEpCount').value)||1;
     const nums=predefinedNums&&predefinedNums.length?predefinedNums:Array.from({length:count},(_,i)=>i+1);
     document.getElementById('btnConvertAll').style.display='inline-flex';
@@ -568,47 +569,49 @@ function generateEpFields(predefinedNums){
 window.generateEpFields=generateEpFields;
 
 function addEpField(num){
-    const list=document.getElementById('pubEpList');
-    epFieldCounter++;
+    const list=document.getElementById('pubEpList');epFieldCounter++;
     const n=num||epFieldCounter;
-    const div=document.createElement('div');
-    div.className='ep-item';
-    div.dataset.epField=epFieldCounter;
+    const div=document.createElement('div');div.className='ep-item';
     div.innerHTML=`<div class="ep-item-header">
         <span class="ep-num">${n}</span>
         <input type="text" class="ep-title-input" placeholder="Judul episode (opsional)" value="Episode ${n}">
         <button class="ep-remove" onclick="this.closest('.ep-item').remove()" title="Hapus"><i class="fas fa-trash-alt"></i></button>
     </div>
-    <input type="url" class="ep-url" placeholder="https://www.dropbox.com/scl/fi/.../?dl=0" data-raw="0">`;
+    <input type="url" class="ep-url" placeholder="https://www.dropbox.com/scl/fi/.../?dl=0">`;
     list.appendChild(div);
 }
 window.addEpField=addEpField;
 
+// Konversi semua URL episode di modal publish
 function convertAllEpUrls(){
+    let converted=0,skipped=0;
     document.querySelectorAll('#pubEpList .ep-url').forEach(input=>{
-        if(!input.value.trim())return;
+        if(!input.value.trim()){return}
+        if(hasRaw(input.value)){input.classList.remove('converted');input.classList.add('already-converted');skipped++;return}
         input.value=convertDropboxUrl(input.value);
+        input.classList.remove('already-converted');
         input.classList.add('converted');
+        converted++;
     });
-    showToast('Semua URL Dropbox telah dikonversi ke raw=1');
+    if(converted)showToast(`${converted} URL dikonversi ke raw=1`);
+    else if(skipped)showToast(`${skipped} URL sudah memiliki raw=1`);
+    else showToast('Tidak ada URL untuk dikonversi');
 }
 window.convertAllEpUrls=convertAllEpUrls;
 
 function convertVideoUrl(){
     const input=document.getElementById('pubVideoUrl');
     if(!input.value.trim())return;
+    if(hasRaw(input.value)){input.classList.add('converted');showToast('URL sudah memiliki raw=1');return}
     input.value=convertDropboxUrl(input.value);
-    input.style.color='var(--success)';
-    input.style.borderColor='rgba(76,175,80,.3)';
-    showToast('URL Dropbox dikonversi ke raw=1');
+    input.classList.add('converted');
+    showToast('URL dikonversi ke raw=1');
 }
 window.convertVideoUrl=convertVideoUrl;
 
-// === PUBLISH MOVIE ===
 async function publishMovie(){
     const title=document.getElementById('pubTitle').value.trim();
     if(!title){showToast('Judul wajib diisi!','error');return}
-
     const ct=document.getElementById('pubType').value.toLowerCase();
     const poster=document.getElementById('pubPoster').value.trim();
     const rating=parseFloat(document.getElementById('pubRating').value)||null;
@@ -616,13 +619,11 @@ async function publishMovie(){
     const year=document.getElementById('pubYear').value;
     const desc=document.getElementById('pubDesc').value.trim();
     const requestId=document.getElementById('pubRequestId').value;
-
     const btn=document.getElementById('btnPublish');
     btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
     try{
         const movieData={title,contentType:ct,poster,genre,year,rating,description:desc,createdAt:Date.now()};
-
         if(ct==='movie'){
             const videoUrl=document.getElementById('pubVideoUrl').value.trim();
             if(!videoUrl){showToast('URL video wajib diisi!','error');btn.disabled=false;btn.innerHTML='<i class="fas fa-upload"></i> Publikasikan';return}
@@ -630,8 +631,7 @@ async function publishMovie(){
         }else{
             const epItems=document.querySelectorAll('#pubEpList .ep-item');
             if(!epItems.length){showToast('Tambahkan minimal 1 episode!','error');btn.disabled=false;btn.innerHTML='<i class="fas fa-upload"></i> Publikasikan';return}
-            movieData.episodes={};
-            let hasUrl=false;
+            movieData.episodes={};let hasUrl=false;
             epItems.forEach(item=>{
                 const num=item.querySelector('.ep-num').textContent.trim();
                 const epTitle=item.querySelector('.ep-title-input').value.trim()||`Episode ${num}`;
@@ -641,51 +641,38 @@ async function publishMovie(){
             });
             if(!hasUrl){showToast('Minimal 1 episode harus punya URL!','error');btn.disabled=false;btn.innerHTML='<i class="fas fa-upload"></i> Publikasikan';return}
         }
-
         const newRef=push(ref(db,'movies'));
         await set(newRef,movieData);
-
-        if(requestId){
-            await update(ref(db,'requests/'+requestId),{status:'published',publishedAt:Date.now(),publishedId:newRef.key});
-        }
-
+        if(requestId)await update(ref(db,'requests/'+requestId),{status:'published',publishedAt:Date.now(),publishedId:newRef.key});
         closePublishModal();
         showToast(`"${title}" berhasil dipublikasikan!`);
-    }catch(err){
-        console.error(err);
-        showToast('Gagal mempublikasikan: '+err.message,'error');
-    }finally{
-        btn.disabled=false;btn.innerHTML='<i class="fas fa-upload"></i> Publikasikan';
-    }
+    }catch(err){console.error(err);showToast('Gagal: '+err.message,'error')}
+    finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-upload"></i> Publikasikan'}
 }
 window.publishMovie=publishMovie;
 
-// === EPISODES MANAGEMENT MODAL ===
+// === EPISODES MANAGEMENT ===
 function openEpModal(movieId){
     const m=allPublished.find(x=>x.id===movieId);
     if(!m){showToast('Film tidak ditemukan','error');return}
     document.getElementById('epModalTitle').textContent=m.title;
     document.getElementById('epModalMovieId').value=movieId;
-    const list=document.getElementById('epModalList');
-    list.innerHTML='';manageEpCounter=0;
-
+    const list=document.getElementById('epModalList');list.innerHTML='';manageEpCounter=0;
     if(m.episodes){
         Object.entries(m.episodes).forEach(([num,ep])=>{
             manageEpCounter++;
-            const div=document.createElement('div');
-            div.className='ep-item';
-            div.dataset.epNum=num;
+            const div=document.createElement('div');div.className='ep-item';div.dataset.epNum=num;
+            const isConverted=hasRaw(ep.videoSource||'');
             div.innerHTML=`<div class="ep-item-header">
                 <input type="number" class="ep-num-input" value="${num}" min="1" style="width:50px">
                 <input type="text" class="ep-title-input" placeholder="Judul episode" value="${escH(ep.title||'')}">
                 <button class="ep-remove" onclick="this.closest('.ep-item').remove()" title="Hapus"><i class="fas fa-trash-alt"></i></button>
             </div>
-            <input type="url" class="ep-url" placeholder="https://www.dropbox.com/scl/fi/.../?dl=0" value="${ep.videoSource||''}" data-raw="0">`;
+            <input type="url" class="ep-url ${isConverted?'converted':''}" placeholder="https://www.dropbox.com/scl/fi/.../?dl=0" value="${ep.videoSource||''}">`;
             list.appendChild(div);
         });
     }
-    document.getElementById('episodesModal').classList.add('active');
-    document.body.style.overflow='hidden';
+    document.getElementById('episodesModal').classList.add('active');document.body.style.overflow='hidden';
 }
 window.openEpModal=openEpModal;
 
@@ -693,29 +680,32 @@ function closeEpModal(){document.getElementById('episodesModal').classList.remov
 window.closeEpModal=closeEpModal;
 
 function addManageEpField(){
-    const list=document.getElementById('epModalList');
-    manageEpCounter++;
+    const list=document.getElementById('epModalList');manageEpCounter++;
     const nextNum=list.children.length?Math.max(...[...list.querySelectorAll('.ep-num-input')].map(i=>parseInt(i.value)||0))+1:1;
-    const div=document.createElement('div');
-    div.className='ep-item';
+    const div=document.createElement('div');div.className='ep-item';
     div.innerHTML=`<div class="ep-item-header">
         <input type="number" class="ep-num-input" value="${nextNum}" min="1" style="width:50px">
         <input type="text" class="ep-title-input" placeholder="Judul episode">
         <button class="ep-remove" onclick="this.closest('.ep-item').remove()" title="Hapus"><i class="fas fa-trash-alt"></i></button>
     </div>
-    <input type="url" class="ep-url" placeholder="https://www.dropbox.com/scl/fi/.../?dl=0" data-raw="0">`;
-    list.appendChild(div);
-    list.scrollTop=list.scrollHeight;
+    <input type="url" class="ep-url" placeholder="https://www.dropbox.com/scl/fi/.../?dl=0">`;
+    list.appendChild(div);list.scrollTop=list.scrollHeight;
 }
 window.addManageEpField=addManageEpField;
 
 function convertAllManageEpUrls(){
+    let converted=0,skipped=0;
     document.querySelectorAll('#epModalList .ep-url').forEach(input=>{
-        if(!input.value.trim())return;
+        if(!input.value.trim()){return}
+        if(hasRaw(input.value)){input.classList.remove('converted');input.classList.add('already-converted');skipped++;return}
         input.value=convertDropboxUrl(input.value);
+        input.classList.remove('already-converted');
         input.classList.add('converted');
+        converted++;
     });
-    showToast('Semua URL dikonversi');
+    if(converted)showToast(`${converted} URL dikonversi ke raw=1`);
+    else if(skipped)showToast(`${skipped} URL sudah memiliki raw=1`);
+    else showToast('Tidak ada URL untuk dikonversi');
 }
 window.convertAllManageEpUrls=convertAllManageEpUrls;
 
@@ -723,9 +713,7 @@ async function saveEpisodes(){
     const movieId=document.getElementById('epModalMovieId').value;
     const epItems=document.querySelectorAll('#epModalList .ep-item');
     if(!epItems.length){showToast('Tidak ada episode!','error');return}
-
     const btn=event.target;btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-
     try{
         const episodes={};
         epItems.forEach(item=>{
@@ -735,37 +723,25 @@ async function saveEpisodes(){
             if(num)episodes[num]={title:title||`Episode ${num}`,videoSource:url?convertDropboxUrl(url):''};
         });
         await update(ref(db,'movies/'+movieId+'/episodes'),episodes);
-        closeEpModal();
-        showToast('Episode berhasil diperbarui!');
-    }catch(err){
-        console.error(err);
-        showToast('Gagal menyimpan: '+err.message,'error');
-    }finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Simpan Perubahan'}
+        closeEpModal();showToast('Episode berhasil diperbarui!');
+    }catch(err){console.error(err);showToast('Gagal menyimpan: '+err.message,'error')}
+    finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Simpan Perubahan'}
 }
 window.saveEpisodes=saveEpisodes;
 
-// === DELETE MOVIE ===
 async function deleteMovie(id,title){
-    if(!confirm(`Hapus "${title}" dari daftar film?\n\nTindakan ini tidak dapat dibatalkan!`))return;
-    try{
-        await remove(ref(db,'movies/'+id));
-        showToast(`"${title}" telah dihapus`);
-    }catch(err){
-        console.error(err);
-        showToast('Gagal menghapus','error');
-    }
+    if(!confirm(`Hapus "${title}"?\n\nTindakan ini tidak dapat dibatalkan!`))return;
+    try{await remove(ref(db,'movies/'+id));showToast(`"${title}" telah dihapus`)}
+    catch(err){console.error(err);showToast('Gagal menghapus','error')}
 }
 window.deleteMovie=deleteMovie;
 
-// === MANUAL PUBLISH BUTTON ===
 document.getElementById('btnManualPublish').addEventListener('click',()=>openPublishModal(null));
 
-// === CLOSE MODAL ON BACKDROP CLICK ===
 document.querySelectorAll('.modal-overlay').forEach(ov=>{
     ov.addEventListener('click',e=>{if(e.target===ov){ov.classList.remove('active');document.body.style.overflow=''}});
 });
 
-// === INIT ===
 loadAllData();
 </script>
 </body>
