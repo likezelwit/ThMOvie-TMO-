@@ -105,7 +105,7 @@
         .rooms-empty{text-align:center;color:var(--gray);padding:50px 20px}
         .rooms-empty i{font-size:3rem;color:#ddd;margin-bottom:12px;display:block}
 
-        /* ===== DETAIL PAGE (Series/Anime) ===== */
+        /* ===== DETAIL PAGE (Series/Anime/OVA) ===== */
         .detail-hero{position:relative;border-radius:20px;overflow:hidden;margin-bottom:24px;box-shadow:var(--shadow);display:flex;min-height:320px}
         .detail-poster{width:220px;flex-shrink:0;position:relative;z-index:2}
         .detail-poster img{width:100%;height:100%;object-fit:cover}
@@ -375,7 +375,8 @@ const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
 let tickets=JSON.parse(localStorage.getItem('tmoTickets')||'[]');
-let currentBooking={movie:'',type:'',time:'',roomType:'PUBLIC',videoSource:'',poster:''};
+// Tambahkan contentType ke currentBooking
+let currentBooking={movie:'',type:'',roomType:'PUBLIC',videoSource:'',poster:'',contentType:'movie'};
 let allMovies=[];
 let currentDetailMovie=null;
 let roomsUnsub=null;
@@ -407,6 +408,8 @@ function handleMovieClick(movie){
     const ct=(movie.contentType||'movie').toLowerCase();
     if(ct==='movie'){
         currentBooking.videoSource=movie.videoSource;currentBooking.poster=movie.poster;
+        // SET CONTENT TYPE
+        currentBooking.contentType = 'movie';
         startBooking(movie.title,'PUBLIC');
     }else{
         showDetail(movie);
@@ -450,6 +453,8 @@ function showDetail(movie){
 function selectEpisode(ep){
     if(!currentDetailMovie)return;
     currentBooking.videoSource=ep.videoSource;currentBooking.poster=currentDetailMovie.poster;
+    // SET CONTENT TYPE UNTUK EPISODE
+    currentBooking.contentType = currentDetailMovie.contentType || 'series';
     startBooking(`${currentDetailMovie.title} - Ep.${ep.num}`,'PUBLIC');
 }
 
@@ -547,7 +552,19 @@ function confirmBooking(){
     const ti=document.getElementById('user-time').value;
     if(!ti){showToast('Pilih jam tayang!','error');return}
     const ts=timeToTs(ti),disp=toAMPM(ti);
-    tickets.push({movie:currentBooking.movie,type:currentBooking.type,timeDisplay:disp,bookingTimestamp:ts,roomType:currentBooking.roomType,id:Date.now(),date:new Date().toLocaleDateString('id-ID'),videoSource:currentBooking.videoSource,poster:currentBooking.poster});
+    tickets.push({
+        movie:currentBooking.movie,
+        type:currentBooking.type,
+        timeDisplay:disp,
+        bookingTimestamp:ts,
+        roomType:currentBooking.roomType,
+        id:Date.now(),
+        date:new Date().toLocaleDateString('id-ID'),
+        videoSource:currentBooking.videoSource,
+        poster:currentBooking.poster,
+        // SIMPAN CONTENT TYPE KE TIKET
+        contentType: currentBooking.contentType || 'movie'
+    });
     localStorage.setItem('tmoTickets',JSON.stringify(tickets));
     showToast(`Tiket berhasil! ${currentBooking.movie} — ${disp}`);switchView('ticket');
 }
@@ -556,8 +573,16 @@ function renderTickets(){
     const l=document.getElementById('ticket-list');l.innerHTML='';
     if(!tickets.length){l.innerHTML='<div class="text-center" style="color:var(--gray);padding:40px">Belum ada tiket.</div>';return}
     [...tickets].reverse().forEach(t=>{
-        const md=allMovies.find(m=>m.title===t.movie)||(currentDetailMovie&&t.movie.includes(currentDetailMovie.title)?currentDetailMovie:null);
-        const poster=md?md.poster:t.poster||"https://picsum.photos/seed/ticket/100/150";
+        // Logic untuk mencari movie DB (fallback untuk poster/desc)
+        // Untuk series, t.movie mungkin "Series - Ep 1", jadi find by exact title mungkin gagal.
+        // Kita prioritaskan data dari tiket itu sendiri.
+        let md = allMovies.find(m => m.title === t.movie);
+        // Jika tidak ketemu exact match (karena judul episode), coba cari partial match
+        if(!md && currentDetailMovie && t.movie.includes(currentDetailMovie.title)){
+            md = currentDetailMovie;
+        }
+        
+        const poster=t.poster||md?.poster||"https://picsum.photos/seed/ticket/100/150";
         const header=t.roomType==='PRIVATE'?`Private — ${t.movie}`:`Publik — ${t.movie}`;
         l.innerHTML+=`<div class="ticket-card"><div class="t-poster"><img src="${poster}" style="width:100%;height:100%;object-fit:cover" onerror="this.src='https://picsum.photos/seed/ticket/100/150'"></div><div class="t-details"><div style="font-size:.72rem;color:var(--primary);font-weight:800;text-transform:uppercase;margin-bottom:2px">${header}</div><div class="t-title">${t.movie}</div><div class="t-info"><i class="far fa-calendar"></i> ${t.date}</div><div class="t-info"><i class="far fa-clock"></i> ${t.timeDisplay||'-'}</div><div class="t-badge" style="${t.roomType==='PRIVATE'?'background:var(--private)':''}">${t.type}</div><div class="t-actions"><button class="movie-btn" onclick="watchNow(${t.id})" style="background:var(--primary);color:#fff"><i class="fas fa-play"></i> Tonton</button><button class="btn-delete" onclick="deleteTicket(${t.id})"><i class="fas fa-trash-alt"></i> Hapus</button></div></div></div>`;
     });
@@ -568,14 +593,23 @@ function deleteTicket(id){if(!confirm('Hapus tiket ini?'))return;tickets=tickets
 function watchNow(id){
     const t=tickets.find(x=>x.id===id);if(!t){showToast('Tiket tidak ditemukan!','error');return}
     const m=allMovies.find(x=>x.title===t.movie);if(!m){showToast('Film tidak ditemukan di database!','error');return}
-    sessionStorage.setItem('activeMovieTitle',t.movie);sessionStorage.setItem('activeVideoSource',t.videoSource||m.videoSource);sessionStorage.setItem('activePoster',t.poster||m.poster);sessionStorage.setItem('activeBookingTime',String(t.bookingTimestamp||0));sessionStorage.setItem('activeRoomType',t.roomType||'PUBLIC');sessionStorage.setItem('activeContentType',m.contentType||'movie');
+    
+    sessionStorage.setItem('activeMovieTitle',t.movie);
+    // Gunakan videoSource dari tiket (episode) kalau ada, kalau tidak pakai dari DB movie
+    sessionStorage.setItem('activeVideoSource',t.videoSource || m.videoSource);
+    sessionStorage.setItem('activePoster',t.poster || m.poster);
+    sessionStorage.setItem('activeBookingTime',String(t.bookingTimestamp||0));
+    sessionStorage.setItem('activeRoomType',t.roomType||'PUBLIC');
+    // KIRIM CONTENT TYPE KE PLAYER (Priotaskan dari Tiket)
+    sessionStorage.setItem('activeContentType', t.contentType || m.contentType || 'movie');
+    
     window.location.href='movie/index.html';
 }
 
 function renderPrivate(){
     const c=document.getElementById('private-movies-container');c.innerHTML='';
     if(!allMovies.length){c.innerHTML='<p class="text-center" style="grid-column:1/-1;color:#999">Tidak ada film.</p>';return}
-    allMovies.forEach(m=>{const card=document.createElement('div');card.className='movie-card';card.dataset.title=m.title.toLowerCase();card.onclick=()=>{currentBooking.videoSource=m.videoSource;currentBooking.poster=m.poster;startBooking(m.title,'PRIVATE')};card.innerHTML=`<div class="poster"><img src="${m.poster}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'"></div><div class="movie-info"><div class="movie-title">${m.title}</div><div class="movie-genre">${m.genre||''}</div><button class="movie-btn" style="background:var(--private);color:#fff">Beli Tiket Private</button></div>`;c.appendChild(card)});
+    allMovies.forEach(m=>{const card=document.createElement('div');card.className='movie-card';card.dataset.title=m.title.toLowerCase();card.onclick=()=>{currentBooking.videoSource=m.videoSource;currentBooking.poster=m.poster;currentBooking.contentType='movie';startBooking(m.title,'PRIVATE')};card.innerHTML=`<div class="poster"><img src="${m.poster}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'"></div><div class="movie-info"><div class="movie-title">${m.title}</div><div class="movie-genre">${m.genre||''}</div><button class="movie-btn" style="background:var(--private);color:#fff">Beli Tiket Private</button></div>`;c.appendChild(card)});
 }
 
 // Slider
