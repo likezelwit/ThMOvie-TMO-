@@ -2,106 +2,226 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Uji Coba Bioskop Streamtape Tanpa Firebase</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Bioskop Sinkronisasi</title>
     <style>
-        body { background: #0b0c10; color: white; font-family: sans-serif; text-align: center; padding-top: 30px; }
-        .cinema-box { width: 90%; max-width: 700px; margin: 0 auto; position: relative; aspect-ratio: 16/9; background: #000; }
-        iframe { width: 100%; height: 100%; border: none; }
-        /* Kunci Bioskop: Mengunci klik di dalam layar video */
-        .blocker { position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 45px); background: transparent; z-index: 5; }
-        .panel-tes { margin-top: 20px; background: #1f2833; padding: 15px; display: inline-block; border-radius: 8px; }
-        button { padding: 10px 20px; font-weight: bold; cursor: pointer; margin: 5px; border: none; border-radius: 4px; }
-        .btn-action { background: #66fcf1; color: black; }
-        .btn-simulasi { background: #c5a059; color: white; }
+        body { 
+            background: #0b0c10; 
+            color: #c5c6c7; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            padding-top: 20px; 
+            margin: 0;
+        }
+        h2 { color: #66fcf1; margin-bottom: 10px; }
+        
+        .cinema-container { 
+            width: 90%; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            position: relative; 
+            aspect-ratio: 16/9; 
+            background: #000; 
+            box-shadow: 0 0 20px rgba(102, 252, 241, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Layar Video (Simulasi) */
+        .video-simulator {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #1f2833, #000);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .time-display {
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: monospace;
+            color: #66fcf1;
+            text-shadow: 0 0 10px #66fcf1;
+        }
+
+        .status-overlay {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            color: #c5a059;
+        }
+
+        /* Panel Kontrol */
+        .panel-tes { 
+            margin-top: 20px; 
+            background: #1f2833; 
+            padding: 20px; 
+            display: inline-block; 
+            border-radius: 10px; 
+            border: 1px solid #45a29e;
+            max-width: 90%;
+        }
+
+        button { 
+            padding: 10px 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 4px; 
+            transition: transform 0.2s, background 0.2s;
+        }
+        
+        button:hover { transform: scale(1.05); }
+        button:active { transform: scale(0.95); }
+
+        .btn-scenario { background: #45a29e; color: white; }
+        .btn-action { background: #66fcf1; color: #0b0c10; font-size: 1.1rem; padding: 12px 25px; }
+
+        #info-log {
+            margin-top: 15px;
+            padding: 10px;
+            background: #000;
+            border-left: 4px solid #66fcf1;
+            font-family: monospace;
+            min-height: 24px;
+        }
     </style>
 </head>
 <body>
 
-    <h2>🎬 Simulasi Studio Bioskop Streamtape</h2>
+    <h2>🎬 Simulator Sinkronisasi Studio</h2>
     
-    <div class="cinema-box">
-        <div class="blocker"></div>
-        <!-- Menggunakan link video embed Streamtape milik Anda -->
-        <iframe id="tapePlayer" src="https://streamtape.com" allow="autoplay"></iframe>
+    <div class="cinema-container">
+        <!-- Simulasi Video Player (Karena iframe Streamtape asli tidak bisa dikontrol via JS karena CORS) -->
+        <div class="video-simulator" id="layarSimulasi">
+            <div class="time-display" id="timerDisplay">00:00</div>
+            <div class="status-overlay" id="statusDisplay">Siaga</div>
+        </div>
     </div>
     
     <div class="panel-tes">
-        <h3>🛠️ PANEL SIMULASI PENONTON</h3>
-        <p>Pilih skenario kedatangan Anda terlebih dahulu:</p>
-        <button class="btn-simulasi" id="setTepatWaktu">1. Atur: Saya Datang Tepat Waktu</button>
-        <button class="btn-simulasi" id="setTelat5Menit">2. Atur: Saya Telat 5 Menit</button>
-        <hr style="border-color: #45f3ff;">
-        <button class="btn-action" id="tombolKlik">🍿 MASUK BIOSKOP / SINKRONKAN DETIK</button>
+        <h3>🛠️ PANEL KONTROL PENONTON</h3>
+        <p>Pilih skenario Anda:</p>
+        <button class="btn-scenario" id="btnTepatWaktu">1. Saya Datang Tepat Waktu (Mulai -10 detik)</button>
+        <button class="btn-scenario" id="btnTelat5Menit">2. Saya Telat 5 Menit</button>
+        
+        <hr style="border-color: #45a29e; margin: 15px 0;">
+        
+        <button class="btn-action" id="btnMasuk">🍿 MASUK BIOSKOP / SINKRONKAN</button>
+
+        <div id="info-log">Status: Menunggu input...</div>
     </div>
 
-    <p id="info-status">Silakan pilih skenario penonton di atas...</p>
-
     <script>
-        const iframe = document.getElementById('tapePlayer');
-        const info = document.getElementById('info-status');
+        // --- KONFIGURASI & VARIABEL ---
+        const layarTimer = document.getElementById('timerDisplay');
+        const layarStatus = document.getElementById('statusDisplay');
+        const logInfo = document.getElementById('info-log');
         
-        // Variabel penampung waktu mulai film fiktif untuk uji coba
-        let waktuMulaiFilm = 0; 
+        let startTime = 0;       // Waktu target mulai (timestamp)
+        let isPlaying = false;   // Status video
+        let currentSeconds = 0;  // Posisi detik video saat ini
+        let timerInterval = null;// ID untuk interval timer
+        
+        // --- FUNGSI UTILITAS ---
+        
+        // Format detik menjadi MM:SS
+        function formatTime(totalSeconds) {
+            const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
 
-        // Fungsi kirim perintah jarak jauh ke dalam Iframe Streamtape
-        function kontrolStreamtape(perintah, nilai = null) {
-            if (iframe.contentWindow) {
-                iframe.contentWindow.postMessage(JSON.stringify({
-                    'event': perintah, 'value': nilai
-                }), '*');
+        // Update tampilan layar simulasi
+        function updateDisplay() {
+            layarTimer.innerText = formatTime(currentSeconds);
+            if (isPlaying) {
+                layarStatus.innerText = "▶️ PLAYING";
+                layarStatus.style.color = "#66fcf1";
+            } else {
+                layarStatus.innerText = "⏸️ PAUSED / WAITING";
+                layarStatus.style.color = "#c5a059";
             }
         }
 
-        // TOMBOL SIMULASI 1: Berpura-pura film baru mau mulai 10 detik lagi
-        document.getElementById('setTepatWaktu').addEventListener('click', () => {
-            waktuMulaiFilm = Date.now() + 10000; // Waktu sekarang ditambah 10 detik
-            info.innerText = "Skenario diatur: Film akan dimulai dalam 10 detik lagi. Silakan klik tombol masuk.";
+        // Log teks ke panel bawah
+        function log(msg) {
+            logInfo.innerText = `> ${msg}`;
+            console.log(msg);
+        }
+
+        // --- LOGIKA UTAMA ---
+
+        // 1. Tombol Skenario Tepat Waktu
+        document.getElementById('btnTepatWaktu').addEventListener('click', () => {
+            // Film akan mulai 10 detik dari sekarang
+            startTime = Date.now() + 10000; 
+            log("Skenario: Film mulai dalam 10 detik. Silakan masuk studio.");
         });
 
-        // TOMBOL SIMULASI 2: Berpura-pura film sudah jalan 5 menit yang lalu (300 detik)
-        document.getElementById('setTelat5Menit').addEventListener('click', () => {
-            waktuMulaiFilm = Date.now() - 300000; // Waktu sekarang dikurangi 5 menit
-            info.innerText = "Skenario diatur: Film sudah jalan 5 menit. Silakan klik tombol masuk untuk tes lompat detik.";
+        // 2. Tombol Skenario Telat
+        document.getElementById('btnTelat5Menit').addEventListener('click', () => {
+            // Film sudah mulai 5 menit (300 detik) yang lalu
+            startTime = Date.now() - 300000;
+            log("Skenario: Film sudah berjalan 5 menit. Silakan masuk untuk sinkronisasi.");
         });
 
-        // TOMBOL UTAMA: Menerima interaksi klik user untuk sinkronisasi durasi
-        document.getElementById('tombolKlik').addEventListener('click', () => {
-            if (waktuMulaiFilm === 0) {
-                return alert("Pilih skenario kedatangan kamu dulu (Tombol 1 atau Tombol 2)!");
+        // 3. Tombol Masuk / Sinkronisasi
+        document.getElementById('btnMasuk').addEventListener('click', () => {
+            if (startTime === 0) {
+                alert("Harap pilih skenario terlebih dahulu!");
+                return;
             }
 
-            const waktuSekarang = Date.now();
-            const selisihDetik = Math.floor((waktuSekarang - waktuMulaiFilm) / 1000);
+            const now = Date.now();
+            const diff = Math.floor((now - startTime) / 1000); // Selisih waktu dalam detik
 
-            if (selisihDetik > 0) {
-                // Eksekusi Skenario Telat: Otomatis memaksa video Streamtape melompat maju
-                info.innerText = `Menyelaraskan durasi... Kamu telat ${Math.floor(selisihDetik/60)}m ${selisihDetik%60}s.`;
-                kontrolStreamtape('seek', selisihDetik);
-                kontrolStreamtape('play');
+            if (diff < 0) {
+                // BELUM MULAI (Tepat Waktu / Telat Masuk tapi film belum jalan)
+                log(`Masuk Studio! Film mulai dalam ${Math.abs(diff)} detik lagi.`);
+                currentSeconds = 0;
+                isPlaying = false;
+                startSimulationTimer();
             } else {
-                // Eksekusi Skenario Tepat Waktu: Mengunci video di detik 0 sampai hitung mundur habis
-                info.innerText = "Berhasil masuk studio! Menunggu hitung mundur di kursi...";
-                kontrolStreamtape('seek', 0);
-                kontrolStreamtape('pause');
+                // SUDAH JALAN (Telat)
+                log(`Sinkronisasi... Lompat ke detik ke-${diff}`);
+                currentSeconds = diff;
+                isPlaying = true;
+                startSimulationTimer();
             }
+            updateDisplay();
         });
 
-        // Detak jam otomatis setiap 1 detik untuk menghitung mundur atau menyalakan video
-        setInterval(() => {
-            if (waktuMulaiFilm > 0) {
-                const waktuSekarang = Date.now();
-                const selisihDetik = Math.floor((waktuSekarang - waktuMulaiFilm) / 1000);
+        // --- SIMULASI TIMER ENGINE ---
+        // Ini menggantikan fungsi postMessage ke iframe yang tidak bisa bekerja
+        function startSimulationTimer() {
+            if (timerInterval) clearInterval(timerInterval);
 
-                if (selisihDetik === 0) {
-                    info.innerText = "Waktu lobi habis! PROYEKTOR BIOSKOP MULAI BERJALAN!";
-                    kontrolStreamtape('seek', 0);
-                    kontrolStreamtape('play');
-                } else if (selisihDetik < 0) {
-                    const sisa = Math.abs(selisihDetik);
-                    info.innerText = `Menunggu waktu siaran: Film dimulai dalam ${Math.floor(sisa/60)}m ${sisa%60}s lagi.`;
+            timerInterval = setInterval(() => {
+                if (isPlaying) {
+                    // Jika sedang playing, tambah detik
+                    currentSeconds++;
+                    updateDisplay();
+                } else {
+                    // Jika paused/waiting, cek apakah sudah waktunya main
+                    const now = Date.now();
+                    const diff = Math.floor((now - startTime) / 1000);
+
+                    if (diff >= 0) {
+                        isPlaying = true;
+                        log("WAKTU HABIS! PROYEKTOR JALAN OTOMATIS!");
+                        updateDisplay();
+                    }
                 }
-            }
-        }, 1000);
+            }, 1000);
+        }
+
+        // Inisialisasi awal
+        updateDisplay();
+
     </script>
 </body>
 </html>
