@@ -315,34 +315,6 @@ function processEmbedCode(code){
         return code;
     }
 
-    // Jika sudah berupa tag HTML (Iframe)
-    // 1. Cari src
-    const srcMatch = code.match(/src=["']([^"']+)["']/);
-    if(srcMatch){
-        let src = srcMatch[1];
-        // 2. Fix trailing slash dan tambahkan ?api=1 jika belum ada dan jika streamtape
-        if(src.includes('streamtape.com') && !src.includes('api=1')){
-            src = fixStreamtapeUrl(src);
-            code = code.replace(/src=["'][^"']+["']/, `src="${src}"`);
-        }
-    }
-    return code;
-}
-
-    // Jika sudah berupa tag HTML (Iframe)
-    // 1. Cari src
-    const srcMatch = code.match(/src=["']([^"']+)["']/);
-    if(srcMatch){
-        let src = srcMatch[1];
-        // 2. Tambahkan ?api=1 jika belum ada dan jika streamtape
-        if(src.includes('streamtape.com') && !src.includes('api=1')){
-            src += (src.includes('?') ? '&api=1' : '?api=1');
-            code = code.replace(/src=["'][^"']+["']/, `src="${src}"`);
-        }
-    }
-    return code;
-}
-
 function parseEpisodeNumbers(text){
     if(!text)return[];
     const nums=new Set();
