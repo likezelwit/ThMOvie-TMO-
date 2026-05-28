@@ -76,7 +76,6 @@
         .form-label{display:block;font-weight:600;margin-bottom:6px;font-size:.85rem;color:var(--text)}
         .form-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none;font-size:.9rem;font-family:'Inter',sans-serif;transition:.2s}
         .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-        .form-input[readonly]{background:var(--bg);color:var(--text2)}
         textarea.form-input{min-height:80px;resize:vertical;font-family:'JetBrains Mono',monospace;font-size:.82rem}
         .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
@@ -196,14 +195,20 @@
         <div class="modal-body">
             <input type="hidden" id="pubRequestId">
             <div class="form-row">
-                <div class="form-group"><label class="form-label">Judul</label><input type="text" class="form-input" id="pubTitle" readonly></div>
-                <div class="form-group"><label class="form-label">Tipe</label><input type="text" class="form-input" id="pubType" readonly style="text-transform:uppercase;font-weight:700;letter-spacing:1px"></div>
+                <div class="form-group"><label class="form-label">Judul</label><input type="text" class="form-input" id="pubTitle"></div>
+                <div class="form-group"><label class="form-label">Tipe</label>
+                    <select id="pubType" class="form-input" style="appearance:none; background-image:url('data:image/svg+xml;...'); background-repeat:no-repeat; background-position:right 10px;">
+                        <option value="movie">MOVIE</option>
+                        <option value="series">SERIES</option>
+                        <option value="ova">OVA</option>
+                    </select>
+                </div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label class="form-label">Tahun Rilis</label><input type="text" class="form-input" id="pubYear" readonly></div>
+                <div class="form-group"><label class="form-label">Tahun Rilis</label><input type="number" class="form-input" id="pubYear"></div>
                 <div class="form-group"><label class="form-label">Rating / 10</label><input type="number" class="form-input" id="pubRating" placeholder="8.5" min="0" max="10" step="0.1"></div>
             </div>
-            <div class="form-group"><label class="form-label">Genre</label><input type="text" class="form-input" id="pubGenre" readonly></div>
+            <div class="form-group"><label class="form-label">Genre</label><input type="text" class="form-input" id="pubGenre" placeholder="Action, Drama, dll (Pisahkan dengan koma)"></div>
             <div class="form-group"><label class="form-label">URL Poster</label><input type="url" class="form-input" id="pubPoster" placeholder="https://..."></div>
             <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-input" id="pubDesc" placeholder="Sinopsis atau deskripsi singkat..." style="font-family:'Inter',sans-serif;font-size:.9rem"></textarea></div>
             
@@ -211,7 +216,7 @@
                 <hr class="modal-divider">
                 <div class="form-group"><label class="form-label">Embed Code (Streamtape/Google Drive)</label>
                     <textarea class="form-input" id="pubVideoCode" placeholder='<iframe src="https://streamtape.com/e/..." ...></iframe>' style="height:120px;font-family:'JetBrains Mono',monospace;font-size:.8rem"></textarea>
-                    <small style="color:var(--text2);display:block;margin-top:4px">Tempel kode <code>&lt;iframe&gt;</code> lengkap di sini. Kami akan menambahkan <code>?api=1</code> otomatis jika memungkinkan.</small>
+                    <small style="color:var(--text2);display:block;margin-top:4px">Tempel kode <code>&lt;iframe&gt;</code> lengkap di sini. Kami akan menambahkan <code>?api=1</code> otomatis dan memperbaiki URL.</small>
                 </div>
             </div>
 
@@ -278,23 +283,28 @@ function showToast(msg,type='success'){
     setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3500);
 }
 
-// === LOGIKA EMBED CODE (Streamtape/Dropbox) ===
+// === LOGIKA EMBED CODE (PERBAIKAN) ===
 function processEmbedCode(code){
     if(!code) return '';
     code = code.trim();
     
-    // Jika input berupa URL mentah (bukan iframe), coba apakah itu dropbox
+    // Jika input berupa URL mentah (bukan iframe), cek apakah itu dropbox atau streamtape
     if(!code.startsWith('<iframe') && !code.startsWith('<div')){
         if(code.includes('dropbox.com')){
-            // Logika Dropbox lama dipertahankan
+            // Logika Dropbox
             let url = code.replace(/[?&]dl=[^&]*/g, '').replace(/[?&]raw=0[^&]*/g, '');
             url = url.replace(/\?&/g, '?').replace(/&&/g, '&').replace(/[?&]$/, '');
+            // Hapus trailing slash jika ada sebelum tambah raw=1
+            if(url.endsWith('/')) url = url.slice(0, -1);
             if(!/[?&]raw=1(?:&|$)/.test(url)) url += (url.includes('?')?'&raw=1':'?raw=1');
-            return url; // Kembalikan URL murni untuk tag <video>
+            return url; 
         }
-        // Jika URL lain (misal streamtape tanpa tag), coba buat iframe standar
+        // Jika URL lain (misal streamtape tanpa tag), buat iframe standar
         if(code.includes('streamtape.com')){
-             return `<iframe src="${code}?api=1" width="100%" height="100%" allowfullscreen allowtransparency allow="autoplay" scrolling="no" frameborder="0"></iframe>`;
+             let url = code;
+             // Hapus trailing slash sebelum ?api=1
+             if(url.endsWith('/')) url = url.slice(0, -1);
+             return `<iframe src="${url}?api=1" width="100%" height="100%" allowfullscreen allowtransparency allow="autoplay" scrolling="no" frameborder="0"></iframe>`;
         }
         return code;
     }
@@ -306,7 +316,9 @@ function processEmbedCode(code){
         let src = srcMatch[1];
         // 2. Tambahkan ?api=1 jika belum ada dan jika streamtape
         if(src.includes('streamtape.com') && !src.includes('api=1')){
-            src += (src.includes('?') ? '&api=1' : '?api=1');
+            // Hapus trailing slash
+            if(src.endsWith('/')) src = src.slice(0, -1);
+            src += '?api=1';
             code = code.replace(/src=["'][^"']+["']/, `src="${src}"`);
         }
     }
@@ -448,7 +460,6 @@ function renderPublished(){
         const epCount=m.episodes?Object.keys(m.episodes).length:0;
         const filledEps=m.episodes?Object.values(m.episodes).filter(e=>e.videoSource).length:0;
         
-        // Tentukan badge status
         let statusBadge = '';
         if(status === 'coming_soon') statusBadge = '<span class="status-tag coming_soon">Coming Soon</span>';
         else statusBadge = '<span class="status-tag published">Tersedia</span>';
@@ -509,7 +520,7 @@ function openPublishModal(requestId){
         document.getElementById('pubRequestId').value=requestId;
         document.getElementById('pubTitle').value=r.title||'';
         ctInput.value=(r.type||'movie').toUpperCase();
-        document.getElementById('pubYear').value=r.year||'';
+        document.getElementById('pubYear').value=r.year||new Date().getFullYear(); // Default year if empty
         document.getElementById('pubRating').value='';
         document.getElementById('pubGenre').value=Array.isArray(r.genres)?r.genres.join(', '):(r.genres||'');
         document.getElementById('pubPoster').value='';
@@ -526,6 +537,7 @@ function openPublishModal(requestId){
             generateEpFields(epNums);
         }
     }else{
+        // MANUAL PUBLISH: Kosongkan semua field agar admin bisa isi lengkap
         document.getElementById('publishModalTitle').textContent='Publikasi Manual';
         document.getElementById('pubRequestId').value='';
         document.getElementById('pubTitle').value='';
@@ -538,6 +550,15 @@ function openPublishModal(requestId){
         document.getElementById('pubVideoCode').value='';
         epSec.style.display='none';vidSec.style.display='block';
     }
+    
+    // Event listener untuk toggle section eps saat type berubah (manual publish)
+    ctInput.onchange = () => {
+        if(ctInput.value.toLowerCase() === 'series' || ctInput.value.toLowerCase() === 'ova'){
+            epSec.style.display='block';vidSec.style.display='none';
+        } else {
+            epSec.style.display='none';vidSec.style.display='block';
+        }
+    };
 }
 window.openPublishModal=openPublishModal;
 
