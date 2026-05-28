@@ -365,10 +365,10 @@ currentEpNum = parseInt(sessionStorage.getItem('activeCurrentEp')||'0');
 
 if(!roomId)initHost();else initGuest();
 
-// ===== SETUP MEDIA PLAYER =====
+// ===== SETUP MEDIA PLAYER (UPDATED) =====
 function setupMedia(src){
     mediaContainer.innerHTML = ''; // Clear container
-    
+
     // Check if source is Iframe code
     if(src.includes('<iframe') || src.includes('streamtape.com')){
         mediaType = 'iframe';
@@ -378,7 +378,12 @@ function setupMedia(src){
             const match = src.match(/src=["']([^"']+)["']/);
             if(match && match[1]) iframeSrc = match[1];
         }
-        
+
+        // PERBAIKAN 1: Hapus tanda garis miring (/) di ujung link sebelum pasang ?api=1
+        if(iframeSrc.endsWith('/')){
+            iframeSrc = iframeSrc.slice(0, -1); 
+        }
+
         // Ensure api=1 is present for Streamtape
         if(iframeSrc.includes('streamtape.com') && !iframeSrc.includes('api=1')){
             iframeSrc += (iframeSrc.includes('?') ? '&' : '?') + 'api=1';
@@ -388,12 +393,14 @@ function setupMedia(src){
         iframeElement.src = iframeSrc;
         iframeElement.setAttribute('allowfullscreen', '');
         iframeElement.setAttribute('allowtransparency', '');
-        // PERBAIKAN: Tambahkan autoplay dan pointer events agar bisa diklik
         iframeElement.setAttribute('allow', 'autoplay; fullscreen');
         iframeElement.setAttribute('scrolling', 'no');
         iframeElement.setAttribute('frameborder', '0');
         iframeElement.style.pointerEvents = 'auto'; // Pastikan bisa diklik
-        
+
+        // PERBAIKAN 2: Suntikkan Sandbox secara paksa via JS agar Chrome memblokir pop-up iklan tab baru
+        iframeElement.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+
         mediaContainer.appendChild(iframeElement);
         videoElement = null;
     } else {
@@ -403,12 +410,12 @@ function setupMedia(src){
         videoElement.src = src;
         videoElement.preload = 'auto';
         videoElement.playsInline = true;
-        
-        videoElement.addEventListener('waiting',()=>{if(!videoElement.paused)bufferOv.classList.add('show')});
-        videoElement.addEventListener('canplay',()=>bufferOv.classList.remove('show'));
-        videoElement.addEventListener('playing',()=>bufferOv.classList.remove('show'));
-        videoElement.addEventListener('ended',onMediaEnded);
-        
+
+        videoElement.addEventListener('waiting', () => { if (!videoElement.paused) bufferOv.classList.add('show') });
+        videoElement.addEventListener('canplay', () => bufferOv.classList.remove('show'));
+        videoElement.addEventListener('playing', () => bufferOv.classList.remove('show'));
+        videoElement.addEventListener('ended', onMediaEnded);
+
         mediaContainer.appendChild(videoElement);
         iframeElement = null;
     }
