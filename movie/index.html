@@ -40,17 +40,9 @@
         .iframe-container{width:100%;height:100%;display:none}
         iframe{width:100%;height:100%;border:none;outline:none}
         
-        .control-bar{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-end;z-index:6;pointer-events:none;transition:opacity .35s,transform .35s;background:linear-gradient(transparent,rgba(0,0,0,.7))}
-        .control-bar.bar-hidden{opacity:0;transform:translateY(8px);pointer-events:none!important}.control-bar.bar-hidden>*{pointer-events:none!important}
-        .ctrl-left,.ctrl-right{display:flex;align-items:center;gap:8px;pointer-events:auto}
-        .ctrl-btn{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:.2s;position:relative;flex-shrink:0}
-        .ctrl-btn:hover{background:rgba(0,120,255,.35);border-color:rgba(0,120,255,.3)}.ctrl-btn:active{transform:scale(.92)}
-        .unread-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:#f44336;border-radius:50%;display:none}
-        .unread-dot.show{display:block;animation:popIn .3s ease}
-        @keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
-        .sync-pill{background:rgba(0,0,0,.6);backdrop-filter:blur(8px);padding:6px 10px;border-radius:8px;font-size:.68rem;display:flex;align-items:center;gap:5px;border:1px solid rgba(255,255,255,.06)}
-        .dot{width:7px;height:7px;background:#4caf50;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}.dot.off{background:#f44336;animation:none}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+        /* Hapus Control Bar Kustom karena minta disable semua kontrol */
+        .control-bar{display:none !important}
+
         .chat-panel{position:absolute;top:0;right:0;width:320px;height:100%;background:rgba(18,18,18,.97);backdrop-filter:blur(12px);border-left:1px solid #2a2a2a;z-index:20;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
         .chat-panel.open{transform:translateX(0)}
         .chat-head{padding:10px 14px;background:rgba(30,30,30,.9);border-bottom:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -59,11 +51,13 @@
         .chat-body{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin;scrollbar-color:#333 transparent}
         .chat-body::-webkit-scrollbar{width:4px}.chat-body::-webkit-scrollbar-thumb{background:#444;border-radius:2px}
         .chat-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#555;font-size:.82rem;text-align:center;padding:20px}
-        .msg{max-width:82%;padding:7px 11px;border-radius:12px;font-size:.82rem;line-height:1.4;word-break:break-word;animation:msgIn .25s ease}
+        .msg{max-width:82%;padding:7px 11px;border-radius:12px;font-size:.82rem;line-height:1.4;word-break:break-word;animation:msgIn .25s ease;cursor:pointer;position:relative}
         @keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+        .msg:hover{background:#2a2a2a}
         .msg.self{align-self:flex-end;background:#0078ff;color:#fff;border-bottom-right-radius:4px}
         .msg.other{align-self:flex-start;background:#2a2a2a;color:#ddd;border-bottom-left-radius:4px}
-        .msg-name{font-size:.65rem;font-weight:700;color:#ff9800;margin-bottom:1px;display:block}
+        .msg-name{font-size:.65rem;font-weight:700;color:#ff9800;margin-bottom:1px;display:block;cursor:pointer}
+        .msg-name:hover{text-decoration:underline}
         .msg.self .msg-name{color:rgba(255,255,255,.65)}
         .msg-time{font-size:.58rem;color:rgba(255,255,255,.35);margin-top:2px;display:block;text-align:right}
         .chat-input{padding:8px 10px;background:rgba(25,25,25,.95);border-top:1px solid #2a2a2a;display:flex;gap:6px;flex-shrink:0}
@@ -124,10 +118,12 @@
         .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:rgba(30,30,30,.95);backdrop-filter:blur(8px);color:#fff;padding:10px 20px;border-radius:10px;font-size:.82rem;z-index:9999;border:1px solid #3a3a3a;opacity:0;transition:all .35s cubic-bezier(.175,.885,.32,1.275);pointer-events:none;max-width:88vw;text-align:center}
         .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
         @media(max-width:640px){
-            .player-header{padding:6px 10px;min-height:44px;gap:6px}.movie-thumb{width:26px;height:26px;border-radius:3px}.movie-title{max-width:90px;font-size:.8rem}.badge{font-size:.6rem;padding:2px 5px}.exit-btn{padding:5px 8px;font-size:.75rem}.share-toggle{display:flex}.url-grp{width:100%}.ctrl-btn{width:44px;height:44px;font-size:1.05rem;border-radius:12px}.sync-pill{font-size:.62rem;padding:5px 8px}.chat-panel{width:100%;border-left:none;border-top:1px solid #2a2a2a}.chat-head{padding:8px 12px}.chat-head h4{font-size:.82rem}.msg{font-size:.8rem;max-width:85%}.chat-input input{padding:10px 14px;font-size:.85rem}.send-btn{width:42px;height:42px}.modal-card{padding:24px 18px;border-radius:14px}.m-title{font-size:1.2rem}.m-icon{width:68px;height:68px}.btn-p{padding:12px 26px;font-size:.88rem}.control-bar{padding:8px 10px}
+            .player-header{padding:6px 10px;min-height:44px;gap:6px}.movie-thumb{width:26px;height:26px;border-radius:3px}.movie-title{max-width:120px;font-size:.8rem}.badge{font-size:.6rem;padding:2px 5px}.exit-btn{padding:5px 8px;font-size:.75rem}.share-toggle{display:flex}.url-grp{width:100%}.chat-panel{width:100%;border-left:none;border-top:1px solid #2a2a2a}.chat-head{padding:8px 12px}.chat-head h4{font-size:.82rem}.msg{font-size:.8rem;max-width:85%}.chat-input input{padding:10px 14px;font-size:.85rem}.send-btn{width:42px;height:42px}.modal-card{padding:24px 18px;border-radius:14px}.m-title{font-size:1.2rem}.m-icon{width:68px;height:68px}.btn-p{padding:12px 26px;font-size:.88rem}
         }
-        @media(max-width:380px){.movie-title{max-width:70px;font-size:.75rem}.badges{gap:3px}.sync-pill span{display:none}}
-        :fullscreen .player-header{display:none}:fullscreen .control-bar{padding-bottom:env(safe-area-inset-bottom,10px)}:-webkit-full-screen .player-header{display:none}
+        @media(max-width:380px){.movie-title{max-width:90px;font-size:.75rem}.badges{gap:3px}}
+        /* Unread Dot Red */
+        .unread-dot{width:10px;height:10px;background:#f44336;border-radius:50%;display:block;animation:popIn .3s ease}
+        @keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
     </style>
 </head>
 <body>
@@ -176,13 +172,8 @@
         <p>Ruangan akan ditutup otomatis...</p>
         <button class="btn-p" onclick="location.href='../index.html'"><i class="fas fa-home"></i> Kembali ke Beranda</button>
     </div>
-    <div class="control-bar" id="controlBar">
-        <div class="ctrl-left">
-            <button class="ctrl-btn" id="fsBtn" title="Layar Penuh"><i class="fas fa-expand"></i></button>
-            <button class="ctrl-btn" id="chatBtn" title="Obrolan"><i class="fas fa-comment-dots"></i><span class="unread-dot" id="unreadDot"></span></button>
-        </div>
-        <div class="ctrl-right"><div class="sync-pill" id="syncPill"><div class="dot" id="syncDot"></div><span id="syncLabel">Menghubungkan...</span></div></div>
-    </div>
+    
+    <!-- Chat Panel -->
     <div class="chat-panel" id="chatPanel">
         <div class="chat-head"><h4><i class="fas fa-comments"></i> Obrolan</h4><button class="chat-close" id="chatClose"><i class="fas fa-times"></i></button></div>
         <div class="name-setup" id="nameSetup"><i class="fas fa-user-edit"></i><h4>Masukkan Nama</h4><p>Nama Anda terlihat di obrolan</p><input type="text" id="nameInput" placeholder="Nama Anda..." maxlength="15" autocomplete="off"><button id="nameSubmit">Mulai Chat</button></div>
@@ -204,7 +195,7 @@
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getDatabase,ref,set,onValue,onDisconnect,remove,push,query,limitToLast,onChildAdded}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,onValue,onDisconnect,remove,push,query,limitToLast,onChildAdded,update}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig={apiKey:"AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",authDomain:"thmovie-3646f.firebaseapp.com",databaseURL:"https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"thmovie-3646f",storageBucket:"thmovie-3646f.firebasestorage.app",messagingSenderId:"1041137356432",appId:"1:1041137356432:web:96edbe3402937c82f09215",measurementId:"G-6SNE976L7G"};
 const app=initializeApp(firebaseConfig);
@@ -219,7 +210,6 @@ const contentArea=document.getElementById('content-area');
 const shareArea=document.getElementById('share-area');
 const shareInput=document.getElementById('shareLinkInput');
 const mainModal=document.getElementById('mainModal');
-const controlBar=document.getElementById('controlBar');
 const toastEl=document.getElementById('toast');
 const bufferOv=document.getElementById('bufferOv');
 const syncSeekOv=document.getElementById('syncSeekOv');
@@ -245,8 +235,7 @@ let roomId=null,isHost=false,bookingTimestamp=null,isSyncing=false,lastSentTs=0;
 let cdInterval=null,sendInterval=null,hasInteracted=false,videoReady=false;
 let modalActive=false,currentMode=null,syncSeekTo=null,toastTo=null;
 let syncListenerOn=false,chatOpen=false,chatName=null,chatUserId=null;
-let unreadCount=0,ctrlHideTimer=null,contentType='movie',roomCleaned=false,playerType='video'; // 'video' or 'iframe'
-const CTRL_DELAY=3500;
+let unreadCount=0,contentType='movie',roomCleaned=false,playerType='video'; // 'video' or 'iframe'
 
 // Series Data
 let seriesData = { currentKey: null, parentKey: null, episodes: {} };
@@ -265,13 +254,11 @@ function showModal(){
     mainModal.classList.add('active');
     modalActive=true;
     contentArea.classList.add('modal-open');
-    showCtrlBar();
 }
 function hideModal(){
     mainModal.classList.remove('active');
     modalActive=false;
     contentArea.classList.remove('modal-open');
-    resetCtrlTimer();
 }
 function showMode(n){
     Object.values(modes).forEach(e=>e.style.display='none');
@@ -320,27 +307,10 @@ function setSyncFlag(v){
     if(v)syncSeekTo=setTimeout(()=>{isSyncing=false;syncSeekTo=null},3000);
 }
 
-// Control bar
-function showCtrlBar(){
-    controlBar.classList.remove('bar-hidden');
-    resetCtrlTimer();
-}
-function hideCtrlBar(){
-    if(!chatOpen&&!isPaused && !modalActive && playerType !== 'iframe') controlBar.classList.add('bar-hidden');
-}
-function resetCtrlTimer(){
-    clearTimeout(ctrlHideTimer);
-    if(!isPaused && !chatOpen && !modalActive && document.activeElement!==msgInput && playerType !== 'iframe'){
-        ctrlHideTimer=setTimeout(hideCtrlBar,CTRL_DELAY);
-    }
-}
-contentArea.addEventListener('mousemove',showCtrlBar);
-contentArea.addEventListener('touchstart',showCtrlBar,{passive:true});
 // Overlay Logic for Iframe
 interactionOverlay.addEventListener('click', () => {
     interactionOverlay.classList.remove('show');
     interactionOverlay.style.pointerEvents='none';
-    // Trigger postMessage play to iframe
     const iframe = iframeContainer.querySelector('iframe');
     if(iframe && iframe.contentWindow){
         iframe.contentWindow.postMessage(JSON.stringify({event:"command",func:"play",args:[]}), "*");
@@ -349,38 +319,6 @@ interactionOverlay.addEventListener('click', () => {
 
 // Video State Tracker
 let isPaused = true;
-
-// Fullscreen
-const fsBtn=document.getElementById('fsBtn');
-fsBtn.addEventListener('click',()=>{
-    if(!document.fullscreenElement&&!document.webkitFullscreenElement){
-        (contentArea.requestFullscreen||contentArea.webkitRequestFullscreen).call(contentArea).catch(()=>showToast('Fullscreen tidak didukung'));
-    }else{
-        (document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{});
-    }
-});
-function onFsCh(){
-    fsBtn.querySelector('i').className=!!(document.fullscreenElement||document.webkitFullscreenElement)?'fas fa-compress':'fas fa-expand';
-}
-document.addEventListener('fullscreenchange',onFsCh);
-document.addEventListener('webkitfullscreenchange',onFsCh);
-
-document.getElementById('shareToggle').addEventListener('click',()=>shareArea.classList.toggle('mobile-open'));
-
-// ===== ROOM CLEANUP =====
-function cleanupRoom(){
-    if(roomCleaned)return;
-    roomCleaned=true;
-    endScreen.classList.add('show');
-    if(isHost){
-        remove(ref(db,'sync_rooms/'+roomId)).catch(()=>{});
-        showToast('Film selesai. Ruangan ditutup.');
-    }
-    setTimeout(()=>{location.href='../index.html'},4000);
-}
-
-video.addEventListener('ended',()=>{if(!modalActive)cleanupRoom()});
-// Jika iframe (Streamtape), kita tidak bisa event listener ended dengan mudah, jadi rely pada user Next Ep atau selesai waktu.
 
 // ===== INIT =====
 const urlP=new URLSearchParams(window.location.search);
@@ -399,7 +337,7 @@ if(contentType === 'series') {
 
 if(!roomId)initHost();else initGuest();
 
-// ===== HOST =====
+// ===== HOST (Sama seperti Guest, tapi punya hak tulis status awal) =====
 function initHost(){
     isHost=true;
     roomId='room_'+Math.random().toString(36).substring(2,8)+Date.now().toString(36);
@@ -420,7 +358,7 @@ function initHost(){
     
     titleEl.textContent=t;
     setPoster(p);
-    setupPlayer(v); // Setup Video or Iframe
+    setupPlayer(v); 
     videoReady=true;
     
     bookingTimestamp=bt?parseInt(bt,10):null;
@@ -442,7 +380,8 @@ function initHost(){
         contentType:contentType||'movie'
     }).then(()=>setSyncStatus(true)).catch(()=>setSyncStatus(false));
     
-    onDisconnect(ref(db,'sync_rooms/'+roomId)).remove();
+    // HAPUS onDisconnect remove pada ROOM agar tidak hilang saat creator keluar
+    // onDisconnect(ref(db,'sync_rooms/'+roomId)).remove(); 
     
     registerViewer();
     setupSync();
@@ -495,17 +434,12 @@ function initGuest(){
 
 // ===== PLAYER SETUP HYBRID =====
 function setupPlayer(source){
-    // Cek apakah source adalah embed code (iframe) atau link (video)
     if(source.trim().startsWith('<iframe')){
         playerType = 'iframe';
         video.style.display = 'none';
         iframeContainer.style.display = 'block';
         iframeContainer.innerHTML = source;
-        
-        // Streamtape tidak support event listener eksternal yang handal selain postMessage
-        // Kita set isPaused manual berdasarkan logika sync
         isPaused = true; 
-        
     } else {
         playerType = 'video';
         iframeContainer.style.display = 'none';
@@ -525,7 +459,7 @@ function setupPlayer(source){
     }
 }
 
-// Series Logic: Check Next Episode
+// Series Logic
 function checkNextEpisode() {
     if(!seriesData.currentKey || !seriesData.episodes) {
         nextEpBtn.style.display = 'none';
@@ -546,24 +480,13 @@ window.playNextEpisode = playNextEpisode;
 
 function playSpecificEpisode(epKey) {
     if(!seriesData.episodes[epKey]) return;
-    
-    // Ambil data episode
     const ep = seriesData.episodes[epKey];
-    
-    // Update UI
     titleEl.textContent = `${seriesData.parentKey} - Ep.${epKey}`;
-    
-    // Setup Player
     setupPlayer(ep.videoSource);
-    
-    // Update State Series
     seriesData.currentKey = epKey;
     checkNextEpisode();
-    
-    // Sync Reset (Start from 0)
     if(isHost) {
         if(playerType === 'video') video.currentTime = 0;
-        // Iframe tidak bisa seek, reload iframe untuk reset? Tidak perlu, biarkan user play.
         sendSync();
     }
 }
@@ -591,8 +514,6 @@ function checkGuestInit(){
                     setTimeout(()=>setSyncFlag(false),300);
                 };
                 video.addEventListener('seeked',h);
-            } else {
-                // Iframe: Tidak bisa seek. Hanya beri info user join.
             }
             showJoinMode();
             return;
@@ -626,12 +547,10 @@ function startCd(ts){
             document.getElementById('cdTimer').textContent='00:00:00';
             interactBtn.style.display='none';
             
-            // Waktu Habis -> Siap Play
             if(playerType === 'video'){
                 hideModal();
                 video.play().catch(()=>showToast('Klik video untuk memulai'));
             } else {
-                // Iframe Mode: Tunjukkan overlay interaksi
                 hideModal();
                 interactionOverlay.classList.add('show');
             }
@@ -677,7 +596,6 @@ function startPlay(){
     if(playerType === 'video'){
         video.play().catch(()=>showToast('Klik video untuk memulai'));
     } else {
-        // Host memulai Iframe
         interactionOverlay.classList.add('show');
     }
     
@@ -691,7 +609,6 @@ function joinPlay(){
     if(playerType === 'video'){
         video.play().catch(()=>showToast('Klik video untuk memulai'));
     } else {
-        // Guest join Iframe
         interactionOverlay.classList.add('show');
     }
 }
@@ -718,11 +635,9 @@ document.getElementById('exitBtn').addEventListener('click',()=>{
     location.href='../index.html';
 });
 
-// Listen for Iframe messages (Streamtape ?api=1)
+// Listen for Iframe messages
 window.addEventListener("message", (e) => {
     if(playerType !== 'iframe') return;
-    // Pastikan pesan dari streamtape domain (idealnya cek e.origin)
-    // Format pesan streamtape biasanya: {"event":"command","func":"play","":""}
     try {
         const data = JSON.parse(e.data);
         if(data.event === 'command' && data.func === 'play') {
@@ -731,9 +646,6 @@ window.addEventListener("message", (e) => {
         } else if (data.event === 'command' && data.func === 'pause') {
             isPaused = true;
             if(isHost) sendSync();
-        } else if (data.event === 'info' && data.info === 'video_time') {
-            // Streamtape mengirim waktu update
-            // Kita bisa sync ini jika perlu, tapi biasanya Streamtape tidak mem-post update waktu realtime yang akurat
         }
     } catch(err) {}
 });
@@ -746,11 +658,10 @@ function sendSync(){
     
     let currentTime = 0;
     if(playerType === 'video') currentTime = video.currentTime;
-    // Iframe tidak mengirim currentTime akurat ke luar, kita kirim 0 atau terakhir known state
     
     set(ref(db,'sync_rooms/'+roomId+'/status'),{
         currentTime:currentTime,
-        isPlaying:!isPaused, // Gunakan flag isPaused
+        isPlaying:!isPaused,
         lastUpdate:n
     }).catch(()=>setSyncStatus(false));
 }
@@ -759,9 +670,6 @@ function setupSender(){
     sendInterval=setInterval(()=>{
         if(isHost&&!isPaused&&!isSyncing&&videoReady)sendSync();
     },1500);
-    
-    // Video Events handled in setupPlayer
-    // Iframe Events handled in window.postMessage
 }
 
 // ===== SYNC LISTENER =====
@@ -779,11 +687,9 @@ function setupSync(){
         setSyncStatus(true);
         if(isHost&&Math.abs(d.lastUpdate-lastSentTs)<800)return;
         
-        // Play/Pause Sync logic
         const shouldBePlaying = d.isPlaying;
         
         if(playerType === 'video'){
-            // Seek Sync (Video Only)
             if(Math.abs(video.currentTime-d.currentTime)>2){
                 if(!isHost)flashSync();
                 setSyncFlag(true);
@@ -795,7 +701,6 @@ function setupSync(){
                 video.addEventListener('seeked',h);
             }
             
-            // Play/Pause Sync
             if(shouldBePlaying && video.paused){
                 if(hasInteracted&&!modalActive)video.play().catch(()=>showToast('Klik video untuk melanjutkan'));
             }else if(!shouldBePlaying && !video.paused){
@@ -804,32 +709,24 @@ function setupSync(){
             
         } else {
             // Iframe Sync Logic
-            // Seek tidak bisa. Fokus Play/Pause.
-            // Jika Host play, pastikan user di mode play (hilangkan overlay block jika ada)
-            // Jika Host pause, kita tidak bisa pause iframe streamtape eksternal (k限制), tapi kita bisa beritahu user lewat UI.
-            
             if(shouldBePlaying && isPaused && hasInteracted) {
-                 // Host Play, Guest Pause (Catch up)
-                 // Coba post message
                  const iframe = iframeContainer.querySelector('iframe');
                  if(iframe && iframe.contentWindow){
                      iframe.contentWindow.postMessage(JSON.stringify({event:"command",func:"play",args:[]}), "*");
                  }
             } else if (!shouldBePlaying && !isPaused) {
-                 // Host Pause, Guest Playing
                  showToast('Host telah menjeda video');
-                 isPaused = true; // Update local state saja
+                 isPaused = true;
             }
         }
         
-        // State Update for Mode Switch
         if(!isHost&&modalActive){
             if((currentMode==='waiting'||currentMode==='countdown')&&d.isPlaying){
                 if(cdInterval){
                     clearInterval(cdInterval);
                     cdInterval=null;
                 }
-                joinPlay(); // Handle Join logic
+                joinPlay();
                 return;
             }
             return;
@@ -864,7 +761,8 @@ function appendMsg(m){
     const div=document.createElement('div');
     div.className='msg '+(isSelf?'self':'other');
     const ts=new Date(m.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
-    div.innerHTML=`<span class="msg-name">${escH(m.name)}</span>${escH(m.text)}<span class="msg-time">${ts}</span>`;
+    // Add click event on name for reply
+    div.innerHTML=`<span class="msg-name" onclick="replyTo('${m.name}')">${escH(m.name)}</span>${escH(m.text)}<span class="msg-time">${ts}</span>`;
     chatBody.appendChild(div);
 }
 function escH(s){
@@ -872,6 +770,12 @@ function escH(s){
     d.textContent=s;
     return d.innerHTML;
 }
+// Reply Function
+window.replyTo = (name) => {
+    msgInput.value = `@${name} ` + msgInput.value;
+    msgInput.focus();
+};
+
 function sendMsg(){
     const txt=msgInput.value.trim();
     if(!txt||!chatName)return;
@@ -894,9 +798,9 @@ function toggleChat(){
         unreadDot.classList.remove('show');
         setTimeout(()=>chatBody.scrollTop=chatBody.scrollHeight,100);
         msgInput.focus();
-        showCtrlBar();
     }else{
-        resetCtrlTimer();
+        // Close chat when opening modal
+        if(modalActive) showModal(); 
     }
 }
 
@@ -920,9 +824,9 @@ document.getElementById('sendBtn').addEventListener('click',sendMsg);
 msgInput.addEventListener('keydown',(e)=>{
     if(e.key==='Enter')sendMsg();
 });
-msgInput.addEventListener('focus',showCtrlBar);
 
 // Copy
+document.getElementById('shareToggle').addEventListener('click',()=>shareArea.classList.toggle('mobile-open'));
 document.getElementById('btnCopy').addEventListener('click',function(){
     const l=shareInput.value;
     if(!l)return;
@@ -956,7 +860,6 @@ window.addEventListener('beforeunload',()=>{
     if(sendInterval)clearInterval(sendInterval);
     if(syncSeekTo)clearTimeout(syncSeekTo);
     if(toastTo)clearTimeout(toastTo);
-    if(ctrlHideTimer)clearTimeout(ctrlHideTimer);
 });
 
 setTimeout(initChatUI,100);
