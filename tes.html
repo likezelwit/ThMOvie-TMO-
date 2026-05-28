@@ -18,20 +18,27 @@
     
     <div class="cinema-box">
         <div class="blocker"></div>
-        <!-- Link video streamtape yang kamu kirim tadi -->
+        <!-- Link video embed streamtape milik Anda yang tadi -->
         <iframe id="tapePlayer" src="https://streamtape.com" allow="autoplay"></iframe>
     </div>
     
-    <button class="btn-masuk" id="tombolKlik">🍿 MASUK BIOSKOP / SINGKRONKAN DETIK</button>
+    <button class="btn-masuk" id="tombolKlik">🍿 MASUK BIOSKOP / SINKRONKAN DETIK</button>
     <p id="info-status">Membaca data server...</p>
 
     <script type="module">
+        // PERBAIKAN: Jalur CDN Firebase wajib lengkap agar tidak terkena eror CORS
         import { initializeApp } from "https://gstatic.com";
         import { getDatabase, ref, onValue } from "https://gstatic.com";
 
-        // GANTI dengan Config Firebase milik Anda sendiri
+        // CONFIG FIREBASE: Pastikan Anda mengganti ini dengan Config asli dari Firebase Console Anda!
         const firebaseConfig = {
-            databaseURL: "https://firebaseio.com"
+            apiKey: "AIzaSy...",
+            authDomain: "://firebaseapp.com",
+            databaseURL: "https://proyek-kamu-default-rtdb.firebaseio.com", // WAJIB GANTI URL DATABASE ASLI KAMU
+            projectId: "proyek-kamu",
+            storageBucket: "://appspot.com",
+            messagingSenderId: "12345678",
+            appId: "1:12345:web:abcde"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -40,7 +47,7 @@
         const info = document.getElementById('info-status');
         const judul = document.getElementById('judul-anime');
 
-        let waktuMulaiFilm = 0; // Mengambil dari Firebase nanti
+        let waktuMulaiFilm = 0; 
 
         // Fungsi kirim perintah jarak jauh ke dalam Iframe Streamtape
         function kontrolStreamtape(perintah, nilai = null) {
@@ -51,17 +58,24 @@
             }
         }
 
-        // Ambil data siaran langsung dari Firebase
+        // Ambil data siaran langsung dari Firebase secara otomatis
         onValue(ref(db, 'bioskop_live'), (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 judul.innerText = data.judul;
-                waktuMulaiFilm = data.waktu_mulai; // Mengambil angka jam tayang
+                waktuMulaiFilm = data.waktu_mulai; 
+                
+                // Ganti link video otomatis jika admin memperbarui link di Firebase
+                if (data.video_url && iframe.src !== data.video_url) {
+                    iframe.src = data.video_url;
+                }
             }
         });
 
         // Tombol Interaksi Wajib: Dolar masuk akun kamu + Menit langsung lompat sinkron
         document.getElementById('tombolKlik').addEventListener('click', () => {
+            if (waktuMulaiFilm === 0) return alert("Belum ada data jadwal dari server.");
+            
             const waktuSekarang = Date.now();
             const selisihDetik = Math.floor((waktuSekarang - waktuMulaiFilm) / 1000);
 
@@ -90,7 +104,9 @@
                     kontrolStreamtape('play');
                 } else if (selisihDetik < 0) {
                     const sisa = Math.abs(selisihDetik);
-                    info.innerText = `Film dimulai dalam ${Math.floor(sisa/60)}m ${sisa%60}s lagi.`;
+                    const menit = Math.floor(sisa / 60);
+                    const detik = sisa % 60;
+                    info.innerText = `Film dimulai dalam ${menit}m ${detik}s lagi.`;
                 }
             }
         }, 1000);
