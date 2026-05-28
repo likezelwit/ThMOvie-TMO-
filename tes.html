@@ -2,152 +2,98 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThMovie - Dropbox Real-time Sync</title>
-    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+    <title>Uji Coba Bioskop Streamtape - ThMovie</title>
     <style>
-        body { 
-            background-color: #0f0f0f !important; 
-            color: white !important; 
-            font-family: 'Segoe UI', sans-serif; 
-            text-align: center; 
-            margin: 0; 
-            padding: 20px; 
-        }
-        .cinema-header { 
-            margin-bottom: 25px; 
-        }
-        .vowviw-container { 
-            position: relative; 
-            width: 100%; 
-            max-width: 900px; 
-            margin: 0 auto; 
-            padding-bottom: 56.25%; 
-            height: 0; 
-            background: #000; 
-            border-radius: 12px; 
-            box-shadow: 0 0 30px rgba(0, 150, 255, 0.3); 
-            overflow: hidden; 
-            border: 2px solid #222; 
-        }
-        video { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            outline: none; 
-        }
-        .footer { 
-            margin-top: 30px; 
-            font-size: 13px; 
-            color: #666; 
-        }
+        body { background: #0b0c10; color: white; font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .cinema-box { width: 90%; max-width: 700px; margin: 0 auto; position: relative; aspect-ratio: 16/9; background: #000; }
+        iframe { width: 100%; height: 100%; border: none; }
+        /* Kunci Bioskop: Agar penonton tidak bisa klik pause di layar video */
+        .blocker { position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 45px); background: transparent; z-index: 5; }
+        .btn-masuk { padding: 15px 30px; background: #66fcf1; color: black; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 16px; }
     </style>
 </head>
 <body>
 
-    <div class="cinema-header">
-        <h1>🎬 ThMovie (TMO)</h1>
-        <p>Streaming via Dropbox - Real-time Mode</p>
+    <h2 id="judul-anime">Memuat Judul...</h2>
+    
+    <div class="cinema-box">
+        <div class="blocker"></div>
+        <!-- Link video streamtape yang kamu kirim tadi -->
+        <iframe id="tapePlayer" src="https://streamtape.com" allow="autoplay"></iframe>
     </div>
+    
+    <button class="btn-masuk" id="tombolKlik">🍿 MASUK BIOSKOP / SINGKRONKAN DETIK</button>
+    <p id="info-status">Membaca data server...</p>
 
-    <div class="vowviw-container">
-        <video id="tmo-player" controls>
-            <source src="https://www.dropbox.com/scl/fi/c2gb5n9r9pep1gsdo6z82/Attack-On-Titan-High-School-Shingeki-Kyojin-chuugakkou-eps-1-indonesia-sub-Bstation.mp4?rlkey=0cg5yqmy35616hjsh0ykycf2m&st=xj3do6k4&raw=1" type="video/mp4">
-            Browser lo gak support tag video.
-        </video>
-    </div>
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getDatabase, ref, onValue } from "https://gstatic.com";
 
-    <div class="footer">
-        <p>&copy; 2026 ThMovie Production by Gilang - Kelas VI A</p>
-    </div>
-
-    <script>
-        const ably = new Ably.Realtime('4PuneA.m9z7NA:9tNxlKi-0-BnCULHgl54eS8A7agg3ivOQMiVisCncCI');
-        const channel = ably.channels.get('tmo-nobar');
-        const video = document.getElementById('tmo-player');
-
-        const myClientId = 'user_' + Math.random().toString(36).substr(2, 9);
-        let isReceiving = false;
-        let hasHostResponded = false;
-
-        // Saat pertama kali masuk web, langsung minta status dari penonton yang sudah ada
-        setTimeout(() => {
-            channel.publish('request-status', { from: myClientId });
-            
-            // Tunggu 2 detik, kalau tidak ada penonton lama yang menjawab, 
-            // berarti kamulah orang pertama/Host di room ini.
-            setTimeout(() => {
-                if (!hasHostResponded) {
-                    console.log("Tidak ada Host lain. Kamu adalah Host pertama di room ini.");
-                }
-            }, 2000);
-        }, 1000);
-
-        // Deteksi aksi penonton (Hanya kirim sinyal jika bukan karena kiriman sistem Ably)
-        video.onplay = () => { 
-            if (!isReceiving) channel.publish('sync', { action: 'play', time: video.currentTime, sender: myClientId }); 
-        };
-        video.onpause = () => { 
-            if (!isReceiving) channel.publish('sync', { action: 'pause', time: video.currentTime, sender: myClientId }); 
-        };
-        video.onseeked = () => { 
-            if (!isReceiving) channel.publish('sync', { action: 'seek', time: video.currentTime, sender: myClientId }); 
+        // GANTI dengan Config Firebase milik Anda sendiri
+        const firebaseConfig = {
+            databaseURL: "https://firebaseio.com"
         };
 
-        // Mendengarkan sinyal kontrol video (Play, Pause, Seek)
-        channel.subscribe('sync', (message) => {
-            const data = message.data;
-            if (data.sender === myClientId) return; // Abaikan sinyal buatan sendiri
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const iframe = document.getElementById('tapePlayer');
+        const info = document.getElementById('info-status');
+        const judul = document.getElementById('judul-anime');
 
-            isReceiving = true;
-            if (Math.abs(video.currentTime - data.time) > 1.5) {
-                video.currentTime = data.time;
+        let waktuMulaiFilm = 0; // Mengambil dari Firebase nanti
+
+        // Fungsi kirim perintah jarak jauh ke dalam Iframe Streamtape
+        function kontrolStreamtape(perintah, nilai = null) {
+            if (iframe.contentWindow) {
+                iframe.contentWindow.postMessage(JSON.stringify({
+                    'event': perintah, 'value': nilai
+                }), '*');
             }
-            
-            if (data.action === 'play') {
-                video.play().catch(() => {});
-            } else if (data.action === 'pause') {
-                video.pause();
-            } else if (data.action === 'seek') {
-                video.currentTime = data.time;
+        }
+
+        // Ambil data siaran langsung dari Firebase
+        onValue(ref(db, 'bioskop_live'), (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                judul.innerText = data.judul;
+                waktuMulaiFilm = data.waktu_mulai; // Mengambil angka jam tayang
             }
-            
-            setTimeout(() => { isReceiving = false; }, 500);
         });
 
-        // Menjawab permintaan data dari pengguna baru belakangan
-        channel.subscribe('request-status', (message) => {
-            if (message.data.from === myClientId) return;
+        // Tombol Interaksi Wajib: Dolar masuk akun kamu + Menit langsung lompat sinkron
+        document.getElementById('tombolKlik').addEventListener('click', () => {
+            const waktuSekarang = Date.now();
+            const selisihDetik = Math.floor((waktuSekarang - waktuMulaiFilm) / 1000);
 
-            // Jika kita sudah memutar video (bukan menit 0), atau kita penonton lama, kita kirim status kita
-            // Pengguna baru akan mengambil data dari siapa pun penonton lama yang merespon paling cepat
-            channel.publish('response-status', {
-                to: message.data.from,
-                time: video.currentTime,
-                playing: !video.paused
-            });
-        });
-
-        // Menerima data setelan detik dari penonton lama
-        channel.subscribe('response-status', (message) => {
-            const data = message.data;
-            if (data.to !== myClientId || hasHostResponded) return;
-
-            // Kunci agar hanya menerima respon pertama kali saja saat masuk web
-            hasHostResponded = true; 
-            isReceiving = true;
-
-            video.currentTime = data.time;
-            if (data.playing) {
-                video.play().catch(() => {});
+            if (selisihDetik > 0) {
+                // Skenario Telat: Langsung dipaksa lompat ke detik yang sedang berjalan
+                info.innerText = `Menyelaraskan waktu... Kamu telat ${Math.floor(selisihDetik/60)} menit.`;
+                kontrolStreamtape('seek', selisihDetik);
+                kontrolStreamtape('play');
             } else {
-                video.pause();
+                // Skenario Tepat Waktu/Awal: Video disuruh diam di detik 0 menunggu jam tayang
+                info.innerText = "Berhasil stand-by di kursi! Film akan mulai otomatis.";
+                kontrolStreamtape('seek', 0);
+                kontrolStreamtape('pause');
             }
-            
-            setTimeout(() => { isReceiving = false; }, 800);
         });
+
+        // Interval otomatis tiap 1 detik untuk menyalakan video jika hitung mundur lobi habis
+        setInterval(() => {
+            if (waktuMulaiFilm > 0) {
+                const waktuSekarang = Date.now();
+                const selisihDetik = Math.floor((waktuSekarang - waktuMulaiFilm) / 1000);
+
+                if (selisihDetik === 0) {
+                    info.innerText = "Waktu lobi habis! Film dimulai sekarang!";
+                    kontrolStreamtape('seek', 0);
+                    kontrolStreamtape('play');
+                } else if (selisihDetik < 0) {
+                    const sisa = Math.abs(selisihDetik);
+                    info.innerText = `Film dimulai dalam ${Math.floor(sisa/60)}m ${sisa%60}s lagi.`;
+                }
+            }
+        }, 1000);
     </script>
 </body>
 </html>
