@@ -20,6 +20,8 @@
         .badge-sync{color:#4caf50;background:rgba(76,175,80,.1)}.badge-sync.err{color:#f44336;background:rgba(244,67,54,.1)}
         .badge-viewer{color:#ff9800;background:rgba(255,152,0,.1)}
         .badge-type{color:#9c27b0;background:rgba(156,39,176,.1)}
+        .next-ep-btn{background:var(--accent);color:#fff;border:none;padding:4px 10px;border-radius:12px;font-size:.7rem;cursor:pointer;font-weight:700;display:none;align-items:center;gap:4px}
+        .next-ep-btn:hover{background:#0056b3}
         .share-toggle{background:none;border:none;color:#888;font-size:1rem;cursor:pointer;padding:6px;border-radius:6px;transition:.2s;display:none}
         .share-toggle:hover{color:#fff;background:#333}
         .share-box{background:#111;padding:6px 10px;border-radius:6px;display:none;align-items:center;gap:8px;border:1px solid #333;animation:slideD .3s ease}
@@ -32,8 +34,12 @@
         .exit-btn:hover{background:#444;color:#fff}
         @keyframes slideD{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
         .video-wrapper{flex:1;display:flex;justify-content:center;align-items:center;background:#000;position:relative;overflow:hidden}
-        .video-wrapper.modal-open video{pointer-events:none}
+        .video-wrapper.modal-open video, .video-wrapper.modal-open iframe{pointer-events:none}
+        
         video{width:100%;height:100%;object-fit:contain;outline:none}
+        .iframe-container{width:100%;height:100%;display:none}
+        iframe{width:100%;height:100%;border:none;outline:none}
+        
         .control-bar{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-end;z-index:6;pointer-events:none;transition:opacity .35s,transform .35s;background:linear-gradient(transparent,rgba(0,0,0,.7))}
         .control-bar.bar-hidden{opacity:0;transform:translateY(8px);pointer-events:none!important}.control-bar.bar-hidden>*{pointer-events:none!important}
         .ctrl-left,.ctrl-right{display:flex;align-items:center;gap:8px;pointer-events:auto}
@@ -75,6 +81,14 @@
         .buffering-ov.show{opacity:1}.buffering-ov i{font-size:2rem;color:rgba(255,255,255,.7)}
         .sync-seek-ov{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:4;opacity:0;pointer-events:none;transition:opacity .25s}
         .sync-seek-ov.show{opacity:1}.sync-seek-ov div{text-align:center}.sync-seek-ov i{font-size:1.4rem;color:#0078ff}.sync-seek-ov span{display:block;margin-top:6px;font-size:.8rem;color:#ccc}
+        
+        /* Interaction Overlay for Iframe Autoplay Block */
+        .interaction-overlay{position:absolute;inset:0;background:rgba(0,0,0,.85);z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s}
+        .interaction-overlay.show{opacity:1;pointer-events:all}
+        .interaction-overlay i{font-size:4rem;color:#fff;margin-bottom:20px;animation:pulse 1.5s infinite}
+        .interaction-overlay h2{font-size:1.8rem;margin-bottom:10px}
+        .interaction-overlay p{color:#ccc}
+
         /* End screen */
         .end-screen{position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:8;opacity:0;pointer-events:none;transition:opacity .5s}
         .end-screen.show{opacity:1;pointer-events:all}
@@ -132,6 +146,7 @@
                     <span id="syncBadge" class="badge badge-sync"><i class="fas fa-circle-notch fa-spin"></i> Menghubungkan...</span>
                     <span id="viewerBadge" class="badge badge-viewer" style="display:none"><i class="fas fa-eye"></i> Penonton</span>
                     <span id="typeBadge" class="badge badge-type" style="display:none"></span>
+                    <button id="nextEpBtn" class="next-ep-btn" onclick="playNextEpisode()"><i class="fas fa-forward"></i> Next Ep</button>
                 </div>
             </div>
         </div>
@@ -139,9 +154,22 @@
     <button class="exit-btn" id="exitBtn"><i class="fas fa-sign-out-alt"></i> Keluar</button>
 </div>
 <div class="video-wrapper" id="content-area">
-    <video id="mainVideo" preload="auto" playsinline></video>
+    <!-- Video Element for Dropbox/Direct -->
+    <video id="mainVideo" preload="auto" playsinline style="display:none"></video>
+    
+    <!-- Iframe Container for Streamtape/Embed -->
+    <div id="iframeContainer" class="iframe-container"></div>
+
     <div class="buffering-ov" id="bufferOv"><i class="fas fa-circle-notch fa-spin"></i></div>
     <div class="sync-seek-ov" id="syncSeekOv"><div><i class="fas fa-sync-alt fa-spin"></i><span>Menyinkronkan...</span></div></div>
+    
+    <!-- Overlay untuk interaksi klik pada iframe (autoplay block) -->
+    <div id="interactionOverlay" class="interaction-overlay">
+        <i class="fas fa-play-circle"></i>
+        <h2>KLIK VIDEO UNTUK MEMULAI</h2>
+        <p>Silakan klik area ini untuk memutar video Streamtape</p>
+    </div>
+
     <div class="end-screen" id="endScreen">
         <i class="fas fa-check-circle"></i>
         <h2>Film Selesai</h2>
@@ -182,7 +210,9 @@ const firebaseConfig={apiKey:"AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",authDomai
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
+// Elements
 const video=document.getElementById('mainVideo');
+const iframeContainer=document.getElementById('iframeContainer');
 const titleEl=document.getElementById('m-title');
 const posterEl=document.getElementById('m-poster');
 const contentArea=document.getElementById('content-area');
@@ -198,8 +228,10 @@ const syncLabel=document.getElementById('syncLabel');
 const syncBadge=document.getElementById('syncBadge');
 const viewerBadge=document.getElementById('viewerBadge');
 const typeBadge=document.getElementById('typeBadge');
+const nextEpBtn=document.getElementById('nextEpBtn');
 const unreadDot=document.getElementById('unreadDot');
 const endScreen=document.getElementById('endScreen');
+const interactionOverlay=document.getElementById('interactionOverlay');
 const chatPanel=document.getElementById('chatPanel');
 const nameSetup=document.getElementById('nameSetup');
 const nameInput=document.getElementById('nameInput');
@@ -213,8 +245,11 @@ let roomId=null,isHost=false,bookingTimestamp=null,isSyncing=false,lastSentTs=0;
 let cdInterval=null,sendInterval=null,hasInteracted=false,videoReady=false;
 let modalActive=false,currentMode=null,syncSeekTo=null,toastTo=null;
 let syncListenerOn=false,chatOpen=false,chatName=null,chatUserId=null;
-let unreadCount=0,ctrlHideTimer=null,contentType='movie',roomCleaned=false;
+let unreadCount=0,ctrlHideTimer=null,contentType='movie',roomCleaned=false,playerType='video'; // 'video' or 'iframe'
 const CTRL_DELAY=3500;
+
+// Series Data
+let seriesData = { currentKey: null, parentKey: null, episodes: {} };
 
 // Utils
 function showToast(m,d=2500){
@@ -291,18 +326,29 @@ function showCtrlBar(){
     resetCtrlTimer();
 }
 function hideCtrlBar(){
-    if(!chatOpen&&!video.paused&&!modalActive)controlBar.classList.add('bar-hidden');
+    if(!chatOpen&&!isPaused && !modalActive && playerType !== 'iframe') controlBar.classList.add('bar-hidden');
 }
 function resetCtrlTimer(){
     clearTimeout(ctrlHideTimer);
-    if(!video.paused&&!chatOpen&&!modalActive&&document.activeElement!==msgInput){
+    if(!isPaused && !chatOpen && !modalActive && document.activeElement!==msgInput && playerType !== 'iframe'){
         ctrlHideTimer=setTimeout(hideCtrlBar,CTRL_DELAY);
     }
 }
 contentArea.addEventListener('mousemove',showCtrlBar);
 contentArea.addEventListener('touchstart',showCtrlBar,{passive:true});
-video.addEventListener('play',resetCtrlTimer);
-video.addEventListener('pause',showCtrlBar);
+// Overlay Logic for Iframe
+interactionOverlay.addEventListener('click', () => {
+    interactionOverlay.classList.remove('show');
+    interactionOverlay.style.pointerEvents='none';
+    // Trigger postMessage play to iframe
+    const iframe = iframeContainer.querySelector('iframe');
+    if(iframe && iframe.contentWindow){
+        iframe.contentWindow.postMessage(JSON.stringify({event:"command",func:"play",args:[]}), "*");
+    }
+});
+
+// Video State Tracker
+let isPaused = true;
 
 // Fullscreen
 const fsBtn=document.getElementById('fsBtn');
@@ -321,7 +367,7 @@ document.addEventListener('webkitfullscreenchange',onFsCh);
 
 document.getElementById('shareToggle').addEventListener('click',()=>shareArea.classList.toggle('mobile-open'));
 
-// ===== ROOM CLEANUP saat video selesai =====
+// ===== ROOM CLEANUP =====
 function cleanupRoom(){
     if(roomCleaned)return;
     roomCleaned=true;
@@ -334,12 +380,22 @@ function cleanupRoom(){
 }
 
 video.addEventListener('ended',()=>{if(!modalActive)cleanupRoom()});
+// Jika iframe (Streamtape), kita tidak bisa event listener ended dengan mudah, jadi rely pada user Next Ep atau selesai waktu.
 
 // ===== INIT =====
 const urlP=new URLSearchParams(window.location.search);
 roomId=urlP.get('room');
-// Baca contentType dari sessionStorage untuk Host
 contentType=(sessionStorage.getItem('activeContentType')||'movie').toLowerCase();
+
+// Load Series Data
+if(contentType === 'series') {
+    seriesData.parentKey = sessionStorage.getItem('activeParentKey') || '';
+    seriesData.currentKey = sessionStorage.getItem('activeEpKey') || '';
+    try {
+        seriesData.episodes = JSON.parse(sessionStorage.getItem('activeEpisodesData') || '{}');
+        checkNextEpisode();
+    } catch(e){}
+}
 
 if(!roomId)initHost();else initGuest();
 
@@ -364,20 +420,18 @@ function initHost(){
     
     titleEl.textContent=t;
     setPoster(p);
-    video.src=v;
+    setupPlayer(v); // Setup Video or Iframe
     videoReady=true;
     
     bookingTimestamp=bt?parseInt(bt,10):null;
     if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
 
-    // Tampilkan Badge Tipe (Series/OVA) jika bukan Movie
     if(contentType!=='movie'){
         typeBadge.textContent=contentType.toUpperCase();
         typeBadge.style.display='inline-flex';
     }
 
     const isPrivate=rt==='PRIVATE';
-    // Simpan metadata ke Firebase termasuk contentType
     set(ref(db,'sync_rooms/'+roomId+'/meta'),{
         title:t,
         videoSrc:v,
@@ -405,7 +459,6 @@ function initGuest(){
     showMode('loading');
     showModal();
 
-    // PERBAIKAN: Menggunakan onValue dengan benar (tanpa error callback argumen ke-3)
     onValue(ref(db,'sync_rooms/'+roomId+'/meta'),(snap)=>{
         const m=snap.val();
         if(!m){
@@ -415,11 +468,8 @@ function initGuest(){
         }
         titleEl.textContent=m.title||'Unknown';
         setPoster(m.posterSrc);
-        
-        // Baca contentType dari Firebase (yang dikirim oleh Host)
         contentType=(m.contentType||'movie').toLowerCase();
         
-        // Update Badge Tipe
         if(contentType!=='movie'){
             typeBadge.textContent=contentType.toUpperCase();
             typeBadge.style.display='inline-flex';
@@ -428,7 +478,7 @@ function initGuest(){
         }
 
         if(m.videoSrc){
-            video.src=m.videoSrc;
+            setupPlayer(m.videoSrc);
             videoReady=true;
         }else{
             showErr('Video Tidak Tersedia','Sumber video tidak ditemukan.');
@@ -441,6 +491,81 @@ function initGuest(){
         setupSync();
         checkGuestInit();
     }); 
+}
+
+// ===== PLAYER SETUP HYBRID =====
+function setupPlayer(source){
+    // Cek apakah source adalah embed code (iframe) atau link (video)
+    if(source.trim().startsWith('<iframe')){
+        playerType = 'iframe';
+        video.style.display = 'none';
+        iframeContainer.style.display = 'block';
+        iframeContainer.innerHTML = source;
+        
+        // Streamtape tidak support event listener eksternal yang handal selain postMessage
+        // Kita set isPaused manual berdasarkan logika sync
+        isPaused = true; 
+        
+    } else {
+        playerType = 'video';
+        iframeContainer.style.display = 'none';
+        video.style.display = 'block';
+        video.src = source;
+        
+        video.addEventListener('play', () => { isPaused = false; if(isHost) sendSync(); });
+        video.addEventListener('pause', () => { isPaused = true; if(isHost) sendSync(); });
+        video.addEventListener('waiting', () => { if(!video.paused)bufferOv.classList.add('show'); });
+        video.addEventListener('canplay', () => bufferOv.classList.remove('show'));
+        video.addEventListener('playing', () => { bufferOv.classList.remove('show'); });
+        video.addEventListener('error', function(){
+            showErr('Gagal Memuat Video','Sumber video tidak valid atau kedaluwarsa.');
+        });
+        
+        isPaused = video.paused;
+    }
+}
+
+// Series Logic: Check Next Episode
+function checkNextEpisode() {
+    if(!seriesData.currentKey || !seriesData.episodes) {
+        nextEpBtn.style.display = 'none';
+        return;
+    }
+    const keys = Object.keys(seriesData.episodes).sort((a,b)=>parseInt(a)-parseInt(b));
+    const idx = keys.indexOf(String(seriesData.currentKey));
+    
+    if(idx >= 0 && idx < keys.length - 1) {
+        const nextKey = keys[idx + 1];
+        nextEpBtn.style.display = 'flex';
+        nextEpBtn.onclick = () => playSpecificEpisode(nextKey);
+    } else {
+        nextEpBtn.style.display = 'none';
+    }
+}
+window.playNextEpisode = playNextEpisode;
+
+function playSpecificEpisode(epKey) {
+    if(!seriesData.episodes[epKey]) return;
+    
+    // Ambil data episode
+    const ep = seriesData.episodes[epKey];
+    
+    // Update UI
+    titleEl.textContent = `${seriesData.parentKey} - Ep.${epKey}`;
+    
+    // Setup Player
+    setupPlayer(ep.videoSource);
+    
+    // Update State Series
+    seriesData.currentKey = epKey;
+    checkNextEpisode();
+    
+    // Sync Reset (Start from 0)
+    if(isHost) {
+        if(playerType === 'video') video.currentTime = 0;
+        // Iframe tidak bisa seek, reload iframe untuk reset? Tidak perlu, biarkan user play.
+        sendSync();
+    }
 }
 
 function registerViewer(){
@@ -459,12 +584,16 @@ function checkGuestInit(){
         const s=snap.val();
         if(s&&s.isPlaying){
             setSyncFlag(true);
-            video.currentTime=s.currentTime;
-            const h=()=>{
-                video.removeEventListener('seeked',h);
-                setTimeout(()=>setSyncFlag(false),300);
-            };
-            video.addEventListener('seeked',h);
+            if(playerType === 'video'){
+                video.currentTime=s.currentTime;
+                const h=()=>{
+                    video.removeEventListener('seeked',h);
+                    setTimeout(()=>setSyncFlag(false),300);
+                };
+                video.addEventListener('seeked',h);
+            } else {
+                // Iframe: Tidak bisa seek. Hanya beri info user join.
+            }
             showJoinMode();
             return;
         }
@@ -496,8 +625,17 @@ function startCd(ts){
             cdInterval=null;
             document.getElementById('cdTimer').textContent='00:00:00';
             interactBtn.style.display='none';
-            hideModal();
-            video.play().then(()=>{console.log('Auto-play berhasil setelah countdown')}).catch(()=>showToast('Klik video untuk memulai'));
+            
+            // Waktu Habis -> Siap Play
+            if(playerType === 'video'){
+                hideModal();
+                video.play().catch(()=>showToast('Klik video untuk memulai'));
+            } else {
+                // Iframe Mode: Tunjukkan overlay interaksi
+                hideModal();
+                interactionOverlay.classList.add('show');
+            }
+            
             if(isHost)sendSync();
         }
     }
@@ -535,14 +673,27 @@ function startPlay(){
         cdInterval=null;
     }
     hideModal();
-    video.play().catch(()=>showToast('Klik video untuk memulai'));
+    
+    if(playerType === 'video'){
+        video.play().catch(()=>showToast('Klik video untuk memulai'));
+    } else {
+        // Host memulai Iframe
+        interactionOverlay.classList.add('show');
+    }
+    
     if(isHost)sendSync();
 }
+
 function joinPlay(){
     hasInteracted=true;
     setSyncFlag(false);
     hideModal();
-    video.play().catch(()=>showToast('Klik video untuk memulai'));
+    if(playerType === 'video'){
+        video.play().catch(()=>showToast('Klik video untuk memulai'));
+    } else {
+        // Guest join Iframe
+        interactionOverlay.classList.add('show');
+    }
 }
 
 document.getElementById('btnInteract').addEventListener('click',function(){
@@ -567,26 +718,24 @@ document.getElementById('exitBtn').addEventListener('click',()=>{
     location.href='../index.html';
 });
 
-// Video events
-video.addEventListener('waiting',()=>{
-    if(!video.paused)bufferOv.classList.add('show');
-});
-video.addEventListener('canplay',()=>bufferOv.classList.remove('show'));
-video.addEventListener('playing',()=>bufferOv.classList.remove('show'));
-video.addEventListener('pause',()=>{
-    if(!isHost&&!isSyncing&&hasInteracted&&!modalActive)showToast('Hanya Host yang dapat mengontrol');
-});
-video.addEventListener('error',function(){
-    const e=video.error;
-    let m='Sumber video tidak dapat dimuat.';
-    if(e){
-        switch(e.code){
-            case 2:m='Error jaringan.';break;
-            case 3:m='Dekode gagal.';break;
-            case 4:m='Sumber tidak valid atau kedaluwarsa.';break;
+// Listen for Iframe messages (Streamtape ?api=1)
+window.addEventListener("message", (e) => {
+    if(playerType !== 'iframe') return;
+    // Pastikan pesan dari streamtape domain (idealnya cek e.origin)
+    // Format pesan streamtape biasanya: {"event":"command","func":"play","":""}
+    try {
+        const data = JSON.parse(e.data);
+        if(data.event === 'command' && data.func === 'play') {
+            isPaused = false;
+            if(isHost) sendSync();
+        } else if (data.event === 'command' && data.func === 'pause') {
+            isPaused = true;
+            if(isHost) sendSync();
+        } else if (data.event === 'info' && data.info === 'video_time') {
+            // Streamtape mengirim waktu update
+            // Kita bisa sync ini jika perlu, tapi biasanya Streamtape tidak mem-post update waktu realtime yang akurat
         }
-    }
-    showErr('Gagal Memuat Video',m);
+    } catch(err) {}
 });
 
 // ===== SYNC SENDER =====
@@ -594,25 +743,25 @@ function sendSync(){
     if(!isHost||!videoReady)return;
     const n=Date.now();
     lastSentTs=n;
+    
+    let currentTime = 0;
+    if(playerType === 'video') currentTime = video.currentTime;
+    // Iframe tidak mengirim currentTime akurat ke luar, kita kirim 0 atau terakhir known state
+    
     set(ref(db,'sync_rooms/'+roomId+'/status'),{
-        currentTime:video.currentTime,
-        isPlaying:!video.paused,
+        currentTime:currentTime,
+        isPlaying:!isPaused, // Gunakan flag isPaused
         lastUpdate:n
     }).catch(()=>setSyncStatus(false));
 }
+
 function setupSender(){
     sendInterval=setInterval(()=>{
-        if(isHost&&!video.paused&&!isSyncing&&videoReady)sendSync();
+        if(isHost&&!isPaused&&!isSyncing&&videoReady)sendSync();
     },1500);
-    video.addEventListener('play',()=>{
-        if(isHost&&!isSyncing)sendSync();
-    });
-    video.addEventListener('pause',()=>{
-        if(isHost&&!isSyncing)sendSync();
-    });
-    video.addEventListener('seeked',()=>{
-        if(isHost&&!isSyncing)sendSync();
-    });
+    
+    // Video Events handled in setupPlayer
+    // Iframe Events handled in window.postMessage
 }
 
 // ===== SYNC LISTENER =====
@@ -630,12 +779,13 @@ function setupSync(){
         setSyncStatus(true);
         if(isHost&&Math.abs(d.lastUpdate-lastSentTs)<800)return;
         
-        if(!isHost&&modalActive){
-            if((currentMode==='waiting'||currentMode==='countdown')&&d.isPlaying){
-                if(cdInterval){
-                    clearInterval(cdInterval);
-                    cdInterval=null;
-                }
+        // Play/Pause Sync logic
+        const shouldBePlaying = d.isPlaying;
+        
+        if(playerType === 'video'){
+            // Seek Sync (Video Only)
+            if(Math.abs(video.currentTime-d.currentTime)>2){
+                if(!isHost)flashSync();
                 setSyncFlag(true);
                 video.currentTime=d.currentTime;
                 const h=()=>{
@@ -643,25 +793,46 @@ function setupSync(){
                     setTimeout(()=>setSyncFlag(false),300);
                 };
                 video.addEventListener('seeked',h);
-                showJoinMode();
+            }
+            
+            // Play/Pause Sync
+            if(shouldBePlaying && video.paused){
+                if(hasInteracted&&!modalActive)video.play().catch(()=>showToast('Klik video untuk melanjutkan'));
+            }else if(!shouldBePlaying && !video.paused){
+                video.pause();
+            }
+            
+        } else {
+            // Iframe Sync Logic
+            // Seek tidak bisa. Fokus Play/Pause.
+            // Jika Host play, pastikan user di mode play (hilangkan overlay block jika ada)
+            // Jika Host pause, kita tidak bisa pause iframe streamtape eksternal (k限制), tapi kita bisa beritahu user lewat UI.
+            
+            if(shouldBePlaying && isPaused && hasInteracted) {
+                 // Host Play, Guest Pause (Catch up)
+                 // Coba post message
+                 const iframe = iframeContainer.querySelector('iframe');
+                 if(iframe && iframe.contentWindow){
+                     iframe.contentWindow.postMessage(JSON.stringify({event:"command",func:"play",args:[]}), "*");
+                 }
+            } else if (!shouldBePlaying && !isPaused) {
+                 // Host Pause, Guest Playing
+                 showToast('Host telah menjeda video');
+                 isPaused = true; // Update local state saja
+            }
+        }
+        
+        // State Update for Mode Switch
+        if(!isHost&&modalActive){
+            if((currentMode==='waiting'||currentMode==='countdown')&&d.isPlaying){
+                if(cdInterval){
+                    clearInterval(cdInterval);
+                    cdInterval=null;
+                }
+                joinPlay(); // Handle Join logic
                 return;
             }
             return;
-        }
-        if(Math.abs(video.currentTime-d.currentTime)>2){
-            if(!isHost)flashSync();
-            setSyncFlag(true);
-            video.currentTime=d.currentTime;
-            const h=()=>{
-                video.removeEventListener('seeked',h);
-                setTimeout(()=>setSyncFlag(false),300);
-            };
-            video.addEventListener('seeked',h);
-        }
-        if(d.isPlaying&&video.paused){
-            if(hasInteracted&&!modalActive)video.play().catch(()=>showToast('Klik video untuk melanjutkan'));
-        }else if(!d.isPlaying&&!video.paused){
-            video.pause();
         }
     });
 }
