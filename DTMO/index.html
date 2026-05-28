@@ -1,3 +1,4 @@
+<!-- DTMO/index.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -127,6 +128,11 @@
         .pub-meta{font-size:.8rem;color:var(--text2);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
         .pub-ep-count{display:inline-flex;align-items:center;gap:4px;font-size:.73rem;color:var(--warn);background:var(--warn-light);padding:3px 10px;border-radius:5px;font-weight:700}
         .pub-ep-count.ok{color:var(--success);background:var(--success-light)}
+        
+        /* Tambahan CSS untuk Request Form di Admin */
+        .req-admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .req-chip { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: .75rem; cursor: pointer; transition: .2s; }
+        .req-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
         @media(max-width:768px){
             .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:99;display:none}.sidebar-backdrop.show{display:block}.main{margin-left:0}.hamburger{display:block}.content-body{padding:16px}.stats-grid{grid-template-columns:1fr 1fr}.form-row{grid-template-columns:1fr}.pub-card{flex-direction:column;align-items:center;text-align:center}.pub-poster{width:100px;height:150px}.modal{max-width:100%}.modal-overlay{padding:16px}
@@ -195,28 +201,41 @@
         <div class="modal-body">
             <input type="hidden" id="pubRequestId">
             <div class="form-row">
-                <div class="form-group"><label class="form-label">Judul</label><input type="text" class="form-input" id="pubTitle"></div>
+                <div class="form-group"><label class="form-label">Judul</label><input type="text" class="form-input" id="pubTitle" placeholder="Judul Film/Anime"></div>
                 <div class="form-group"><label class="form-label">Tipe</label>
-                    <select id="pubType" class="form-input" style="appearance:none; background-image:url('data:image/svg+xml;...'); background-repeat:no-repeat; background-position:right 10px;">
+                    <select class="form-input" id="pubType" style="text-transform:uppercase;font-weight:700">
                         <option value="movie">MOVIE</option>
-                        <option value="series">SERIES</option>
-                        <option value="ova">OVA</option>
+                        <option value="series">SERIES / ANIME</option>
+                        <option value="ova">OVA / SPECIAL</option>
                     </select>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label class="form-label">Tahun Rilis</label><input type="number" class="form-input" id="pubYear"></div>
+                <div class="form-group"><label class="form-label">Tahun Rilis</label><input type="number" class="form-input" id="pubYear" placeholder="2024"></div>
                 <div class="form-group"><label class="form-label">Rating / 10</label><input type="number" class="form-input" id="pubRating" placeholder="8.5" min="0" max="10" step="0.1"></div>
             </div>
-            <div class="form-group"><label class="form-label">Genre</label><input type="text" class="form-input" id="pubGenre" placeholder="Action, Drama, dll (Pisahkan dengan koma)"></div>
+            <div class="form-group"><label class="form-label">Genre</label><input type="text" class="form-input" id="pubGenre" placeholder="Action, Drama, Comedy"></div>
             <div class="form-group"><label class="form-label">URL Poster</label><input type="url" class="form-input" id="pubPoster" placeholder="https://..."></div>
             <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-input" id="pubDesc" placeholder="Sinopsis atau deskripsi singkat..." style="font-family:'Inter',sans-serif;font-size:.9rem"></textarea></div>
             
+            <!-- Tambahan Field dari Request -->
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Link Referensi</label><input type="url" class="form-input" id="pubLink" placeholder="MAL/IMDb"></div>
+                <div class="form-group"><label class="form-label">Resolusi</label>
+                    <select class="form-input" id="pubRes">
+                        <option value="720p">720p (HD)</option>
+                        <option value="1080p">1080p (Full HD)</option>
+                        <option value="360p/480p">360p/480p (Hemat)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group"><label class="form-label">Catatan Admin</label><textarea class="form-input" id="pubNotes" placeholder="Catatan internal admin..." style="min-height:60px"></textarea></div>
+
             <div id="pubVideoSection" style="display:block">
                 <hr class="modal-divider">
                 <div class="form-group"><label class="form-label">Embed Code (Streamtape/Google Drive)</label>
                     <textarea class="form-input" id="pubVideoCode" placeholder='<iframe src="https://streamtape.com/e/..." ...></iframe>' style="height:120px;font-family:'JetBrains Mono',monospace;font-size:.8rem"></textarea>
-                    <small style="color:var(--text2);display:block;margin-top:4px">Tempel kode <code>&lt;iframe&gt;</code> lengkap di sini. Kami akan menambahkan <code>?api=1</code> otomatis dan memperbaiki URL.</small>
+                    <small style="color:var(--text2);display:block;margin-top:4px">Sistem otomatis membersihkan URL dan menambahkan <code>?api=1</code>.</small>
                 </div>
             </div>
 
@@ -233,7 +252,7 @@
                 <div class="ep-list" id="pubEpList"></div>
                 <button class="add-ep-btn" onclick="addEpField()"><i class="fas fa-plus"></i> Tambah Episode</button>
                 <div style="margin-top:12px;text-align:right">
-                    <button class="btn btn-ghost btn-sm" onclick="processAllEpCodes()" id="btnProcessAll" style="display:none"><i class="fas fa-magic"></i> Proses Semua Kode</button>
+                    <button class="btn btn-ghost btn-sm" onclick="processAllEpCodes()" id="btnProcessAll"><i class="fas fa-magic"></i> Proses Semua Kode</button>
                 </div>
             </div>
         </div>
@@ -283,41 +302,36 @@ function showToast(msg,type='success'){
     setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3500);
 }
 
-// === LOGIKA EMBED CODE (PERBAIKAN) ===
+// === LOGIKA EMBED CODE (STREAMTAPE FIX) ===
 function processEmbedCode(code){
     if(!code) return '';
     code = code.trim();
     
-    // Jika input berupa URL mentah (bukan iframe), cek apakah itu dropbox atau streamtape
+    // Jika input berupa URL mentah (bukan iframe), coba apakah itu dropbox atau streamtape raw
     if(!code.startsWith('<iframe') && !code.startsWith('<div')){
         if(code.includes('dropbox.com')){
-            // Logika Dropbox
             let url = code.replace(/[?&]dl=[^&]*/g, '').replace(/[?&]raw=0[^&]*/g, '');
             url = url.replace(/\?&/g, '?').replace(/&&/g, '&').replace(/[?&]$/, '');
-            // Hapus trailing slash jika ada sebelum tambah raw=1
-            if(url.endsWith('/')) url = url.slice(0, -1);
             if(!/[?&]raw=1(?:&|$)/.test(url)) url += (url.includes('?')?'&raw=1':'?raw=1');
             return url; 
         }
-        // Jika URL lain (misal streamtape tanpa tag), buat iframe standar
         if(code.includes('streamtape.com')){
-             let url = code;
-             // Hapus trailing slash sebelum ?api=1
-             if(url.endsWith('/')) url = url.slice(0, -1);
-             return `<iframe src="${url}?api=1" width="100%" height="100%" allowfullscreen allowtransparency allow="autoplay" scrolling="no" frameborder="0"></iframe>`;
+             // FIX: Hapus slash trailing, tambahkan api=1
+             let url = code.replace(/\/$/, ''); 
+             if(!url.includes('api=1')) url += '?api=1';
+             return `<iframe src="${url}" width="100%" height="100%" allowfullscreen allowtransparency allow="autoplay" scrolling="no" frameborder="0"></iframe>`;
         }
         return code;
     }
 
     // Jika sudah berupa tag HTML (Iframe)
-    // 1. Cari src
     const srcMatch = code.match(/src=["']([^"']+)["']/);
     if(srcMatch){
         let src = srcMatch[1];
-        // 2. Tambahkan ?api=1 jika belum ada dan jika streamtape
+        // FIX: Hapus slash trailing di src, tambahkan api=1 jika streamtape
+        src = src.replace(/\/$/, '');
+        
         if(src.includes('streamtape.com') && !src.includes('api=1')){
-            // Hapus trailing slash
-            if(src.endsWith('/')) src = src.slice(0, -1);
             src += '?api=1';
             code = code.replace(/src=["'][^"']+["']/, `src="${src}"`);
         }
@@ -509,7 +523,6 @@ function openPublishModal(requestId){
     epFieldCounter=0;
     document.getElementById('pubEpList').innerHTML='';
     
-    const ctInput=document.getElementById('pubType');
     const epSec=document.getElementById('pubEpSection');
     const vidSec=document.getElementById('pubVideoSection');
 
@@ -518,14 +531,21 @@ function openPublishModal(requestId){
         if(!r){showToast('Request tidak ditemukan','error');closePublishModal();return}
         document.getElementById('publishModalTitle').textContent='Proses & Publikasikan';
         document.getElementById('pubRequestId').value=requestId;
+        
+        // Field Editable
         document.getElementById('pubTitle').value=r.title||'';
-        ctInput.value=(r.type||'movie').toUpperCase();
-        document.getElementById('pubYear').value=r.year||new Date().getFullYear(); // Default year if empty
+        document.getElementById('pubType').value=(r.type||'movie').toLowerCase();
+        document.getElementById('pubYear').value=r.year||'';
         document.getElementById('pubRating').value='';
         document.getElementById('pubGenre').value=Array.isArray(r.genres)?r.genres.join(', '):(r.genres||'');
         document.getElementById('pubPoster').value='';
         document.getElementById('pubDesc').value='';
         document.getElementById('pubVideoCode').value='';
+        
+        // Data Tambahan dari Request
+        document.getElementById('pubLink').value=r.referenceLink || '';
+        document.getElementById('pubRes').value=r.resolution || '720p';
+        document.getElementById('pubNotes').value=`Request oleh User: ${r.notes ? r.notes : '-'}`;
 
         const ct=(r.type||'movie').toLowerCase();
         if(ct==='movie'){epSec.style.display='none';vidSec.style.display='block'}
@@ -537,28 +557,22 @@ function openPublishModal(requestId){
             generateEpFields(epNums);
         }
     }else{
-        // MANUAL PUBLISH: Kosongkan semua field agar admin bisa isi lengkap
         document.getElementById('publishModalTitle').textContent='Publikasi Manual';
         document.getElementById('pubRequestId').value='';
         document.getElementById('pubTitle').value='';
-        ctInput.value='MOVIE';
+        document.getElementById('pubType').value='movie';
         document.getElementById('pubYear').value=new Date().getFullYear();
         document.getElementById('pubRating').value='';
         document.getElementById('pubGenre').value='';
         document.getElementById('pubPoster').value='';
         document.getElementById('pubDesc').value='';
         document.getElementById('pubVideoCode').value='';
+        document.getElementById('pubLink').value='';
+        document.getElementById('pubRes').value='720p';
+        document.getElementById('pubNotes').value='';
+        
         epSec.style.display='none';vidSec.style.display='block';
     }
-    
-    // Event listener untuk toggle section eps saat type berubah (manual publish)
-    ctInput.onchange = () => {
-        if(ctInput.value.toLowerCase() === 'series' || ctInput.value.toLowerCase() === 'ova'){
-            epSec.style.display='block';vidSec.style.display='none';
-        } else {
-            epSec.style.display='none';vidSec.style.display='block';
-        }
-    };
 }
 window.openPublishModal=openPublishModal;
 
