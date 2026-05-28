@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root{--primary:#0078ff;--bg:#f4f6f8;--white:#fff;--text:#222;--gray:#666;--shadow:0 10px 30px rgba(0,0,0,.1);--ticket-bg:#fff9c4;--private:#e91e63;--rooms:#9c27b0;--request:#ff9800;--success:#4caf50;--coming-soon:#7c3aed}
+        :root{--primary:#0078ff;--bg:#f4f6f8;--white:#fff;--text:#222;--gray:#666;--shadow:0 10px 30px rgba(0,0,0,.1);--ticket-bg:#fff9c4;--private:#e91e63;--rooms:#9c27b0;--request:#ff9800;--success:#4caf50;--coming-soon:#795548}
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
         body{background:var(--bg);color:var(--text);padding-bottom:40px;min-height:100vh}
         a{text-decoration:none;color:inherit;transition:.3s;cursor:pointer}
@@ -40,22 +40,7 @@
         .btn:hover{background:#0056b3;transform:translateY(-2px)}
 
         /* Coming Soon Section */
-        .cs-header{font-size:1.5rem;font-weight:800;margin-bottom:20px;border-left:5px solid var(--coming-soon);padding-left:15px;display:flex;align-items:center;gap:10px}
-        .cs-grid{display:flex;overflow-x:auto;gap:20px;padding-bottom:10px;scroll-snap-type:x mandatory}
-        .cs-card{min-width:180px;width:180px;background:var(--white);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);scroll-snap-align:start}
-        .cs-poster{height:280px;position:relative;overflow:hidden}
-        .cs-poster img{height:100%;transition:.5s}
-        .cs-card:hover .cs-poster img{transform:scale(1.08)}
-        .cs-badge{position:absolute;top:10px;left:10px;background:var(--coming-soon);color:#fff;font-size:.65rem;font-weight:700;padding:4px 8px;border-radius:4px}
-        .cs-info{padding:12px;text-align:center}
-        .cs-title{font-weight:800;margin-bottom:4px;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .cs-date{font-size:.75rem;color:var(--gray)}
-
-        /* Movie Grid */
-        .section-header{font-size:1.5rem;font-weight:800;margin-bottom:20px;border-left:5px solid var(--primary);padding-left:15px}
-        .section-header.purple{border-color:var(--rooms)}
-        .section-header.orange{border-color:var(--request)}
-        .section-header.pink{border-color:var(--private)}
+        .section-header.coming-soon{border-color:var(--coming-soon); color: var(--coming-soon)}
         .movie-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:24px}
         .movie-card{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:.3s;cursor:pointer;position:relative}
         .movie-card:hover{transform:translateY(-5px)}
@@ -63,7 +48,10 @@
         .poster img{height:100%;transition:.5s}
         .movie-card:hover .poster img{transform:scale(1.08)}
         .type-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.75);color:#fff;font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;backdrop-filter:blur(4px)}
-        .type-badge.movie{background:rgba(0,120,255,.8)}.type-badge.series{background:rgba(255,152,0,.8)}.type-badge.ova{background:rgba(156,39,176,.8)}
+        .type-badge.movie{background:rgba(0,120,255,.8)}
+        .type-badge.series{background:rgba(255,152,0,.8)}
+        .type-badge.ova{background:rgba(156,39,176,.8)}
+        .type-badge.coming-soon{background:var(--coming-soon)}
         .movie-info{padding:12px;text-align:center}
         .movie-title{font-weight:800;margin-bottom:4px;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .movie-genre{font-size:.75rem;color:var(--gray);margin-bottom:8px}
@@ -99,7 +87,7 @@
         .btn-delete{background:transparent;color:#999;border:1px solid #ccc;padding:7px 14px;border-radius:20px;font-weight:600;cursor:pointer;transition:.2s;font-size:.78rem;font-family:'Inter',sans-serif}
         .btn-delete:hover{background:#f44336;color:#fff;border-color:#f44336}
 
-        /* ===== ROOMS TAB ===== */
+        /* ROOMS TAB */
         .room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
         .room-card{background:#fff;border-radius:16px;padding:20px;box-shadow:var(--shadow);border:1px solid #eee;transition:.3s;position:relative;overflow:hidden}
         .room-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--rooms),var(--primary))}
@@ -108,13 +96,14 @@
         .room-meta{display:flex;align-items:center;gap:12px;font-size:.8rem;color:var(--gray);margin-bottom:14px}
         .room-meta i{color:var(--rooms)}
         .room-status{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;padding:3px 8px;border-radius:20px;font-weight:600}
-        .room-status.playing{background:rgba(76,175,80,.1);color:#4caf50}.room-status.waiting{background:rgba(255,152,0,.1);color:#ff9800}
+        .room-status.playing{background:rgba(76,175,80,.1);color:#4caf50}
+        .room-status.waiting{background:rgba(255,152,0,.1);color:#ff9800}
         .btn-join{background:var(--rooms);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;transition:.2s;font-family:'Inter',sans-serif;font-size:.88rem}
         .btn-join:hover{background:#7b1fa2;transform:translateY(-1px)}
         .rooms-empty{text-align:center;color:var(--gray);padding:50px 20px}
         .rooms-empty i{font-size:3rem;color:#ddd;margin-bottom:12px;display:block}
 
-        /* ===== DETAIL PAGE (Series/Anime/OVA) ===== */
+        /* DETAIL PAGE */
         .detail-hero{position:relative;border-radius:20px;overflow:hidden;margin-bottom:24px;box-shadow:var(--shadow);display:flex;min-height:320px}
         .detail-poster{width:220px;flex-shrink:0;position:relative;z-index:2}
         .detail-poster img{width:100%;height:100%;object-fit:cover}
@@ -137,7 +126,7 @@
         .ep-label{font-size:.72rem;color:var(--gray)}
         .no-episodes{text-align:center;color:var(--gray);padding:40px;background:#fff;border-radius:16px;box-shadow:var(--shadow)}
 
-        /* ===== REQUEST FORM ===== */
+        /* REQUEST FORM */
         .req-form{background:#fff;border-radius:20px;padding:35px;box-shadow:var(--shadow);max-width:700px;margin:0 auto}
         .form-section{margin-bottom:28px}
         .form-section h4{font-size:1rem;font-weight:800;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
@@ -238,12 +227,12 @@
             </div>
         </div>
 
-        <!-- COMING SOON SECTION -->
-        <section id="coming-soon-section" style="display:none">
-            <h3 class="cs-header"><i class="fas fa-clock"></i> Coming Soon</h3>
-            <div id="coming-soon-container" class="cs-grid"></div>
+        <!-- COMING SOON (Requests with status 'publishing') -->
+        <section id="sec-coming-soon" style="display:none">
+            <h3 class="section-header coming-soon">Coming Soon</h3>
+            <div id="coming-soon-container" class="movie-grid"></div>
         </section>
-
+        
         <section><h3 class="section-header">Now Playing</h3><div id="movies-container" class="movie-grid"><p class="text-center" style="grid-column:1/-1;color:#999">Memuat film...</p></div></section>
     </div>
 
@@ -391,7 +380,7 @@ const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
 let tickets=JSON.parse(localStorage.getItem('tmoTickets')||'[]');
-let currentBooking={movie:'',type:'',roomType:'PUBLIC',videoSource:'',poster:'',contentType:'movie', currentEpKey:null, parentSeriesKey:null, episodesData:null};
+let currentBooking={movie:'',type:'',roomType:'PUBLIC',videoSource:'',poster:'',contentType:'movie',episodes:null,currentEp:null};
 let allMovies=[];
 let currentDetailMovie=null;
 let roomsUnsub=null;
@@ -406,56 +395,46 @@ function toAMPM(t){if(!t)return t;let[h,m]=t.split(':');const ap=h>=12?'PM':'AM'
 // Load movies
 function loadMovies(){
     onValue(ref(db,'movies/'),snap=>{
-        const c=document.getElementById('movies-container');c.innerHTML='';
-        const csC=document.getElementById('coming-soon-container');csC.innerHTML='';
-        
-        const data=snap.val();allMovies=[];
+        const c=document.getElementById('movies-container');c.innerHTML='';const data=snap.val();allMovies=[];
         if(data){snap.forEach(cs=>{const m=cs.val();allMovies.push(m);
-            // Filter status
-            const status = m.status || 'published';
-            if(status !== 'published' && status !== 'coming_soon') return;
-
             const ct=(m.contentType||'movie').toLowerCase();
-            
-            // Render Card
             const card=document.createElement('div');card.className='movie-card';card.dataset.title=m.title.toLowerCase();card.dataset.type=ct;
             card.onclick=()=>handleMovieClick(m);
-            
-            const btnText = ct==='movie'?'Beli Tiket':'Lihat Detail';
-            
-            card.innerHTML=`<div class="poster"><img src="${m.poster}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'"><div class="type-badge ${ct}">${ct==='series'?'SERIES':ct==='ova'?'OVA':'MOVIE'}</div></div><div class="movie-info"><div class="movie-title">${m.title}</div><div class="movie-genre">${m.genre||''}</div><button class="movie-btn">${btnText}</button></div>`;
-            
-            if(status === 'published') {
-                c.appendChild(card);
-            } else if (status === 'coming_soon') {
-                // Render Coming Soon Card
-                const csCard = document.createElement('div');csCard.className='cs-card';
-                csCard.innerHTML=`<div class="cs-poster"><img src="${m.poster}" onerror="this.src='https://picsum.photos/seed/cs/200/300'"><div class="cs-badge">COMING SOON</div></div><div class="cs-info"><div class="cs-title">${m.title}</div><div class="cs-date">Segera Hadir</div></div>`;
-                csC.appendChild(csCard);
+            card.innerHTML=`<div class="poster"><img src="${m.poster}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'"><div class="type-badge ${ct}">${ct==='series'?'SERIES':ct==='ova'?'OVA':'MOVIE'}</div></div><div class="movie-info"><div class="movie-title">${m.title}</div><div class="movie-genre">${m.genre||''}</div><button class="movie-btn">${ct==='movie'?'Beli Tiket':'Lihat Detail'}</button></div>`;
+            c.appendChild(card)});
+            if(document.getElementById('view-private').classList.contains('active'))renderPrivate();
+        }else{c.innerHTML='<p class="text-center" style="grid-column:1/-1;color:#999">Belum ada film.</p>'}
+    });
+
+    // Load Requests for Coming Soon (status: 'publishing')
+    onValue(ref(db,'requests'),snap=>{
+        const c=document.getElementById('coming-soon-container');c.innerHTML='';
+        const data=snap.val();
+        let hasComingSoon = false;
+        if(data){
+            const reqList = [];
+            snap.forEach(cs => {
+                const r = cs.val();
+                if(r.status === 'publishing') reqList.push(r);
+            });
+            if(reqList.length > 0){
+                hasComingSoon = true;
+                document.getElementById('sec-coming-soon').style.display = 'block';
+                reqList.forEach(r => {
+                    const ct=(r.type||'movie').toLowerCase();
+                    const card=document.createElement('div');card.className='movie-card';
+                    card.innerHTML=`<div class="poster"><img src="${r.poster||'https://picsum.photos/seed/coming/200/300'}" alt="${r.title}"><div class="type-badge coming-soon">SOON</div></div><div class="movie-info"><div class="movie-title">${r.title}</div><div class="movie-genre">Sedang diproses...</div></div>`;
+                    c.appendChild(card);
+                });
             }
-        })};
-        
-        if(!c.innerHTML)c.innerHTML='<p class="text-center" style="grid-column:1/-1;color:#999">Belum ada film yang tayang.</p>';
-        if(csC.children.length > 0) {
-            document.getElementById('coming-soon-section').style.display = 'block';
-        } else {
-            document.getElementById('coming-soon-section').style.display = 'none';
         }
-        
-        if(document.getElementById('view-private').classList.contains('active'))renderPrivate();
+        if(!hasComingSoon) document.getElementById('sec-coming-soon').style.display = 'none';
     });
 }
 
-// Handle movie click
+// Handle movie click — Movie goes to booking, Series/OVA goes to detail
 function handleMovieClick(movie){
     const ct=(movie.contentType||'movie').toLowerCase();
-    const status = movie.status || 'published';
-    
-    if(status === 'coming_soon') {
-        showToast('Film ini akan segera tayang!', 'error');
-        return;
-    }
-
     if(ct==='movie'){
         currentBooking.videoSource=movie.videoSource;currentBooking.poster=movie.poster;
         currentBooking.contentType = 'movie';
@@ -503,11 +482,8 @@ function selectEpisode(ep){
     if(!currentDetailMovie)return;
     currentBooking.videoSource=ep.videoSource;currentBooking.poster=currentDetailMovie.poster;
     currentBooking.contentType = currentDetailMovie.contentType || 'series';
-    // Simpan data episode untuk logic Next Ep
-    currentBooking.currentEpKey = ep.num;
-    currentBooking.parentSeriesKey = currentDetailMovie.title; // Sederhana: pakai judul sebagai ID series
-    currentBooking.episodesData = currentDetailMovie.episodes;
-    
+    currentBooking.episodes = currentDetailMovie.episodes; // Save all episodes for player
+    currentBooking.currentEp = parseInt(ep.num);
     startBooking(`${currentDetailMovie.title} - Ep.${ep.num}`,'PUBLIC');
 }
 
@@ -613,9 +589,9 @@ function confirmBooking(){
         videoSource:currentBooking.videoSource,
         poster:currentBooking.poster,
         contentType: currentBooking.contentType || 'movie',
-        currentEpKey: currentBooking.currentEpKey,
-        parentSeriesKey: currentBooking.parentSeriesKey,
-        episodesData: currentBooking.episodesData
+        episodes: currentBooking.episodes || null,
+        currentEp: currentBooking.currentEp || null,
+        fullTitle: currentBooking.movie // Useful for series logic
     });
     localStorage.setItem('tmoTickets',JSON.stringify(tickets));
     showToast(`Tiket berhasil! ${currentBooking.movie} — ${disp}`);switchView('ticket');
@@ -636,10 +612,12 @@ function renderTickets(){
                 <div class="t-title">${t.movie}</div>
                 <div class="t-info"><i class="far fa-calendar"></i> ${t.date}</div>
                 <div class="t-info"><i class="far fa-clock"></i> ${t.timeDisplay||'-'}</div>
+                
                 <div style="margin-top:5px;display:flex;align-items:center;gap:5px">
                     <div class="t-badge" style="${t.roomType==='PRIVATE'?'background:var(--private)':''}">${t.type}</div>
                     <span class="type-badge ${ct}" style="position:static;margin-left:5px;font-size:.55rem;padding:2px 6px">${ct.toUpperCase()}</span>
                 </div>
+
                 <div class="t-actions">
                     <button class="movie-btn" onclick="watchNow(${t.id})" style="background:var(--primary);color:#fff"><i class="fas fa-play"></i> Tonton</button>
                     <button class="btn-delete" onclick="deleteTicket(${t.id})"><i class="fas fa-trash-alt"></i> Hapus</button>
@@ -655,16 +633,16 @@ function watchNow(id){
     const t = tickets.find(x => x.id === id);
     if(!t) { showToast('Tiket tidak ditemukan!','error'); return; }
     
-    const m = allMovies.find(x => x.title === t.movie);
-    const videoSrc = t.videoSource || (m ? m.videoSource : null);
-    const poster = t.poster || (m ? m.poster : "https://picsum.photos/seed/ticket/100/150");
-    const contentType = t.contentType || (m ? m.contentType : 'movie');
+    const videoSrc = t.videoSource;
+    const poster = t.poster;
+    const contentType = t.contentType || 'movie';
 
     if(!videoSrc){
         showToast('Video source tidak tersedia di tiket!','error');
         return;
     }
 
+    // Simpan data lengkap ke sessionStorage
     sessionStorage.setItem('activeMovieTitle', t.movie);
     sessionStorage.setItem('activeVideoSource', videoSrc);
     sessionStorage.setItem('activePoster', poster);
@@ -672,11 +650,14 @@ function watchNow(id){
     sessionStorage.setItem('activeRoomType', t.roomType||'PUBLIC');
     sessionStorage.setItem('activeContentType', contentType);
     
-    // Simpan data series untuk Next Episode
-    if(contentType === 'series') {
-        sessionStorage.setItem('activeEpKey', t.currentEpKey || '');
-        sessionStorage.setItem('activeParentKey', t.parentSeriesKey || '');
-        sessionStorage.setItem('activeEpisodesData', JSON.stringify(t.episodesData || {}));
+    // Simpan data Series untuk Next Episode
+    if(contentType !== 'movie' && t.episodes && t.currentEp){
+        sessionStorage.setItem('activeEpisodes', JSON.stringify(t.episodes));
+        sessionStorage.setItem('activeCurrentEp', String(t.currentEp));
+        sessionStorage.setItem('activeFullTitle', t.fullTitle || t.movie);
+    } else {
+        sessionStorage.removeItem('activeEpisodes');
+        sessionStorage.removeItem('activeCurrentEp');
     }
     
     window.location.href='movie/index.html';
