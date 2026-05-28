@@ -9,7 +9,7 @@
     <style>
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
         body{margin:0;background:#000;color:#fff;font-family:'Inter',sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
-        .player-header{padding:8px 14px;background:rgba(18,18,18,.97);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a2a;z-index:10;flex-wrap:wrap;gap:8px;min-height:50px}
+        .player-header{padding:8px 14px;background:rgba(18,18,18,.97);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a2a;z-index:100;flex-wrap:wrap;gap:8px;min-height:50px;position:relative}
         .header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
         .movie-info{display:flex;align-items:center;gap:10px;min-width:0}
         .movie-thumb{width:30px;height:30px;border-radius:4px;object-fit:cover;background:#222;flex-shrink:0}
@@ -32,11 +32,13 @@
         .exit-btn:hover{background:#444;color:#fff}
         @keyframes slideD{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
         .video-wrapper{flex:1;display:flex;justify-content:center;align-items:center;background:#000;position:relative;overflow:hidden}
-        .video-wrapper.modal-open iframe,.video-wrapper.modal-open video{pointer-events:none}
-        /* Iframe & Video styles */
+        
+        /* PERBAIKAN: Pastikan overlay tidak memblokir klik saat tidak aktif */
+        .video-wrapper.modal-open iframe, .video-wrapper.modal-open video{pointer-events:none}
+        
         iframe, video{width:100%;height:100%;object-fit:contain;outline:none;border:none}
         
-        .control-bar{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-end;z-index:6;pointer-events:none;transition:opacity .35s,transform .35s;background:linear-gradient(transparent,rgba(0,0,0,.7))}
+        .control-bar{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-end;z-index:10;pointer-events:none;transition:opacity .35s,transform .35s;background:linear-gradient(transparent,rgba(0,0,0,.7))}
         .control-bar.bar-hidden{opacity:0;transform:translateY(8px);pointer-events:none!important}.control-bar.bar-hidden>*{pointer-events:none!important}
         .ctrl-left,.ctrl-right{display:flex;align-items:center;gap:8px;pointer-events:auto}
         .ctrl-btn{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:.2s;position:relative;flex-shrink:0}
@@ -49,7 +51,7 @@
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
         
         /* Chat */
-        .chat-panel{position:absolute;top:0;right:0;width:320px;height:100%;background:rgba(18,18,18,.97);backdrop-filter:blur(12px);border-left:1px solid #2a2a2a;z-index:20;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+        .chat-panel{position:absolute;top:0;right:0;width:320px;height:100%;background:rgba(18,18,18,.97);backdrop-filter:blur(12px);border-left:1px solid #2a2a2a;z-index:50;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
         .chat-panel.open{transform:translateX(0)}
         .chat-head{padding:10px 14px;background:rgba(30,30,30,.9);border-bottom:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
         .chat-head h4{margin:0;font-size:.88rem;display:flex;align-items:center;gap:6px}
@@ -75,13 +77,13 @@
         .name-setup input:focus{border-color:#0078ff}
         .name-setup button{margin-top:12px;background:#0078ff;color:#fff;border:none;padding:9px 28px;border-radius:20px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s}
         .name-setup button:hover{background:#0062cc}
-        .buffering-ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none;opacity:0;transition:opacity .3s}
+        .buffering-ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;pointer-events:none;opacity:0;transition:opacity .3s}
         .buffering-ov.show{opacity:1}.buffering-ov i{font-size:2rem;color:rgba(255,255,255,.7)}
-        .sync-seek-ov{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:4;opacity:0;pointer-events:none;transition:opacity .25s}
+        .sync-seek-ov{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:6;opacity:0;pointer-events:none;transition:opacity .25s}
         .sync-seek-ov.show{opacity:1}.sync-seek-ov div{text-align:center}.sync-seek-ov i{font-size:1.4rem;color:#0078ff}.sync-seek-ov span{display:block;margin-top:6px;font-size:.8rem;color:#ccc}
         
         /* End screen */
-        .end-screen{position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:8;opacity:0;pointer-events:none;transition:opacity .5s}
+        .end-screen{position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;opacity:0;pointer-events:none;transition:opacity .5s}
         .end-screen.show{opacity:1;pointer-events:all}
         .end-screen i{font-size:3rem;color:#4caf50;margin-bottom:16px}
         .end-screen h2{font-size:1.5rem;margin-bottom:8px}
@@ -120,7 +122,6 @@
             .player-header{padding:6px 10px;min-height:44px;gap:6px}.movie-thumb{width:26px;height:26px;border-radius:3px}.movie-title{max-width:90px;font-size:.8rem}.badge{font-size:.6rem;padding:2px 5px}.exit-btn{padding:5px 8px;font-size:.75rem}.share-toggle{display:flex}.url-grp{width:100%}.ctrl-btn{width:44px;height:44px;font-size:1.05rem;border-radius:12px}.sync-pill{font-size:.62rem;padding:5px 8px}.chat-panel{width:100%;border-left:none;border-top:1px solid #2a2a2a}.chat-head{padding:8px 12px}.chat-head h4{font-size:.82rem}.msg{font-size:.8rem;max-width:85%}.chat-input input{padding:10px 14px;font-size:.85rem}.send-btn{width:42px;height:42px}.modal-card{padding:24px 18px;border-radius:14px}.m-title{font-size:1.2rem}.m-icon{width:68px;height:68px}.btn-p{padding:12px 26px;font-size:.88rem}.control-bar{padding:8px 10px}
         }
         @media(max-width:380px){.movie-title{max-width:70px;font-size:.75rem}.badges{gap:3px}.sync-pill span{display:none}}
-        :fullscreen .player-header{display:none}:fullscreen .control-bar{padding-bottom:env(safe-area-inset-bottom,10px)}:-webkit-full-screen .player-header{display:none}
     </style>
 </head>
 <body>
@@ -147,7 +148,7 @@
 </div>
 <div class="video-wrapper" id="content-area">
     <!-- Media Container: Will contain Video or Iframe -->
-    <div id="media-container" style="width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:#000"></div>
+    <div id="media-container" style="width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:#000;pointer-events:auto"></div>
     
     <div class="buffering-ov" id="bufferOv"><i class="fas fa-circle-notch fa-spin"></i></div>
     <div class="sync-seek-ov" id="syncSeekOv"><div><i class="fas fa-sync-alt fa-spin"></i><span>Menyinkronkan...</span></div></div>
@@ -160,7 +161,7 @@
     </div>
     <div class="control-bar" id="controlBar">
         <div class="ctrl-left">
-            <button class="ctrl-btn" id="fsBtn" title="Layar Penuh"><i class="fas fa-expand"></i></button>
+            <!-- Tombol Fullscreen Website DIHAPUS -->
             <button class="ctrl-btn" id="chatBtn" title="Obrolan"><i class="fas fa-comment-dots"></i><span class="unread-dot" id="unreadDot"></span></button>
         </div>
         <div class="ctrl-right"><div class="sync-pill" id="syncPill"><div class="dot" id="syncDot"></div><span id="syncLabel">Menghubungkan...</span></div></div>
@@ -253,7 +254,8 @@ function showModal(){
 function hideModal(){
     mainModal.classList.remove('active');
     modalActive=false;
-    contentArea.classList.remove('modal-open');
+    // PENTING: Pastikan kelas ini hilang agar pointer-events kembali normal
+    contentArea.classList.remove('modal-open'); 
     resetCtrlTimer();
 }
 function showMode(n){
@@ -334,21 +336,6 @@ function isPlaying(){
     return false;
 }
 
-// Fullscreen
-const fsBtn=document.getElementById('fsBtn');
-fsBtn.addEventListener('click',()=>{
-    if(!document.fullscreenElement&&!document.webkitFullscreenElement){
-        (contentArea.requestFullscreen||contentArea.webkitRequestFullscreen).call(contentArea).catch(()=>showToast('Fullscreen tidak didukung'));
-    }else{
-        (document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{});
-    }
-});
-function onFsCh(){
-    fsBtn.querySelector('i').className=!!(document.fullscreenElement||document.webkitFullscreenElement)?'fas fa-compress':'fas fa-expand';
-}
-document.addEventListener('fullscreenchange',onFsCh);
-document.addEventListener('webkitfullscreenchange',onFsCh);
-
 document.getElementById('shareToggle').addEventListener('click',()=>shareArea.classList.toggle('mobile-open'));
 
 // ===== ROOM CLEANUP =====
@@ -401,16 +388,14 @@ function setupMedia(src){
         iframeElement.src = iframeSrc;
         iframeElement.setAttribute('allowfullscreen', '');
         iframeElement.setAttribute('allowtransparency', '');
-        iframeElement.setAttribute('allow', 'autoplay');
+        // PERBAIKAN: Tambahkan autoplay dan pointer events agar bisa diklik
+        iframeElement.setAttribute('allow', 'autoplay; fullscreen');
         iframeElement.setAttribute('scrolling', 'no');
         iframeElement.setAttribute('frameborder', '0');
+        iframeElement.style.pointerEvents = 'auto'; // Pastikan bisa diklik
         
         mediaContainer.appendChild(iframeElement);
         videoElement = null;
-        
-        // For Iframe, we can't detect 'ended' event reliably without internal API.
-        // But we can use the Host's timer or manual sync.
-        // Disable control bar seeking for iframes generally, rely on Host sync.
     } else {
         mediaType = 'video';
         videoElement = document.createElement('video');
@@ -642,7 +627,7 @@ function startPlay(){
     } else if (mediaType === 'iframe' && iframeElement) {
         // Try to send play command via PostMessage (Streamtape)
         sendIframeCommand('play');
-        showToast('Memuat pemutar...');
+        showToast('Silakan klik tombol Play pada video jika tidak otomatis.');
     }
     
     if(isHost)sendSync();
@@ -657,6 +642,7 @@ function joinPlay(){
         videoElement.play().catch(()=>showToast('Klik video untuk memulai'));
     } else if (mediaType === 'iframe' && iframeElement) {
         sendIframeCommand('play');
+        showToast('Silakan klik tombol Play pada video.');
     }
 }
 
