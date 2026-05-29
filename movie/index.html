@@ -365,7 +365,7 @@ currentEpNum = parseInt(sessionStorage.getItem('activeCurrentEp')||'0');
 
 if(!roomId)initHost();else initGuest();
 
-// ===== SETUP MEDIA PLAYER (UPDATED) =====
+// ===== SETUP MEDIA PLAYER (UPDATED FIX) =====
 function setupMedia(src){
     mediaContainer.innerHTML = ''; // Clear container
 
@@ -398,8 +398,12 @@ function setupMedia(src){
         iframeElement.setAttribute('frameborder', '0');
         iframeElement.style.pointerEvents = 'auto'; // Pastikan bisa diklik
 
-        // PERBAIKAN 2: Suntikkan Sandbox secara paksa via JS agar Chrome memblokir pop-up iklan tab baru
-        iframeElement.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+        // PERBAIKAN 2: Tambahkan allow-popups agar Streamtape tidak Client Blocked
+        // allow-scripts: Diperlukan agar JS video player berjalan.
+        // allow-same-origin: Diperlukan agar iframe bisa memuat resource domain sendiri.
+        // allow-forms: Diperlukan jika ada interaksi form internal.
+        // allow-popups: Diperlukan agar Streamtape tidak memblokir pemutaran (Client Blocked).
+        iframeElement.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups');
 
         mediaContainer.appendChild(iframeElement);
         videoElement = null;
