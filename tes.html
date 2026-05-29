@@ -1,24 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>ThMovie Watch Party</title>
+    <style>
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background-color: #000;
+            border-radius: 8px;
+        }
+        iframe {
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .controls {
+            text-align: center;
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #ff0055;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
 <div class="video-container">
-    <iframe 
-        src="https://odysee.com/$/embed/@TheMOvie:2/TMOeps-01-Jujutsu-Kaisen-SUBindonesia:2" 
-        allowfullscreen 
-        width="100%" 
-        height="100%" 
-        style="border: none; position: absolute; top: 0; left: 0;">
-    </iframe>
+    <iframe id="thmovie-player" allowfullscreen></iframe>
 </div>
 
-<style>
-/* CSS agar ukuran video otomatis pas (rasio 16:9) dan responsif */
-.video-container {
-    position: relative;
-    width: 100%;
-    max-width: 800px; /* Batas lebar maksimal video di web kamu */
-    margin: 0 auto;
-    padding-bottom: 56.25%; /* Rasio aspek 16:9 */
-    height: 0;
-    overflow: hidden;
-    background-color: #000; /* Warna hitam saat loading */
-    border-radius: 8px; /* Biar sudutnya agak melengkung rapi */
-}
-</style>
+<div class="controls">
+    <button onclick="startParty()">Mulai Bareng (Set Jam Mulai)</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // Firebase Config milik ThMovie
+    const firebaseConfig = {
+        apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
+        authDomain: "thmovie-3646f.firebaseapp.com",
+        databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "thmovie-3646f",
+        storageBucket: "thmovie-3646f.firebasestorage.app",
+        messagingSenderId: "1041137356432",
+        appId: "1:1041137356432:web:96edbe3402937c82f09215",
+        measurementId: "G-6SNE976L7G"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const roomRef = ref(db, "watch_party/jujutsu_eps1");
+
+    const baseEmbedUrl = "https://odysee.com/$/embed/@TheMOvie:2/TMOeps-01-Jujutsu-Kaisen-SUBindonesia:2";
+    const player = document.getElementById("thmovie-player");
+
+    // 1. Fungsi untuk Host: Menentukan kapan video dimulai (detik saat ini)
+    window.startParty = function() {
+        const waktuSekarang = Date.now(); // Mengambil timestamp milidetik saat ini
+        set(roomRef, {
+            startTime: waktuSekarang
+        });
+    };
+
+    // 2. Fungsi Komunitas/Penonton: Mendengarkan perubahan di Firebase secara real-time
+    onValue(roomRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.startTime) {
+            const waktuMulai = data.startTime;
+            const waktuSekarang = Date.now();
+            
+            // Hitung sudah berapa detik video berjalan sejak Host menekan tombol mulai
+            const selisihDetik = Math.floor((waktuSekarang - waktuMulai) / 1000);
+
+            if (selisihDetik > 0) {
+                // Odysee mendukung parameter ?t=detik untuk melompat ke menit tertentu
+                player.src = `${baseEmbedUrl}?t=${selisihDetik}`;
+            } else {
+                player.src = baseEmbedUrl;
+            }
+        } else {
+            // Jika belum ada data di Firebase, putar dari awal
+            player.src = baseEmbedUrl;
+        }
+    });
+</script>
+
+</body>
+</html>
