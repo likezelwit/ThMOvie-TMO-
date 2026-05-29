@@ -365,7 +365,7 @@ currentEpNum = parseInt(sessionStorage.getItem('activeCurrentEp')||'0');
 
 if(!roomId)initHost();else initGuest();
 
-// ===== SETUP MEDIA PLAYER (UPDATED FIX) =====
+// ===== SETUP MEDIA PLAYER (FINAL FIX - NO SANDBOX) =====
 function setupMedia(src){
     mediaContainer.innerHTML = ''; // Clear container
 
@@ -393,17 +393,20 @@ function setupMedia(src){
         iframeElement.src = iframeSrc;
         iframeElement.setAttribute('allowfullscreen', '');
         iframeElement.setAttribute('allowtransparency', '');
-        iframeElement.setAttribute('allow', 'autoplay; fullscreen');
+        
+        // PERBAIKAN 2: Memperluas atribut 'allow' untuk fitur media modern
+        iframeElement.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write');
+        
         iframeElement.setAttribute('scrolling', 'no');
         iframeElement.setAttribute('frameborder', '0');
         iframeElement.style.pointerEvents = 'auto'; // Pastikan bisa diklik
 
-        // PERBAIKAN 2: Tambahkan allow-popups agar Streamtape tidak Client Blocked
-        // allow-scripts: Diperlukan agar JS video player berjalan.
-        // allow-same-origin: Diperlukan agar iframe bisa memuat resource domain sendiri.
-        // allow-forms: Diperlukan jika ada interaksi form internal.
-        // allow-popups: Diperlukan agar Streamtape tidak memblokir pemutaran (Client Blocked).
-        iframeElement.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups');
+        // PERBAIKAN 3: SANDBOX DIHAPUS TOTAL
+        // Streamtape memblokir video jika atribut sandbox ada, 
+        // karena menganggapnya lingkungan yang dibatasi (suspicious/AdBlock).
+        // Kita hilangkan sandbox agar video bisa diputar.
+        // Konsekuensi: Kontrol pop-up sekarang sepenuhnya diatur oleh pengaturan akun Streamtape Anda.
+        // iframeElement.setAttribute('sandbox', ...); // <--- DIHAPUS
 
         mediaContainer.appendChild(iframeElement);
         videoElement = null;
