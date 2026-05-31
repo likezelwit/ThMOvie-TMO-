@@ -358,12 +358,10 @@ function loadMovies(){
             
             // Render Logic
             if(isComingSoon){
-                // Coming Soon Section
                 const card=document.createElement('div');card.className='movie-card';card.dataset.title=m.title.toLowerCase();
                 card.innerHTML=`<div class="poster"><img src="${m.poster}" onerror="this.src='https://picsum.photos/seed/fb/200/300'"><div class="type-badge ${ct}">${ct.toUpperCase()}</div><div class="coming-soon-tag">SOON</div></div><div class="movie-info"><div class="movie-title">${m.title}</div><div class="movie-genre">${m.genre||''}</div></div>`;
                 cs.appendChild(card);
             } else {
-                // Now Playing Section
                 const card=document.createElement('div');card.className='movie-card';card.dataset.title=m.title.toLowerCase();card.dataset.type=ct;
                 card.onclick=()=>handleMovieClick(m);
                 card.innerHTML=`<div class="poster"><img src="${m.poster}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'"><div class="type-badge ${ct}">${ct==='series'?'SERIES':ct==='ova'?'OVA':'MOVIE'}</div></div><div class="movie-info"><div class="movie-title">${m.title}</div><div class="movie-genre">${m.genre||''}</div><button class="movie-btn">${ct==='movie'?'Beli Tiket':'Lihat Detail'}</button></div>`;
@@ -375,7 +373,7 @@ function loadMovies(){
         c.innerHTML='<p class="text-center" style="grid-column:1/-1;color:#999">Belum ada film.</p>';
         cs.innerHTML='';
     }
-    handleSearch(); // Re-apply search filter
+    handleSearch(); 
 }
 
 // Handle movie click
@@ -403,7 +401,8 @@ function showDetail(movie){
     if(episodes.length>0){
         epHtml=`<div class="ep-section"><h3><i class="fas fa-list"></i> Daftar Episode (${episodes.length})</h3><div class="ep-grid">`;
         episodes.forEach(ep=>{
-            epHtml+=`<div class="ep-card" onclick="selectEpisode(${JSON.stringify(ep).replace(/"/g,'&quot;')})"><div class="ep-num">${ep.num}</div><div><div class="ep-title">${ep.title||'Episode '+ep.num}</div><div class="ep-label">Episode ${ep.num}</div></div></div>`;
+            // FIX: Hapus onclick yang error, gunakan data-num
+            epHtml+=`<div class="ep-card" data-num="${ep.num}"><div class="ep-num">${ep.num}</div><div><div class="ep-title">${ep.title||'Episode '+ep.num}</div><div class="ep-label">Episode ${ep.num}</div></div></div>`;
         });
         epHtml+='</div></div>';
     }else{
@@ -423,6 +422,20 @@ function showDetail(movie){
     </div>${epHtml}`;
     switchView('detail');
 }
+
+// FIX: Event listener untuk episode card (Mencegah Syntax Error)
+document.addEventListener('click', (e) => {
+    const card = e.target.closest('.ep-card');
+    if (card && currentDetailMovie && currentDetailMovie.episodes) {
+        const num = card.dataset.num;
+        const epData = currentDetailMovie.episodes[num];
+        if (epData) {
+            // Bangun object ep sesuai format yang dibutuhkan selectEpisode
+            const ep = { num: num, ...epData };
+            selectEpisode(ep);
+        }
+    }
+});
 
 // Select episode
 function selectEpisode(ep){
@@ -598,7 +611,7 @@ let slides=document.querySelectorAll('.slide'),si=0;
 setInterval(()=>{slides[si].classList.remove('active');si=(si+1)%slides.length;slides[si].classList.add('active')},5000);
 
 // Exports
-window.switchView=switchView;window.startBooking=startBooking;window.selectClassType=selectClassType;window.confirmBooking=confirmBooking;window.handleSearch=handleSearch;window.handleSearchFocus=handleSearchFocus;window.setTimeNowPlus2=setTimeNowPlus2;window.watchNow=watchNow;window.deleteTicket=deleteTicket;window.selectEpisode=selectEpisode;window.joinRoom=joinRoom;window.submitRequest=submitRequest;
+window.switchView=switchView;window.startBooking=startBooking;window.selectClassType=selectClassType;window.confirmBooking=confirmBooking;window.handleSearch=handleSearch;window.handleSearchFocus=handleSearchFocus;window.setTimeNowPlus2=setTimeNowPlus2;window.watchNow=watchNow;window.deleteTicket=deleteTicket;window.joinRoom=joinRoom;window.submitRequest=submitRequest;
 loadMovies();
 </script>
 </body>
