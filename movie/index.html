@@ -257,7 +257,7 @@ const contentArea=document.getElementById('content-area');
 const shareArea=document.getElementById('share-area');
 const shareInput=document.getElementById('shareLinkInput');
 const mainModal=document.getElementById('mainModal');
-const controlBar=document.getElementById('controlBar');
+const controlBar=document.getElementById('control-bar');
 const toastEl=document.getElementById('toast');
 const bufferOv=document.getElementById('bufferOv');
 const syncSeekOv=document.getElementById('syncSeekOv');
@@ -287,41 +287,23 @@ let modalActive=false,currentMode=null,syncSeekTo=null,toastTo=null;
 let syncListenerOn=false,chatOpen=false,chatName=null,chatUserId=null;
 let unreadCount=0,ctrlHideTimer=null,contentType='movie',roomCleaned=false;
 let seriesTitle='',currentEpisodeNum='',allEpisodesData={};
+
+// FIX VARIABLES FOR RACE CONDITION
+let guestDataReady = false; 
+let guestInteracted = false;
+
 const CTRL_DELAY=3500;
 const GDRIVE_API_KEY='AIzaSyBQByCxyGwLSkAJg3UA1supTgLzpcda-Gk';
 
-// ===== DUAL-FLAG GATE =====
-// Both flags must be true before proceeding to mode logic.
-// This prevents race conditions where data arrives before/after user interaction.
-let _guestDataReady=false;   // Firebase meta loaded
-let _guestInteracted=false;  // User clicked interact overlay
-let _guestReadyFn=null;      // Function to call when both flags are set
-
-function guestCheckBothReady(){
-    if(_guestDataReady&&_guestInteracted&&_guestReadyFn){
-        const fn=_guestReadyFn;
-        _guestReadyFn=null; // run only once
-        fn();
-    }
-}
-function guestMarkDataReady(fn){
-    _guestReadyFn=fn;
-    _guestDataReady=true;
-    guestCheckBothReady();
-}
-function guestMarkInteracted(){
-    _guestInteracted=true;
-    guestCheckBothReady();
-}
-
 // ===== INTERACT OVERLAY =====
+// User MUST click before any autoplay works
 tapBtn.addEventListener('click',activateInteraction);
 interactOv.addEventListener('click',activateInteraction);
 
 function activateInteraction(){
     if(hasInteracted)return;
     hasInteracted=true;
-    // Briefly play/pause to unlock audio context in browser
+    // Briefly play/pause to unlock audio context
     video.muted=true;
     video.play().then(()=>{
         video.pause();
@@ -329,16 +311,11 @@ function activateInteraction(){
         video.currentTime=0;
     }).catch(()=>{video.muted=false});
     interactOv.classList.add('hide');
-    if(isHost){
-        // Host: interaction unlocks mode decision directly
-        decideMode();
-    } else {
-        // Guest: signal interaction; data may already be ready
-        guestMarkInteracted();
-    }
+    // Now proceed with mode logic
+    if(onInteractionReady) onInteractionReady();
 }
 
-// Keep for host path only (legacy compat)
+// Callback set after host/guest init
 let onInteractionReady=()=>{};
 
 // Utils
@@ -515,7 +492,9 @@ function initHost(){
     registerViewer();
     setupSync();
     setupSender();
-    // Host: decideMode() is called from activateInteraction() directly
+
+    // Wait for user interaction before deciding mode
+    onInteractionReady=()=>decideMode();
 }
 
 // ===== GUEST =====
@@ -527,6 +506,12 @@ function initGuest(){
     showMode('loading');
     showModal();
 
+    // FIX: Assign handler for user interaction
+    onInteractionReady = () => {
+        guestInteracted = true;
+        tryProceedGuest();
+    };
+
     onValue(ref(db,'sync_rooms/'+roomId+'/meta'),(snap)=>{
         const m=snap.val();
         if(!m){showErr('Room Tidak Ditemukan','Kamar ini mungkin sudah dihapus.');setSyncStatus(false);return}
@@ -535,8 +520,7 @@ function initGuest(){
         contentType=(m.contentType||'movie').toLowerCase();
         seriesTitle=m.seriesTitle||'';
         currentEpisodeNum=m.episodeNum||'';
-        if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex';}
-        else{typeBadge.style.display='none';}
+        if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex';}else{typeBadge.style.display='none';}
         if(m.videoSrc){video.src=m.videoSrc;videoReady=true;}
         else{showErr('Video Tidak Tersedia','Sumber video tidak ditemukan.');return}
         bookingTimestamp=m.targetTime?parseInt(m.targetTime,10):null;
@@ -544,10 +528,19 @@ function initGuest(){
         setSyncStatus(true);
         registerViewer();
         setupSync();
-        // Signal that Firebase data is ready.
-        // checkGuestInit() will only run once the user has also interacted.
-        guestMarkDataReady(()=>checkGuestInit());
+        
+        // FIX: Mark data as ready and try to proceed
+        guestDataReady = true;
+        tryProceedGuest();
     });
+}
+
+// FIX: Synchronization Helper
+function tryProceedGuest() {
+    // Only proceed if we have BOTH data AND interaction
+    if (guestDataReady && guestInteracted) {
+        checkGuestInit();
+    }
 }
 
 function registerViewer(){
