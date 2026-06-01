@@ -391,6 +391,23 @@ let allMovies=[];
 let currentDetailMovie=null;
 let roomsUnsub=null;
 
+// ---- Helper: Extract Poster URL from Firebase Data (Supports HTML/BBCode) ----
+function extractPosterUrl(input) {
+    if (!input) return '';
+    input = input.trim();
+    // 1. Coba ambil dari HTML tag <img src="...">
+    const htmlMatch = input.match(/<img[^>]+src=['"]([^'"]+)['"]/i);
+    if (htmlMatch) return htmlMatch[1];
+    // 2. Coba ambil dari BBCode [img]...[/img]
+    const bbMatch = input.match(/\[img\](.*?)\[\/img\]/i);
+    if (bbMatch) return bbMatch[1].trim();
+    // 3. Coba ambil link langsung (http/https)
+    const urlMatch = input.match(/(https?:\/\/[^\s<]+)/i);
+    if (urlMatch) return urlMatch[1];
+    // Fallback
+    return input;
+}
+
 // ---- Toast ----
 function showToast(msg,type='success'){
     const c=document.getElementById('toastContainer'),t=document.createElement('div');
@@ -433,6 +450,9 @@ function loadMovies(){
                 allMovies.push(m);
                 const ct=(m.contentType||'movie').toLowerCase();
                 const isComingSoon=m.status==='coming_soon';
+                
+                // Gunakan extractPosterUrl untuk membersihkan URL poster
+                const posterUrl = extractPosterUrl(m.poster);
 
                 if(isComingSoon){
                     // Coming Soon card — no booking, just info
@@ -443,7 +463,7 @@ function loadMovies(){
                     card.dataset.type=ct;
                     card.innerHTML=`
                         <div class="poster">
-                            <img src="${m.poster||''}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/cs${m.title}/200/300'">
+                            <img src="${posterUrl}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/cs${m.title}/200/300'">
                             <div class="coming-overlay">
                                 <i class="fas fa-hourglass-half" style="color:#fff;font-size:1.5rem"></i>
                                 <span class="coming-label">COMING SOON</span>
@@ -465,7 +485,7 @@ function loadMovies(){
                     card.onclick=()=>handleMovieClick(m);
                     card.innerHTML=`
                         <div class="poster">
-                            <img src="${m.poster||''}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/${m.title}/200/300'">
+                            <img src="${posterUrl}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/${m.title}/200/300'">
                             <div class="type-badge ${ct}">${ct==='series'?'SERIES':ct==='ova'?'OVA':'MOVIE'}</div>
                         </div>
                         <div class="movie-info">
@@ -495,7 +515,7 @@ function handleMovieClick(movie){
     const ct=(movie.contentType||'movie').toLowerCase();
     if(ct==='movie'){
         currentBooking.videoSource=movie.videoSource;
-        currentBooking.poster=movie.poster;
+        currentBooking.poster=extractPosterUrl(movie.poster); // Bersihkan poster
         currentBooking.contentType='movie';
         startBooking(movie.title,'PUBLIC');
     }else{
@@ -510,6 +530,9 @@ function showDetail(movie){
     const rating=movie.rating?parseFloat(movie.rating):0;
     const stars=Array.from({length:5},(_,i)=>i<Math.round(rating)?'<i class="fas fa-star"></i>':'<i class="far fa-star"></i>').join('');
     const episodes=movie.episodes?Object.entries(movie.episodes).map(([k,v])=>({num:k,...v})):[];
+
+    // Bersihkan poster URL untuk detail
+    const posterUrl = extractPosterUrl(movie.poster);
 
     let epHtml='';
     if(episodes.length>0){
@@ -530,8 +553,8 @@ function showDetail(movie){
 
     document.getElementById('detail-content').innerHTML=`
     <div class="detail-hero">
-        <div class="detail-backdrop" style="background-image:url('${movie.poster||''}')"></div>
-        <div class="detail-poster"><img src="${movie.poster||''}" onerror="this.src='https://picsum.photos/seed/fb/220/330'"></div>
+        <div class="detail-backdrop" style="background-image:url('${posterUrl}')"></div>
+        <div class="detail-poster"><img src="${posterUrl}" onerror="this.src='https://picsum.photos/seed/fb/220/330'"></div>
         <div class="detail-info">
             <div class="detail-meta">
                 <span class="tag">${ct}</span>
@@ -554,7 +577,7 @@ function selectEpisode(ep){
         return;
     }
     currentBooking.videoSource=ep.videoSource;
-    currentBooking.poster=currentDetailMovie.poster;
+    currentBooking.poster=extractPosterUrl(currentDetailMovie.poster); // Bersihkan poster
     currentBooking.contentType=currentDetailMovie.contentType||'series';
     currentBooking.episodeNum=ep.num;
     currentBooking.seriesTitle=currentDetailMovie.title;
@@ -577,7 +600,9 @@ function loadRooms(){
                 if(age>3600000)return;
                 const viewers=room.viewers?Object.keys(room.viewers).length:0;
                 const isPlaying=room.status?.isPlaying;
-                rooms.push({id:rid,title:meta.title,poster:meta.posterSrc,viewers,isPlaying,createdAt:meta.createdAt,contentType:meta.contentType||'movie'});
+                // Bersihkan poster URL di room
+                const posterUrl = extractPosterUrl(meta.posterSrc);
+                rooms.push({id:rid,title:meta.title,poster:posterUrl,viewers,isPlaying,createdAt:meta.createdAt,contentType:meta.contentType||'movie'});
             });
         }
         rooms.sort((a,b)=>b.createdAt-a.createdAt);
@@ -711,7 +736,7 @@ function confirmBooking(){
         id:Date.now(),
         date:new Date().toLocaleDateString('id-ID'),
         videoSource:currentBooking.videoSource,
-        poster:currentBooking.poster,
+        poster:currentBooking.poster, // Sudah bersih saat startBooking
         contentType:currentBooking.contentType||'movie',
         episodeNum:currentBooking.episodeNum||null,
         seriesTitle:currentBooking.seriesTitle||null
@@ -732,11 +757,12 @@ function renderTickets(){
         return;
     }
     [...tickets].reverse().forEach(t=>{
-        const poster=t.poster||'https://picsum.photos/seed/ticket/100/150';
+        // Bersihkan poster URL tiket (jika ada data lama yang berantakan)
+        const posterUrl = extractPosterUrl(t.poster) || 'https://picsum.photos/seed/ticket/100/150';
         const ct=(t.contentType||'movie').toLowerCase();
         const header=t.roomType==='PRIVATE'?`Private — ${t.movie}`:`Publik — ${t.movie}`;
         l.innerHTML+=`<div class="ticket-card">
-            <div class="t-poster"><img src="${poster}" style="width:100%;height:100%;object-fit:cover" onerror="this.src='https://picsum.photos/seed/ticket/100/150'"></div>
+            <div class="t-poster"><img src="${posterUrl}" style="width:100%;height:100%;object-fit:cover" onerror="this.src='https://picsum.photos/seed/ticket/100/150'"></div>
             <div class="t-details">
                 <div style="font-size:.72rem;color:var(--primary);font-weight:800;text-transform:uppercase;margin-bottom:2px">${header}</div>
                 <div class="t-title">${t.movie}</div>
@@ -774,9 +800,12 @@ function watchNow(id){
         return;
     }
 
+    // Bersihkan poster sebelum kirim ke player
+    const cleanPoster = extractPosterUrl(t.poster) || '';
+
     sessionStorage.setItem('activeMovieTitle',t.movie);
     sessionStorage.setItem('activeVideoSource',videoSrc);
-    sessionStorage.setItem('activePoster',t.poster||'');
+    sessionStorage.setItem('activePoster',cleanPoster);
     sessionStorage.setItem('activeBookingTime',String(t.bookingTimestamp||0));
     sessionStorage.setItem('activeRoomType',t.roomType||'PUBLIC');
     sessionStorage.setItem('activeContentType',t.contentType||'movie');
@@ -796,18 +825,20 @@ function renderPrivate(){
         return;
     }
     available.forEach(m=>{
+        // Bersihkan poster URL
+        const posterUrl = extractPosterUrl(m.poster);
         const card=document.createElement('div');
         card.className='movie-card';
         card.dataset.title=m.title.toLowerCase();
         card.onclick=()=>{
             currentBooking.videoSource=m.videoSource;
-            currentBooking.poster=m.poster;
+            currentBooking.poster=posterUrl; // Simpan URL bersih
             currentBooking.contentType=m.contentType||'movie';
             startBooking(m.title,'PRIVATE');
         };
         card.innerHTML=`
             <div class="poster">
-                <img src="${m.poster||''}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'">
+                <img src="${posterUrl}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'">
             </div>
             <div class="movie-info">
                 <div class="movie-title">${m.title}</div>
