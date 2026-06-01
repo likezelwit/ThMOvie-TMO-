@@ -290,15 +290,38 @@ let seriesTitle='',currentEpisodeNum='',allEpisodesData={};
 const CTRL_DELAY=3500;
 const GDRIVE_API_KEY='AIzaSyBQByCxyGwLSkAJg3UA1supTgLzpcda-Gk';
 
+// ===== DUAL-FLAG GATE =====
+// Both flags must be true before proceeding to mode logic.
+// This prevents race conditions where data arrives before/after user interaction.
+let _guestDataReady=false;   // Firebase meta loaded
+let _guestInteracted=false;  // User clicked interact overlay
+let _guestReadyFn=null;      // Function to call when both flags are set
+
+function guestCheckBothReady(){
+    if(_guestDataReady&&_guestInteracted&&_guestReadyFn){
+        const fn=_guestReadyFn;
+        _guestReadyFn=null; // run only once
+        fn();
+    }
+}
+function guestMarkDataReady(fn){
+    _guestReadyFn=fn;
+    _guestDataReady=true;
+    guestCheckBothReady();
+}
+function guestMarkInteracted(){
+    _guestInteracted=true;
+    guestCheckBothReady();
+}
+
 // ===== INTERACT OVERLAY =====
-// User MUST click before any autoplay works
 tapBtn.addEventListener('click',activateInteraction);
 interactOv.addEventListener('click',activateInteraction);
 
 function activateInteraction(){
     if(hasInteracted)return;
     hasInteracted=true;
-    // Briefly play/pause to unlock audio context
+    // Briefly play/pause to unlock audio context in browser
     video.muted=true;
     video.play().then(()=>{
         video.pause();
@@ -306,11 +329,16 @@ function activateInteraction(){
         video.currentTime=0;
     }).catch(()=>{video.muted=false});
     interactOv.classList.add('hide');
-    // Now proceed with mode logic
-    onInteractionReady();
+    if(isHost){
+        // Host: interaction unlocks mode decision directly
+        decideMode();
+    } else {
+        // Guest: signal interaction; data may already be ready
+        guestMarkInteracted();
+    }
 }
 
-// Callback set after host/guest init
+// Keep for host path only (legacy compat)
 let onInteractionReady=()=>{};
 
 // Utils
@@ -487,9 +515,7 @@ function initHost(){
     registerViewer();
     setupSync();
     setupSender();
-
-    // Wait for user interaction before deciding mode
-    onInteractionReady=()=>decideMode();
+    // Host: decideMode() is called from activateInteraction() directly
 }
 
 // ===== GUEST =====
@@ -509,7 +535,8 @@ function initGuest(){
         contentType=(m.contentType||'movie').toLowerCase();
         seriesTitle=m.seriesTitle||'';
         currentEpisodeNum=m.episodeNum||'';
-        if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex';}else{typeBadge.style.display='none';}
+        if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex';}
+        else{typeBadge.style.display='none';}
         if(m.videoSrc){video.src=m.videoSrc;videoReady=true;}
         else{showErr('Video Tidak Tersedia','Sumber video tidak ditemukan.');return}
         bookingTimestamp=m.targetTime?parseInt(m.targetTime,10):null;
@@ -517,8 +544,9 @@ function initGuest(){
         setSyncStatus(true);
         registerViewer();
         setupSync();
-        // Wait for interaction then check guest state
-        onInteractionReady=()=>checkGuestInit();
+        // Signal that Firebase data is ready.
+        // checkGuestInit() will only run once the user has also interacted.
+        guestMarkDataReady(()=>checkGuestInit());
     });
 }
 
