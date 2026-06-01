@@ -75,23 +75,12 @@
         .radio-card label{display:block;padding:12px;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;transition:.2s;font-weight:600;font-size:.82rem;color:var(--text2)}
         .radio-card input:checked+label{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
         .radio-card label:hover{border-color:#bbb}
-        
-        /* ADMIN GENRE SEARCH SYSTEM */
-        .genre-search-container{position:relative}
-        .genre-input-wrapper{position:relative}
-        .genre-input-wrapper input{padding-right:30px}
-        .genre-input-wrapper i{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text2)}
-        .genre-dropdown{position:absolute;top:100%;left:0;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;max-height:250px;overflow-y:auto;z-index:100;box-shadow:var(--shadow-lg);display:none}
-        .genre-dropdown.show{display:block}
-        .genre-option{padding:10px 16px;cursor:pointer;font-size:.85rem;color:var(--text);transition:.1s;border-bottom:1px solid var(--bg)}
-        .genre-option:last-child{border-bottom:none}
-        .genre-option:hover{background:var(--bg);color:var(--accent)}
-        .genre-option.selected{background:var(--accent-light);color:var(--accent);font-weight:600;cursor:default}
-        .selected-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:32px}
-        .tag-chip-admin{background:var(--accent);color:#fff;padding:5px 10px;border-radius:16px;font-size:.75rem;font-weight:600;display:flex;align-items:center;gap:6px}
-        .tag-chip-admin i{cursor:pointer;font-size:.65rem;opacity:.8}
-        .tag-chip-admin i:hover{opacity:1}
-
+        .tag-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+        .tag-toggle{position:relative}
+        .tag-toggle input{position:absolute;opacity:0;pointer-events:none}
+        .tag-toggle label{display:inline-block;padding:7px 14px;border:2px solid var(--border);border-radius:20px;cursor:pointer;transition:.2s;font-weight:600;font-size:.8rem;color:var(--text2)}
+        .tag-toggle input:checked+label{border-color:var(--accent);background:var(--accent);color:#fff}
+        .tag-toggle label:hover{border-color:#aaa}
         .ep-list{max-height:400px;overflow-y:auto;padding-right:4px}
         .ep-item{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
         .ep-item-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -280,20 +269,20 @@
                         <div class="radio-card"><input type="radio" name="pub-type" id="pt-ova" value="ova"><label for="pt-ova"><i class="fas fa-star"></i><br>OVA / Special</label></div>
                     </div>
                 </div>
-                
-                <!-- ADMIN GENRE SEARCH -->
-                <div class="form-group">
-                    <label class="form-label">Genre (Cari & Pilih)</label>
-                    <div class="genre-search-container">
-                        <div class="genre-input-wrapper">
-                            <input type="text" class="form-input" id="pub-genre-search" placeholder="Ketik genre...">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <div class="genre-dropdown" id="pub-genre-dropdown"></div>
-                        <div class="selected-tags" id="pub-genre-tags"></div>
+                <div class="form-group"><label class="form-label">Genre</label>
+                    <div class="tag-grid" id="pub-genre-tags">
+                        <div class="tag-toggle"><input type="checkbox" id="pg-action" value="Action"><label for="pg-action">Action</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="pg-comedy" value="Comedy"><label for="pg-comedy">Comedy</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="pg-drama" value="Drama"><label for="pg-drama">Drama</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="pg-horror" value="Horror"><label for="pg-horror">Horror</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="pg-scifi" value="Sci-Fi"><label for="pg-scifi">Sci-Fi</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="pg-romance" value="Romance"><label for="pg-romance">Romance</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="pg-psych" value="Psychological"><label for="pg-psych">Psychological</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="pg-fantasy" value="Fantasy"><label for="pg-fantasy">Fantasy</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="pg-thriller" value="Thriller"><label for="pg-thriller">Thriller</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="pg-sol" value="Slice of Life"><label for="pg-sol">Slice of Life</label></div>
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group"><label class="form-label">Rating / 10</label><input type="number" class="form-input" id="pubRating" placeholder="8.5" min="0" max="10" step="0.1"></div>
                     <div class="form-group" style="flex: 1.5">
@@ -386,20 +375,8 @@ const db=getDatabase(app);
 
 const GDRIVE_API_KEY='AIzaSyBQByCxyGwLSkAJg3UA1supTgLzpcda-Gk';
 let allRequests=[],allMovies=[],currentFilter='pending',epFieldCounter=0,manageEpCounter=0;
+// modalMode: 'new_request' | 'new_manual' | 'edit_coming' | 'edit_published'
 let modalMode='new_manual';
-
-// ===== GENRE DATA (150+) =====
-const ALL_GENRES = [
-    "Action", "Adventure", "Avant Garde", "Award Winning", "Boys Love", "Comedy", "Drama", "Fantasy", "Girls Love", "Gourmet", "Horror", "Mystery", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Suspense", "Thriller",
-    "Adult", "Anthropomorphic", "Angst", "Cars", "Childcare", "Combat", "Crossdressing", "Delinquents", "Dementia", "Demons", "Detective", "Ecchi", "Erotica", "Fashion", "Game", "Gender Bender", "Harem", "Hentai", "Historical", "Isekai",
-    "Josei", "Kids", "Love Polygon", "Magic", "Magical Sex Shift", "Martial Arts", "Mecha", "Medical", "Military", "Music", "Mythological", "Parody", "Performing Arts", "Pets", "Psychological", "Racing", "Reincarnation", "Reverse Harem",
-    "Romantic Subplot", "Samurai", "School", "Seinen", "Shoujo", "Shounen", "Shounen Ai", "Space", "Strategy", "Super Power", "Time Travel", "Vampire", "Visual Arts", "Workplace", "Yaoi", "Yuri", "Iyashikei", "CGDCT", "Cyberpunk",
-    "Steampunk", "Post-Apocalyptic", "Survival", "Tragedy", "Wuxia", "Xianxia", "Mahou Shoujo", "Kaiju", "Tokusatsu", "Yankii", "Otaku Culture", "Idols", "Music Video", "Eroge", "Harem Inverse", "Chunibyo", "Gag Humor", "Dark Fantasy",
-    "Urban Fantasy", "Space Opera", "Martial Arts", "Horror Comedy", "Psychological Horror", "Aliens", "Robots", "Post-Apocalyptic", "Dystopian", "Cyberpunk", "Steampunk", "Biopunk", "Dieselpunk", "Sword & Sorcery", "High Fantasy",
-    "Low Fantasy", "Mythology", "Folklore", "Noir", "Western", "Samurai", "Ninja", "Yakuza", "Gangster", "Police Procedural", "Courtroom", "Political", "Spy", "War", "Military", "Anti-Hero", "Vigilante", "Superhero", "Meta",
-    "Absurdist", "Surreal", "Experimental", "Anthology", "Episodic", "Coming of Age", "Family", "Friendship", "Rivalry", "Team Sports", "Individual Sports", "Mind Game", "Tournament", "Survival Game", "Battle Royale", "Isekai", "Reincarnation",
-    "Time Loop", "Virtual Reality", "Augmented Reality", "Artificial Intelligence", "Transhumanism", "Genetic Modification", "Pandemic", "Zombie", "Apocalypse", "Dystopia", "Utopia", "Conspiracy", "Paranormal", "Occult", "Exorcism"
-];
 
 // ===== URL CONVERTERS =====
 function extractGDriveId(url){const m=url.match(/\/file\/d\/([\w-]+)/)||url.match(/id=([\w-]+)/)||url.match(/open\?id=([\w-]+)/);return m?m[1]:null}
@@ -430,16 +407,24 @@ function getUrlHint(url){
     return'ℹ️ Direct link';
 }
 
-// ===== POSTER URL EXTRACTOR =====
+// ===== POSTER URL EXTRACTOR (NEW LOGIC) =====
 function extractPosterUrl(input) {
     if (!input) return '';
     input = input.trim();
+
+    // 1. Coba ambil dari HTML tag <img src="...">
     const htmlMatch = input.match(/<img[^>]+src=['"]([^'"]+)['"]/i);
     if (htmlMatch) return htmlMatch[1];
+
+    // 2. Coba ambil dari BBCode [img]...[/img]
     const bbMatch = input.match(/\[img\](.*?)\[\/img\]/i);
     if (bbMatch) return bbMatch[1].trim();
+
+    // 3. Coba ambil link langsung (http/https)
     const urlMatch = input.match(/(https?:\/\/[^\s<]+)/i);
     if (urlMatch) return urlMatch[1];
+
+    // Fallback return raw jika tidak dikenali (mungkin user mengetik manual)
     return input;
 }
 
@@ -461,6 +446,8 @@ function updatePosterPreview() {
         previewImg.src = extractedUrl;
         previewBox.classList.add('active');
         statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> Poster terdeteksi`;
+        
+        // Handle image error (link broken)
         previewImg.onerror = function() {
             previewBox.classList.remove('active');
             statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:var(--warn)"></i> URL gambar tidak valid / error`;
@@ -469,67 +456,6 @@ function updatePosterPreview() {
         previewBox.classList.remove('active');
         statusDiv.innerHTML = `<i class="fas fa-info-circle"></i> Menunggu URL...`;
     }
-}
-
-// ===== ADMIN GENRE SEARCH LOGIC =====
-let selectedAdminGenres = [];
-
-function initAdminGenreSearch() {
-    const input = document.getElementById('pub-genre-search');
-    const dropdown = document.getElementById('pub-genre-dropdown');
-    const tagsContainer = document.getElementById('pub-genre-tags');
-
-    function renderTags() {
-        tagsContainer.innerHTML = '';
-        selectedAdminGenres.forEach(g => {
-            const chip = document.createElement('div');
-            chip.className = 'tag-chip-admin';
-            chip.innerHTML = `<span>${g}</span><i class="fas fa-times" onclick="adminRemoveGenre('${g}')"></i>`;
-            tagsContainer.appendChild(chip);
-        });
-    }
-
-    window.adminRemoveGenre = (genre) => {
-        selectedAdminGenres = selectedAdminGenres.filter(g => g !== genre);
-        renderTags();
-    };
-
-    input.addEventListener('input', (e) => {
-        const val = e.target.value.toLowerCase();
-        dropdown.innerHTML = '';
-        if (!val) {
-            dropdown.classList.remove('show');
-            return;
-        }
-        
-        const filtered = ALL_GENRES.filter(g => g.toLowerCase().includes(val) && !selectedAdminGenres.includes(g));
-        
-        if (filtered.length > 0) {
-            dropdown.classList.add('show');
-            filtered.forEach(g => {
-                const div = document.createElement('div');
-                div.className = 'genre-option';
-                div.textContent = g;
-                div.onclick = () => {
-                    if(!selectedAdminGenres.includes(g)){
-                        selectedAdminGenres.push(g);
-                        renderTags();
-                    }
-                    input.value = '';
-                    dropdown.classList.remove('show');
-                };
-                dropdown.appendChild(div);
-            });
-        } else {
-            dropdown.classList.remove('show');
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.genre-search-container')) {
-            dropdown.classList.remove('show');
-        }
-    });
 }
 
 // ===== TOAST =====
@@ -734,6 +660,9 @@ async function promoteToPublished(movieId){
 window.promoteToPublished=promoteToPublished;
 
 // ===== MODAL OPEN =====
+// mode: 'new_manual' | 'new_request' | 'edit_coming' | 'edit_published'
+// refId: requestId (for new_request) OR movieId (for edit modes)
+// forceStatus: 'coming_soon' | 'published' (optional, for new_request shortcut)
 function openPublishModal(mode, refId, forceStatus){
     modalMode=mode;
     document.getElementById('publishModal').classList.add('active');
@@ -745,12 +674,8 @@ function openPublishModal(mode, refId, forceStatus){
     document.getElementById('pubMovieId').value='';
     document.getElementById('pubRequestId').value='';
 
-    // Reset Genres
-    selectedAdminGenres = [];
-    document.getElementById('pub-genre-tags').innerHTML = '';
-    document.getElementById('pub-genre-search').value = '';
-
-    // Reset other fields
+    // Reset all fields
+    document.querySelectorAll('#pub-genre-tags input[type="checkbox"]').forEach(i=>i.checked=false);
     document.querySelectorAll('#pubAudioSection input[type="checkbox"]').forEach(i=>i.checked=false);
     document.getElementById('pt-movie').checked=true;
     document.getElementById('pubTitle').value='';
@@ -761,9 +686,6 @@ function openPublishModal(mode, refId, forceStatus){
     document.getElementById('posterPreviewContainer').classList.remove('active');
     document.getElementById('posterPreviewStatus').innerHTML='';
     document.getElementById('pubVideoUrl').classList.remove('converted','already');
-
-    // Initialize Genre Search Logic
-    setTimeout(initAdminGenreSearch, 100);
 
     if(mode==='new_manual'){
         document.getElementById('publishModalTitle').textContent='Publikasi Manual';
@@ -778,15 +700,13 @@ function openPublishModal(mode, refId, forceStatus){
         document.getElementById('pubRequestId').value=refId;
         document.getElementById('pubTitle').value=r.title||'';
         document.getElementById('pubYear').value=r.year||'';
+        // Set radio
         const ct=(r.type||'movie').toLowerCase();
         const radio=document.getElementById(`pt-${ct}`);if(radio)radio.checked=true;
-        
-        // Load Genres from Request
-        if(Array.isArray(r.genres)){
-            selectedAdminGenres = [...r.genres];
-            initAdminGenreSearch(); // Re-render tags
-        }
-
+        // Genres
+        const genres=Array.isArray(r.genres)?r.genres:(r.genres?[r.genres]:[]);
+        document.querySelectorAll('#pub-genre-tags input').forEach(i=>{if(genres.includes(i.value))i.checked=true});
+        // Audio
         if(Array.isArray(r.audioSub)){
             const am={'Sub Indo':'pa-subin','Eng Sub':'pa-eng','Dub Indo':'pa-dubin','Dub Eng':'pa-duben'};
             r.audioSub.forEach(a=>{const el=document.getElementById(am[a]);if(el)el.checked=true});
@@ -805,34 +725,36 @@ function openPublishModal(mode, refId, forceStatus){
         document.getElementById('pubRating').value=m.rating||'';
         document.getElementById('pubDesc').value=m.description||'';
         document.getElementById('pubPoster').value=m.poster||'';
+        // Trigger preview update for existing poster
         if(m.poster) updatePosterPreview();
         
+        // Radio
         const ct=(m.contentType||'movie').toLowerCase();
         const radio=document.getElementById(`pt-${ct}`);if(radio)radio.checked=true;
-        
-        // Load Genres from Movie
-        if(m.genre){
-            // Genre is stored as string "Action, Comedy", split it
-            selectedAdminGenres = m.genre.split(',').map(g=>g.trim()).filter(g=>g!=='');
-            initAdminGenreSearch(); // Re-render tags
-        }
-
+        // Genres
+        const genres=m.genre?m.genre.split(',').map(g=>g.trim()):[];
+        document.querySelectorAll('#pub-genre-tags input').forEach(i=>{if(genres.includes(i.value))i.checked=true});
+        // Audio
         if(Array.isArray(m.audioSub)){
             const am={'Sub Indo':'pa-subin','Eng Sub':'pa-eng','Dub Indo':'pa-dubin','Dub Eng':'pa-duben'};
             m.audioSub.forEach(a=>{const el=document.getElementById(am[a]);if(el)el.checked=true});
         }
+        // Load existing video/episodes
         updateModalSections(ct, null, m);
         buildModalFooter(mode, null);
     }
 
+    // Bind type radio change
     document.querySelectorAll('input[name="pub-type"]').forEach(r=>{
         r.addEventListener('change',()=>updateModalSections(r.value,null,null));
     });
 }
 window.openPublishModal=openPublishModal;
 
+// Add event listener for poster input
 document.getElementById('pubPoster').addEventListener('input', updatePosterPreview);
 
+// Build footer buttons based on mode
 function buildModalFooter(mode, forceStatus){
     const foot=document.getElementById('publishModalFoot');
     foot.innerHTML='';
@@ -866,6 +788,7 @@ function updateModalSections(ct, request, existingMovie){
     const vidSec=document.getElementById('pubVideoSection');
     if(ct==='movie'){
         epSec.style.display='none';vidSec.style.display='block';
+        // If editing existing movie, fill video url
         if(existingMovie&&existingMovie.videoSource){
             const inp=document.getElementById('pubVideoUrl');
             inp.value=existingMovie.videoSource;
@@ -877,6 +800,7 @@ function updateModalSections(ct, request, existingMovie){
         document.getElementById('pubEpList').innerHTML='';
         epFieldCounter=0;
         if(existingMovie&&existingMovie.episodes){
+            // Load existing episodes
             Object.entries(existingMovie.episodes).sort((a,b)=>parseInt(a[0])-parseInt(b[0])).forEach(([num,ep])=>{
                 addEpField(parseInt(num),ep.title||'',ep.videoSource||'');
             });
@@ -898,6 +822,7 @@ function parseEpisodeNumbers(text){
 function closePublishModal(){
     document.getElementById('publishModal').classList.remove('active');
     document.body.style.overflow='';
+    // Remove type change listeners by cloning
     document.querySelectorAll('input[name="pub-type"]').forEach(r=>{const c=r.cloneNode(true);r.parentNode.replaceChild(c,r)});
 }
 window.closePublishModal=closePublishModal;
@@ -977,21 +902,19 @@ async function saveMovie(publishStatus){
     if(!title){showToast('Judul wajib diisi!','error');return}
     const ct=document.querySelector('input[name="pub-type"]:checked').value.toLowerCase();
     
+    // Extract clean poster URL using the new logic
     const rawPosterInput = document.getElementById('pubPoster').value.trim();
     const poster = extractPosterUrl(rawPosterInput) || '';
     
     const rating=parseFloat(document.getElementById('pubRating').value)||null;
-    
-    // Get genres from array
-    const genres = selectedAdminGenres.join(', ');
-    if(!genres){showToast('Pilih minimal 1 genre!','error');return}
-    
+    const genres=[...document.querySelectorAll('#pub-genre-tags input:checked')].map(i=>i.value).join(', ');
     const year=document.getElementById('pubYear').value;
     const desc=document.getElementById('pubDesc').value.trim();
     const audioSub=[...document.querySelectorAll('#pubAudioSection input:checked')].map(i=>i.value);
     const requestId=document.getElementById('pubRequestId').value;
-    const movieId=document.getElementById('pubMovieId').value; 
+    const movieId=document.getElementById('pubMovieId').value; // set only in edit mode
 
+    // Find the button that was clicked
     const foot=document.getElementById('publishModalFoot');
     const btns=foot.querySelectorAll('button:not(.btn-ghost)');
     btns.forEach(b=>{b.disabled=true;if(b.textContent.trim().startsWith('Simpan')||b.textContent.trim().startsWith('Publikas')||b.textContent.trim().startsWith('Coming'))b.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memproses...'});
@@ -1000,6 +923,7 @@ async function saveMovie(publishStatus){
         const movieData={title,contentType:ct,poster,genre:genres,year,rating,description:desc,audioSub,status:publishStatus};
 
         if(publishStatus==='coming_soon'){
+            // No video needed for coming soon
             if(movieId){
                 await update(ref(db,'movies/'+movieId),movieData);
                 if(requestId)await update(ref(db,'requests/'+requestId),{status:'coming_soon'});
@@ -1012,6 +936,7 @@ async function saveMovie(publishStatus){
             closePublishModal();showToast(`"${title}" disimpan sebagai Coming Soon!`);return;
         }
 
+        // Published — need video
         if(ct==='movie'){
             const videoUrlRaw=document.getElementById('pubVideoUrl').value.trim();
             if(!videoUrlRaw){showToast('URL video wajib diisi!','error');return}
@@ -1031,10 +956,12 @@ async function saveMovie(publishStatus){
         }
 
         if(movieId){
+            // EDIT existing
             await update(ref(db,'movies/'+movieId),movieData);
             if(requestId)await update(ref(db,'requests/'+requestId),{status:'published'});
             closePublishModal();showToast(`"${title}" berhasil diperbarui!`);
         }else{
+            // NEW
             movieData.createdAt=Date.now();
             const newRef=push(ref(db,'movies'));
             await set(newRef,movieData);
