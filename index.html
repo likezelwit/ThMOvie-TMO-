@@ -29,16 +29,15 @@
         .view-section.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-        /* --- NEW PROMO SECTION (Replaces Slider) --- */
-        .promo-section{max-width:1000px;margin:20px auto 30px;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
-        .promo-card{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;aspect-ratio:16/9;transition:.3s}
-        .promo-card:hover{transform:translateY(-5px);box-shadow:0 15px 35px rgba(0,0,0,.15)}
-        .promo-card img{width:100%;height:100%;object-fit:cover;transition:.5s}
-        .promo-card:hover img{transform:scale(1.05)}
-        .promo-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);display:flex;align-items:flex-end;padding:20px;opacity:0;transition:.3s}
-        .promo-card:hover .promo-overlay{opacity:1}
-        .promo-text{color:#fff;font-weight:800;font-size:1.1rem;text-transform:uppercase;letter-spacing:1px}
-        @media(max-width:768px){.promo-section{grid-template-columns:1fr}}
+        /* Hero Slider */
+        .hero{height:400px;position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:30px}
+        .slide{position:absolute;inset:0;opacity:0;transition:.8s;background-size:cover;background-position:center}
+        .slide.active{opacity:1}
+        .slide::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),transparent)}
+        .slide-content{position:relative;z-index:2;padding:40px;color:#fff;max-width:60%}
+        .slide-content h2{font-size:2rem;font-weight:800;margin-bottom:10px;text-transform:uppercase}
+        .btn{background:var(--primary);color:#fff;border:none;padding:12px 30px;border-radius:50px;font-weight:700;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+        .btn:hover{background:#0056b3;transform:translateY(-2px)}
 
         /* Movie Grid */
         .section-header{font-size:1.5rem;font-weight:800;margin-bottom:20px;border-left:5px solid var(--primary);padding-left:15px}
@@ -149,24 +148,7 @@
         .radio-card label{display:block;padding:14px 12px;border:2px solid #eee;border-radius:12px;text-align:center;cursor:pointer;transition:.2s;font-weight:600;font-size:.88rem}
         .radio-card input:checked+label{border-color:var(--primary);background:#e3f2fd;color:var(--primary)}
         .radio-card label:hover{border-color:#bbb}
-        
-        /* GENRE SEARCH SYSTEM */
-        .genre-search-container{position:relative}
-        .genre-input-wrapper{position:relative}
-        .genre-input-wrapper input{padding-right:30px}
-        .genre-input-wrapper i{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--gray)}
-        .genre-dropdown{position:absolute;top:100%;left:0;width:100%;background:#fff;border:1px solid #e0e0e0;border-radius:12px;max-height:250px;overflow-y:auto;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.1);display:none}
-        .genre-dropdown.show{display:block}
-        .genre-option{padding:10px 16px;cursor:pointer;font-size:.9rem;color:var(--text);transition:.1s}
-        .genre-option:hover{background:var(--bg);color:var(--primary)}
-        .genre-option.selected{background:#e3f2fd;color:var(--primary);font-weight:600;cursor:default}
-        .selected-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;min-height:30px}
-        .tag-chip{background:var(--primary);color:#fff;padding:6px 12px;border-radius:20px;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:6px;animation:popIn .2s ease}
-        @keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
-        .tag-chip i{cursor:pointer;font-size:.7rem;opacity:.8}
-        .tag-chip i:hover{opacity:1}
-        
-        .tag-grid{display:flex;flex-wrap:wrap;gap:8px} /* Kept for audio/sub */
+        .tag-grid{display:flex;flex-wrap:wrap;gap:8px}
         .tag-toggle{position:relative}
         .tag-toggle input{position:absolute;opacity:0;pointer-events:none}
         .tag-toggle label{display:inline-block;padding:8px 16px;border:2px solid #e0e0e0;border-radius:20px;cursor:pointer;transition:.2s;font-weight:600;font-size:.82rem}
@@ -242,28 +224,14 @@
 <main>
     <!-- HOME -->
     <div id="view-home" class="view-section active">
-        
-        <!-- NEW PROMO SECTION (Replaces Slider) -->
-        <div class="promo-section">
-            <!-- 1. Link ke Join/masuk/index.html -->
-            <a href="Join/masuk/index.html" class="promo-card">
-                <img src="https://i.ibb.co.com/zTWvGTVX/download-ezremove.png" alt="Join">
-                <div class="promo-overlay"><span class="promo-text">Login / Join</span></div>
-            </a>
-            
-            <!-- 2. Klik ke Private Screening -->
-            <div class="promo-card" onclick="switchView('private')">
-                <img src="https://i.ibb.co.com/3n6QSZx/JJK-THUBNAIL.jpg" alt="Private">
-                <div class="promo-overlay"><span class="promo-text">Private Screening</span></div>
+        <div class="hero" id="slider">
+            <div class="slide active" style="background-image:url('https://picsum.photos/seed/mandalorian/1000/400')">
+                <div class="slide-content"><h2>The Mandalorian</h2><p>Exclusively at TMO.</p><button class="btn">Lihat Jadwal</button></div>
             </div>
-            
-            <!-- 3. Klik ke Request -->
-            <div class="promo-card" onclick="switchView('request')">
-                <img src="https://i.ibb.co.com/TxL4BtQ/wmremove-transformed-1.jpg" alt="Request">
-                <div class="promo-overlay"><span class="promo-text">Request Anime</span></div>
+            <div class="slide" style="background-image:url('https://picsum.photos/seed/nature/1000/400')">
+                <div class="slide-content"><h2 style="color:#81c784">Bring Your Tumbler</h2><p>Diskon 30% setiap pembelian.</p><button class="btn" style="background:#4caf50">Cek Promo</button></div>
             </div>
         </div>
-
         <section style="margin-bottom:32px">
             <h3 class="section-header">Now Playing</h3>
             <div id="movies-container" class="movie-grid"><p class="text-center" style="grid-column:1/-1;color:#999">Memuat film...</p></div>
@@ -335,17 +303,18 @@
                     </div>
                 </div>
                 <div class="form-group"><label>Tahun Rilis</label><input type="number" class="form-input" id="req-year" placeholder="2024" min="1950" max="2030"></div>
-                
-                <!-- NEW GENRE SEARCH UI -->
-                <div class="form-group">
-                    <label>Genre (Cari & Pilih)</label>
-                    <div class="genre-search-container">
-                        <div class="genre-input-wrapper">
-                            <input type="text" class="form-input" id="req-genre-search" placeholder="Ketik genre (contoh: Action, Isekai)...">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <div class="genre-dropdown" id="req-genre-dropdown"></div>
-                        <div class="selected-tags" id="req-genre-tags"></div>
+                <div class="form-group"><label>Genre</label>
+                    <div class="tag-grid">
+                        <div class="tag-toggle"><input type="checkbox" id="g-action" value="Action"><label for="g-action">Action</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-comedy" value="Comedy"><label for="g-comedy">Comedy</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-drama" value="Drama"><label for="g-drama">Drama</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-horror" value="Horror"><label for="g-horror">Horror</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-sci" value="Sci-Fi"><label for="g-sci">Sci-Fi</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-romance" value="Romance"><label for="g-romance">Romance</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-psych" value="Psychological"><label for="g-psych">Psychological</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-fantasy" value="Fantasy"><label for="g-fantasy">Fantasy</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-thriller" value="Thriller"><label for="g-thriller">Thriller</label></div>
+                        <div class="tag-toggle"><input type="checkbox" id="g-sol" value="Slice of Life"><label for="g-sol">Slice of Life</label></div>
                     </div>
                 </div>
             </div>
@@ -421,81 +390,6 @@ let currentBooking={movie:'',type:'',roomType:'PUBLIC',videoSource:'',poster:'',
 let allMovies=[];
 let currentDetailMovie=null;
 let roomsUnsub=null;
-
-// ---- GENRE DATA (150+) ----
-const ALL_GENRES = [
-    "Action", "Adventure", "Avant Garde", "Award Winning", "Boys Love", "Comedy", "Drama", "Fantasy", "Girls Love", "Gourmet", "Horror", "Mystery", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Suspense", "Thriller",
-    "Adult", "Anthropomorphic", "Angst", "Cars", "Childcare", "Combat", "Crossdressing", "Delinquents", "Dementia", "Demons", "Detective", "Ecchi", "Erotica", "Fashion", "Game", "Gender Bender", "Harem", "Hentai", "Historical", "Isekai",
-    "Josei", "Kids", "Love Polygon", "Magic", "Magical Sex Shift", "Martial Arts", "Mecha", "Medical", "Military", "Music", "Mythological", "Parody", "Performing Arts", "Pets", "Psychological", "Racing", "Reincarnation", "Reverse Harem",
-    "Romantic Subplot", "Samurai", "School", "Seinen", "Shoujo", "Shounen", "Shounen Ai", "Space", "Strategy", "Super Power", "Time Travel", "Vampire", "Visual Arts", "Workplace", "Yaoi", "Yuri", "Iyashikei", "CGDCT", "Cyberpunk",
-    "Steampunk", "Post-Apocalyptic", "Survival", "Tragedy", "Wuxia", "Xianxia", "Mahou Shoujo", "Kaiju", "Tokusatsu", "Yankii", "Otaku Culture", "Idols", "Music Video", "Eroge", "Harem Inverse", "Chunibyo", "Gag Humor", "Dark Fantasy",
-    "Urban Fantasy", "Space Opera", "Martial Arts", "Horror Comedy", "Psychological Horror", "Aliens", "Robots", "Post-Apocalyptic", "Dystopian", "Cyberpunk", "Steampunk", "Biopunk", "Dieselpunk", "Sword & Sorcery", "High Fantasy",
-    "Low Fantasy", "Mythology", "Folklore", "Noir", "Western", "Samurai", "Ninja", "Yakuza", "Gangster", "Police Procedural", "Courtroom", "Political", "Spy", "War", "Military", "Anti-Hero", "Vigilante", "Superhero", "Meta",
-    "Absurdist", "Surreal", "Experimental", "Anthology", "Episodic", "Coming of Age", "Family", "Friendship", "Rivalry", "Team Sports", "Individual Sports", "Mind Game", "Tournament", "Survival Game", "Battle Royale", "Isekai", "Reincarnation",
-    "Time Loop", "Virtual Reality", "Augmented Reality", "Artificial Intelligence", "Transhumanism", "Genetic Modification", "Pandemic", "Zombie", "Apocalypse", "Dystopia", "Utopia", "Conspiracy", "Paranormal", "Occult", "Exorcism"
-];
-
-// ---- Request Form Genre Handling ----
-let selectedRequestGenres = [];
-
-function initGenreSearch() {
-    const input = document.getElementById('req-genre-search');
-    const dropdown = document.getElementById('req-genre-dropdown');
-    const tagsContainer = document.getElementById('req-genre-tags');
-
-    function renderTags() {
-        tagsContainer.innerHTML = '';
-        selectedRequestGenres.forEach(g => {
-            const chip = document.createElement('div');
-            chip.className = 'tag-chip';
-            chip.innerHTML = `<span>${g}</span><i class="fas fa-times" onclick="removeGenre('${g}')"></i>`;
-            tagsContainer.appendChild(chip);
-        });
-    }
-
-    window.removeGenre = (genre) => {
-        selectedRequestGenres = selectedRequestGenres.filter(g => g !== genre);
-        renderTags();
-    };
-
-    input.addEventListener('input', (e) => {
-        const val = e.target.value.toLowerCase();
-        dropdown.innerHTML = '';
-        if (!val) {
-            dropdown.classList.remove('show');
-            return;
-        }
-        
-        const filtered = ALL_GENRES.filter(g => g.toLowerCase().includes(val) && !selectedRequestGenres.includes(g));
-        
-        if (filtered.length > 0) {
-            dropdown.classList.add('show');
-            filtered.forEach(g => {
-                const div = document.createElement('div');
-                div.className = 'genre-option';
-                div.textContent = g;
-                div.onclick = () => {
-                    if(!selectedRequestGenres.includes(g)){
-                        selectedRequestGenres.push(g);
-                        renderTags();
-                    }
-                    input.value = '';
-                    dropdown.classList.remove('show');
-                };
-                dropdown.appendChild(div);
-            });
-        } else {
-            dropdown.classList.remove('show');
-        }
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.genre-search-container')) {
-            dropdown.classList.remove('show');
-        }
-    });
-}
 
 // ---- Helper: Extract Poster URL from Firebase Data (Supports HTML/BBCode) ----
 function extractPosterUrl(input) {
@@ -751,10 +645,7 @@ function submitRequest(){
     if(!title){showToast('Judul wajib diisi!','error');return}
     const type=document.querySelector('input[name="req-type"]:checked').value;
     const year=document.getElementById('req-year').value;
-    // Read genres from our custom array
-    const genres = [...selectedRequestGenres]; 
-    if(genres.length === 0) {showToast('Pilih minimal 1 genre!','error');return}
-
+    const genres=[...document.querySelectorAll('.tag-grid input:checked')].map(i=>i.value);
     const season=document.getElementById('req-season').value;
     const epType=document.querySelector('input[name="req-ep-type"]:checked')?.value;
     const epNum=document.getElementById('req-ep-num').value;
@@ -776,16 +667,10 @@ function submitRequest(){
         requestedAt:Date.now(),status:'pending'
     }).then(()=>{
         showToast('Request berhasil dikirim!');
-        // Reset Form
         document.getElementById('req-title').value='';
         document.getElementById('req-year').value='';
         document.getElementById('req-link').value='';
         document.getElementById('req-notes').value='';
-        document.getElementById('req-genre-search').value='';
-        selectedRequestGenres = [];
-        window.removeGenre = () => {}; // dummy
-        document.getElementById('req-genre-tags').innerHTML = '';
-        
         document.querySelectorAll('.req-form input[type="checkbox"],.req-form input[type="radio"]').forEach(i=>{
             if(i.id==='rt-movie'||i.id==='ep-all'||i.id==='res-hd')i.checked=true;
             else i.checked=false;
@@ -806,7 +691,6 @@ function switchView(v){
     if(v==='ticket')renderTickets();
     if(v==='private')renderPrivate();
     if(v==='rooms')loadRooms();
-    if(v==='request')initGenreSearch(); // Initialize search only when viewing request tab
     window.scrollTo(0,0);
 }
 
@@ -815,16 +699,7 @@ function handleSearchFocus(){if(!document.getElementById('view-home').classList.
 function handleSearch(){
     if(!document.getElementById('view-home').classList.contains('active'))switchView('home');
     const q=document.getElementById('searchInput').value.toLowerCase();
-    document.querySelectorAll('.movie-card').forEach(c=>{
-        // Search by title AND genre
-        const title = c.dataset.title || '';
-        const genreText = c.querySelector('.movie-genre') ? c.querySelector('.movie-genre').textContent.toLowerCase() : '';
-        if(title.includes(q) || genreText.includes(q)){
-            c.style.display='block';
-        } else {
-            c.style.display='none';
-        }
-    });
+    document.querySelectorAll('.movie-card').forEach(c=>c.style.display=c.dataset.title&&c.dataset.title.includes(q)?'block':'none');
 }
 
 // ---- Booking flow ----
@@ -974,7 +849,9 @@ function renderPrivate(){
     });
 }
 
-// ---- Slider Script REMOVED (Replaced by Promo Section) ----
+// ---- Slider ----
+let slides=document.querySelectorAll('.slide'),si=0;
+setInterval(()=>{slides[si].classList.remove('active');si=(si+1)%slides.length;slides[si].classList.add('active')},5000);
 
 // ---- Exports ----
 window.switchView=switchView;
