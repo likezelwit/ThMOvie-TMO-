@@ -29,15 +29,16 @@
         .view-section.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-        /* Hero Slider */
-        .hero{height:400px;position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:30px}
-        .slide{position:absolute;inset:0;opacity:0;transition:.8s;background-size:cover;background-position:center}
-        .slide.active{opacity:1}
-        .slide::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),transparent)}
-        .slide-content{position:relative;z-index:2;padding:40px;color:#fff;max-width:60%}
-        .slide-content h2{font-size:2rem;font-weight:800;margin-bottom:10px;text-transform:uppercase}
-        .btn{background:var(--primary);color:#fff;border:none;padding:12px 30px;border-radius:50px;font-weight:700;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
-        .btn:hover{background:#0056b3;transform:translateY(-2px)}
+        /* --- NEW PROMO SECTION (Replaces Slider) --- */
+        .promo-section{max-width:1000px;margin:20px auto 30px;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+        .promo-card{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;aspect-ratio:16/9;transition:.3s}
+        .promo-card:hover{transform:translateY(-5px);box-shadow:0 15px 35px rgba(0,0,0,.15)}
+        .promo-card img{width:100%;height:100%;object-fit:cover;transition:.5s}
+        .promo-card:hover img{transform:scale(1.05)}
+        .promo-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);display:flex;align-items:flex-end;padding:20px;opacity:0;transition:.3s}
+        .promo-card:hover .promo-overlay{opacity:1}
+        .promo-text{color:#fff;font-weight:800;font-size:1.1rem;text-transform:uppercase;letter-spacing:1px}
+        @media(max-width:768px){.promo-section{grid-template-columns:1fr}}
 
         /* Movie Grid */
         .section-header{font-size:1.5rem;font-weight:800;margin-bottom:20px;border-left:5px solid var(--primary);padding-left:15px}
@@ -241,14 +242,28 @@
 <main>
     <!-- HOME -->
     <div id="view-home" class="view-section active">
-        <div class="hero" id="slider">
-            <div class="slide active" style="background-image:url('https://picsum.photos/seed/mandalorian/1000/400')">
-                <div class="slide-content"><h2>The Mandalorian</h2><p>Exclusively at TMO.</p><button class="btn">Lihat Jadwal</button></div>
+        
+        <!-- NEW PROMO SECTION (Replaces Slider) -->
+        <div class="promo-section">
+            <!-- 1. Link ke Join/masuk/index.html -->
+            <a href="Join/masuk/index.html" class="promo-card">
+                <img src="https://i.ibb.co.com/zTWvGTVX/download-ezremove.png" alt="Join">
+                <div class="promo-overlay"><span class="promo-text">Login / Join</span></div>
+            </a>
+            
+            <!-- 2. Klik ke Private Screening -->
+            <div class="promo-card" onclick="switchView('private')">
+                <img src="https://i.ibb.co.com/3n6QSZx/JJK-THUBNAIL.jpg" alt="Private">
+                <div class="promo-overlay"><span class="promo-text">Private Screening</span></div>
             </div>
-            <div class="slide" style="background-image:url('https://picsum.photos/seed/nature/1000/400')">
-                <div class="slide-content"><h2 style="color:#81c784">Bring Your Tumbler</h2><p>Diskon 30% setiap pembelian.</p><button class="btn" style="background:#4caf50">Cek Promo</button></div>
+            
+            <!-- 3. Klik ke Request -->
+            <div class="promo-card" onclick="switchView('request')">
+                <img src="https://i.ibb.co.com/TxL4BtQ/wmremove-transformed-1.jpg" alt="Request">
+                <div class="promo-overlay"><span class="promo-text">Request Anime</span></div>
             </div>
         </div>
+
         <section style="margin-bottom:32px">
             <h3 class="section-header">Now Playing</h3>
             <div id="movies-container" class="movie-grid"><p class="text-center" style="grid-column:1/-1;color:#999">Memuat film...</p></div>
@@ -959,9 +974,7 @@ function renderPrivate(){
     });
 }
 
-// ---- Slider ----
-let slides=document.querySelectorAll('.slide'),si=0;
-setInterval(()=>{slides[si].classList.remove('active');si=(si+1)%slides.length;slides[si].classList.add('active')},5000);
+// ---- Slider Script REMOVED (Replaced by Promo Section) ----
 
 // ---- Exports ----
 window.switchView=switchView;
