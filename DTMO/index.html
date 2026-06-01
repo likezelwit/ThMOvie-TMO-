@@ -133,6 +133,43 @@
         .modal-section-title{font-size:.9rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px;color:var(--text)}
         /* Coming Soon tab section */
         .sec-title{font-size:1rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--coming)}
+        
+        /* Poster Preview Styles */
+        .poster-preview-box {
+            margin-top: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px dashed var(--border);
+            background: var(--surface);
+            display: none; /* Hidden by default */
+            position: relative;
+            max-height: 300px;
+            transition: all 0.3s;
+        }
+        .poster-preview-box.active {
+            display: block;
+            border-color: var(--success);
+        }
+        .poster-preview-box img {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+            display: block;
+            background: #000; /* Dark bg for transparent images */
+        }
+        .poster-preview-status {
+            font-size: 0.75rem;
+            color: var(--text2);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .poster-preview-status i {
+            color: var(--success);
+        }
+
         @media(max-width:768px){
             .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
             .sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:99;display:none}.sidebar-backdrop.show{display:block}
@@ -248,7 +285,14 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label class="form-label">Rating / 10</label><input type="number" class="form-input" id="pubRating" placeholder="8.5" min="0" max="10" step="0.1"></div>
-                    <div class="form-group"><label class="form-label">URL Poster</label><input type="url" class="form-input" id="pubPoster" placeholder="https://..."></div>
+                    <div class="form-group" style="flex: 1.5">
+                        <label class="form-label">URL Poster</label>
+                        <input type="text" class="form-input" id="pubPoster" placeholder="Tempel link gambar, HTML, atau BBCode di sini...">
+                        <div id="posterPreviewContainer" class="poster-preview-box">
+                            <img id="posterPreviewImg" src="" alt="Preview Poster">
+                        </div>
+                        <div id="posterPreviewStatus" class="poster-preview-status"></div>
+                    </div>
                 </div>
                 <div class="form-group"><label class="form-label">Deskripsi / Sinopsis</label><textarea class="form-input" id="pubDesc" placeholder="Sinopsis atau deskripsi singkat..."></textarea></div>
             </div>
@@ -361,6 +405,57 @@ function getUrlHint(url){
     if(isGDriveUrl(url))return'⚠️ Google Drive — perlu dikonversi';
     if(isDropboxUrl(url))return'⚠️ Dropbox — perlu dikonversi';
     return'ℹ️ Direct link';
+}
+
+// ===== POSTER URL EXTRACTOR (NEW LOGIC) =====
+function extractPosterUrl(input) {
+    if (!input) return '';
+    input = input.trim();
+
+    // 1. Coba ambil dari HTML tag <img src="...">
+    const htmlMatch = input.match(/<img[^>]+src=['"]([^'"]+)['"]/i);
+    if (htmlMatch) return htmlMatch[1];
+
+    // 2. Coba ambil dari BBCode [img]...[/img]
+    const bbMatch = input.match(/\[img\](.*?)\[\/img\]/i);
+    if (bbMatch) return bbMatch[1].trim();
+
+    // 3. Coba ambil link langsung (http/https)
+    const urlMatch = input.match(/(https?:\/\/[^\s<]+)/i);
+    if (urlMatch) return urlMatch[1];
+
+    // Fallback return raw jika tidak dikenali (mungkin user mengetik manual)
+    return input;
+}
+
+function updatePosterPreview() {
+    const input = document.getElementById('pubPoster').value;
+    const previewBox = document.getElementById('posterPreviewContainer');
+    const previewImg = document.getElementById('posterPreviewImg');
+    const statusDiv = document.getElementById('posterPreviewStatus');
+
+    if (!input) {
+        previewBox.classList.remove('active');
+        statusDiv.innerHTML = '';
+        return;
+    }
+
+    const extractedUrl = extractPosterUrl(input);
+
+    if (extractedUrl && extractedUrl.startsWith('http')) {
+        previewImg.src = extractedUrl;
+        previewBox.classList.add('active');
+        statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> Poster terdeteksi`;
+        
+        // Handle image error (link broken)
+        previewImg.onerror = function() {
+            previewBox.classList.remove('active');
+            statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:var(--warn)"></i> URL gambar tidak valid / error`;
+        };
+    } else {
+        previewBox.classList.remove('active');
+        statusDiv.innerHTML = `<i class="fas fa-info-circle"></i> Menunggu URL...`;
+    }
 }
 
 // ===== TOAST =====
@@ -588,6 +683,8 @@ function openPublishModal(mode, refId, forceStatus){
     document.getElementById('pubRating').value='';
     document.getElementById('pubDesc').value='';
     document.getElementById('pubPoster').value='';
+    document.getElementById('posterPreviewContainer').classList.remove('active');
+    document.getElementById('posterPreviewStatus').innerHTML='';
     document.getElementById('pubVideoUrl').classList.remove('converted','already');
 
     if(mode==='new_manual'){
@@ -628,6 +725,9 @@ function openPublishModal(mode, refId, forceStatus){
         document.getElementById('pubRating').value=m.rating||'';
         document.getElementById('pubDesc').value=m.description||'';
         document.getElementById('pubPoster').value=m.poster||'';
+        // Trigger preview update for existing poster
+        if(m.poster) updatePosterPreview();
+        
         // Radio
         const ct=(m.contentType||'movie').toLowerCase();
         const radio=document.getElementById(`pt-${ct}`);if(radio)radio.checked=true;
@@ -650,6 +750,9 @@ function openPublishModal(mode, refId, forceStatus){
     });
 }
 window.openPublishModal=openPublishModal;
+
+// Add event listener for poster input
+document.getElementById('pubPoster').addEventListener('input', updatePosterPreview);
 
 // Build footer buttons based on mode
 function buildModalFooter(mode, forceStatus){
@@ -798,7 +901,11 @@ async function saveMovie(publishStatus){
     const title=document.getElementById('pubTitle').value.trim();
     if(!title){showToast('Judul wajib diisi!','error');return}
     const ct=document.querySelector('input[name="pub-type"]:checked').value.toLowerCase();
-    const poster=document.getElementById('pubPoster').value.trim();
+    
+    // Extract clean poster URL using the new logic
+    const rawPosterInput = document.getElementById('pubPoster').value.trim();
+    const poster = extractPosterUrl(rawPosterInput) || '';
+    
     const rating=parseFloat(document.getElementById('pubRating').value)||null;
     const genres=[...document.querySelectorAll('#pub-genre-tags input:checked')].map(i=>i.value).join(', ');
     const year=document.getElementById('pubYear').value;
