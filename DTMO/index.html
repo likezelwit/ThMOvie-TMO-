@@ -36,7 +36,7 @@
         .content-body{padding:28px;flex:1}
         .section{display:none;animation:fadeIn .3s ease}.section.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:28px}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
         .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;align-items:center;gap:16px;transition:.25s;box-shadow:var(--shadow)}
         .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
         .stat-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
@@ -54,7 +54,7 @@
         .card-details{font-size:.84rem;color:var(--text2);line-height:1.7;margin-bottom:14px}.card-details strong{color:var(--text);font-weight:600}
         .card-footer{display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)}
         .btn{border:none;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif;font-size:.82rem;display:inline-flex;align-items:center;gap:6px}
-        .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#1d4ed8;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+        .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#1d4ed8}
         .btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#15803d}
         .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b91c1c}
         .btn-warn{background:var(--warn);color:#fff}.btn-warn:hover{background:#c2410c}
@@ -67,25 +67,20 @@
         .form-label{display:block;font-weight:600;margin-bottom:6px;font-size:.85rem;color:var(--text)}
         .form-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none;font-size:.9rem;font-family:'Inter',sans-serif;transition:.2s}
         .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-        .form-input[readonly]{background:var(--bg);color:var(--text2)}
         textarea.form-input{min-height:80px;resize:vertical}
         .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        /* Radio cards like request form */
         .radio-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:6px}
         .radio-card{position:relative}
         .radio-card input{position:absolute;opacity:0;pointer-events:none}
         .radio-card label{display:block;padding:12px;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;transition:.2s;font-weight:600;font-size:.82rem;color:var(--text2)}
         .radio-card input:checked+label{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
         .radio-card label:hover{border-color:#bbb}
-        /* Tag toggles */
         .tag-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
         .tag-toggle{position:relative}
         .tag-toggle input{position:absolute;opacity:0;pointer-events:none}
         .tag-toggle label{display:inline-block;padding:7px 14px;border:2px solid var(--border);border-radius:20px;cursor:pointer;transition:.2s;font-weight:600;font-size:.8rem;color:var(--text2)}
         .tag-toggle input:checked+label{border-color:var(--accent);background:var(--accent);color:#fff}
         .tag-toggle label:hover{border-color:#aaa}
-        .conditional{display:none;animation:fadeIn .3s ease}.conditional.show{display:block}
-        /* Episode list */
         .ep-list{max-height:400px;overflow-y:auto;padding-right:4px}
         .ep-item{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
         .ep-item-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -112,19 +107,19 @@
         .modal-close:hover{color:var(--danger);border-color:var(--danger);background:var(--danger-light)}
         .modal-body{padding:24px}
         .modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;position:sticky;bottom:0;background:var(--surface);border-radius:0 0 18px 18px}
-        .modal-divider{border:none;border-top:1px solid var(--border);margin:20px 0}
         .empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
         .empty-state i{font-size:3rem;color:var(--border);margin-bottom:14px;display:block}
         .empty-state h3{font-size:1.1rem;color:var(--text);margin-bottom:6px}
         .filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
         .filter-btn{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-weight:600;font-size:.8rem;transition:.2s;font-family:'Inter',sans-serif}
-        .filter-btn:hover{border-color:var(--text2);color:var(--text)}.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(37,99,235,.25)}
+        .filter-btn:hover{border-color:var(--text2);color:var(--text)}.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
         .toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
         .toast{background:var(--surface);color:var(--text);padding:14px 20px;border-radius:12px;font-size:.85rem;box-shadow:0 8px 30px rgba(0,0,0,.12);border-left:4px solid var(--success);pointer-events:auto;transform:translateX(120%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);max-width:380px;display:flex;align-items:center;gap:10px}
         .toast.show{transform:translateX(0)}.toast.error{border-left-color:var(--danger)}
         .toast i{font-size:1.1rem;flex-shrink:0}
+        /* Published card */
         .pub-card{display:flex;gap:16px;align-items:flex-start}
-        .pub-poster{width:80px;height:120px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--border)}
+        .pub-poster{width:80px;height:120px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--border);position:relative}
         .pub-poster img{width:100%;height:100%;object-fit:cover}
         .pub-info{flex:1;min-width:0}
         .pub-title{font-weight:800;font-size:1rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -132,9 +127,12 @@
         .pub-ep-count{display:inline-flex;align-items:center;gap:4px;font-size:.73rem;color:var(--warn);background:var(--warn-light);padding:3px 10px;border-radius:5px;font-weight:700}
         .pub-ep-count.ok{color:var(--success);background:var(--success-light)}
         .coming-badge{display:inline-flex;align-items:center;gap:4px;font-size:.73rem;color:var(--coming);background:var(--coming-light);padding:3px 10px;border-radius:5px;font-weight:700}
-        /* URL helper */
         .url-convert-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:4px}
-        .url-convert-row .form-input{margin-bottom:0}
+        /* Section dividers inside modal */
+        .modal-section{background:var(--bg);border-radius:12px;padding:18px;margin-bottom:18px;border:1px solid var(--border)}
+        .modal-section-title{font-size:.9rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px;color:var(--text)}
+        /* Coming Soon tab section */
+        .sec-title{font-size:1rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--coming)}
         @media(max-width:768px){
             .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
             .sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:99;display:none}.sidebar-backdrop.show{display:block}
@@ -143,7 +141,7 @@
             .pub-card{flex-direction:column;align-items:center;text-align:center}.pub-poster{width:100px;height:150px}
             .modal{max-width:100%}.modal-overlay{padding:16px}.radio-cards{grid-template-columns:1fr 1fr}
         }
-        @media(max-width:480px){.stats-grid{grid-column:1fr}.card-footer{flex-direction:column}.card-footer .btn{width:100%;justify-content:center}}
+        @media(max-width:480px){.stats-grid{grid-template-columns:1fr}.card-footer{flex-direction:column}.card-footer .btn{width:100%;justify-content:center}}
     </style>
 </head>
 <body>
@@ -152,6 +150,7 @@
     <nav class="sidebar-nav">
         <a class="sidebar-item active" data-section="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
         <a class="sidebar-item" data-section="requests"><i class="fas fa-inbox"></i> Permintaan <span class="sidebar-badge" id="pendingBadge" style="display:none">0</span></a>
+        <a class="sidebar-item" data-section="coming"><i class="fas fa-hourglass-half"></i> Coming Soon <span class="sidebar-badge" id="comingBadge" style="display:none;background:var(--coming)">0</span></a>
         <a class="sidebar-item" data-section="published"><i class="fas fa-film"></i> Film Terbit</a>
     </nav>
     <div class="sidebar-footer">
@@ -169,6 +168,8 @@
         </div>
     </header>
     <div class="content-body">
+
+        <!-- DASHBOARD -->
         <section id="sec-dashboard" class="section active">
             <div class="stats-grid">
                 <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-inbox"></i></div><div><div class="stat-num" id="statPending">0</div><div class="stat-label">Permintaan Pending</div></div></div>
@@ -180,6 +181,8 @@
             <h3 style="font-size:1rem;font-weight:800;margin-bottom:14px;color:var(--warn)"><i class="fas fa-clock" style="margin-right:6px"></i>Permintaan Terbaru</h3>
             <div id="recentRequests"></div>
         </section>
+
+        <!-- REQUESTS -->
         <section id="sec-requests" class="section">
             <div class="filter-bar">
                 <button class="filter-btn active" data-filter="pending">Pending</button>
@@ -190,13 +193,22 @@
             </div>
             <div id="requestsList"></div>
         </section>
+
+        <!-- COMING SOON (dedicated tab) -->
+        <section id="sec-coming" class="section">
+            <div class="sec-title"><i class="fas fa-hourglass-half"></i> Film Coming Soon</div>
+            <div id="comingList"></div>
+        </section>
+
+        <!-- PUBLISHED -->
         <section id="sec-published" class="section">
             <div id="publishedList"></div>
         </section>
+
     </div>
 </div>
 
-<!-- ===== PUBLISH MODAL (unified for approve + manual) ===== -->
+<!-- ===== PUBLISH / EDIT MODAL ===== -->
 <div class="modal-overlay" id="publishModal">
     <div class="modal">
         <div class="modal-head">
@@ -205,9 +217,10 @@
         </div>
         <div class="modal-body">
             <input type="hidden" id="pubRequestId">
-            <!-- === INFO SECTION (same as request form) === -->
-            <div style="background:var(--bg);border-radius:12px;padding:18px;margin-bottom:18px;border:1px solid var(--border)">
-                <h4 style="font-size:.9rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px;color:var(--text)"><i class="fas fa-info-circle" style="color:var(--accent)"></i> Informasi Utama</h4>
+            <input type="hidden" id="pubMovieId"><!-- for edit mode -->
+
+            <div class="modal-section">
+                <div class="modal-section-title"><i class="fas fa-info-circle" style="color:var(--accent)"></i> Informasi Utama</div>
                 <div class="form-row">
                     <div class="form-group"><label class="form-label">Judul *</label><input type="text" class="form-input" id="pubTitle" placeholder="Judul film / anime"></div>
                     <div class="form-group"><label class="form-label">Tahun Rilis</label><input type="number" class="form-input" id="pubYear" placeholder="2024" min="1950" max="2030"></div>
@@ -233,14 +246,15 @@
                         <div class="tag-toggle"><input type="checkbox" id="pg-sol" value="Slice of Life"><label for="pg-sol">Slice of Life</label></div>
                     </div>
                 </div>
-                <div class="form-group"><label class="form-label">Rating / 10</label><input type="number" class="form-input" id="pubRating" placeholder="8.5" min="0" max="10" step="0.1"></div>
-                <div class="form-group"><label class="form-label">URL Poster</label><input type="url" class="form-input" id="pubPoster" placeholder="https://image.tmdb.org/... atau link poster lainnya"></div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">Rating / 10</label><input type="number" class="form-input" id="pubRating" placeholder="8.5" min="0" max="10" step="0.1"></div>
+                    <div class="form-group"><label class="form-label">URL Poster</label><input type="url" class="form-input" id="pubPoster" placeholder="https://..."></div>
+                </div>
                 <div class="form-group"><label class="form-label">Deskripsi / Sinopsis</label><textarea class="form-input" id="pubDesc" placeholder="Sinopsis atau deskripsi singkat..."></textarea></div>
             </div>
 
-            <!-- === AUDIO/SUB PREFERENCES === -->
-            <div style="background:var(--bg);border-radius:12px;padding:18px;margin-bottom:18px;border:1px solid var(--border)" id="pubAudioSection">
-                <h4 style="font-size:.9rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px;color:var(--text)"><i class="fas fa-headphones" style="color:var(--accent)"></i> Audio / Subtitle</h4>
+            <div class="modal-section" id="pubAudioSection">
+                <div class="modal-section-title"><i class="fas fa-headphones" style="color:var(--accent)"></i> Audio / Subtitle</div>
                 <div class="tag-grid">
                     <div class="tag-toggle"><input type="checkbox" id="pa-subin" value="Sub Indo"><label for="pa-subin">Sub Indo</label></div>
                     <div class="tag-toggle"><input type="checkbox" id="pa-eng" value="Eng Sub"><label for="pa-eng">Eng Sub</label></div>
@@ -249,27 +263,26 @@
                 </div>
             </div>
 
-            <!-- === VIDEO / EPISODE SECTION === -->
-            <div id="pubEpSection" style="display:none;background:var(--bg);border-radius:12px;padding:18px;border:1px solid var(--border);margin-bottom:18px">
+            <!-- Episode section (series/ova) -->
+            <div id="pubEpSection" class="modal-section" style="display:none">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-                    <h4 style="font-size:.9rem;font-weight:800;display:flex;align-items:center;gap:6px;color:var(--text)"><i class="fas fa-list-ol" style="color:var(--warn)"></i> Episode</h4>
+                    <div class="modal-section-title" style="margin-bottom:0"><i class="fas fa-list-ol" style="color:var(--warn)"></i> Episode</div>
                     <div style="display:flex;gap:8px;align-items:center">
                         <label class="form-label" style="margin:0;white-space:nowrap">Jumlah:</label>
                         <input type="number" class="form-input" id="pubEpCount" style="width:70px;padding:6px 10px;text-align:center" min="1" value="12">
                         <button class="btn btn-ghost btn-sm" onclick="generateEpFields()"><i class="fas fa-sync-alt"></i> Generate</button>
                     </div>
                 </div>
-                <p style="font-size:.78rem;color:var(--text2);margin-bottom:12px"><i class="fas fa-info-circle"></i> Tempel link Google Drive (contoh: <code style="background:#eee;padding:2px 6px;border-radius:4px">https://drive.google.com/file/d/ID/view</code>) — akan otomatis dikonversi ke direct link.</p>
+                <p style="font-size:.78rem;color:var(--text2);margin-bottom:12px"><i class="fas fa-info-circle"></i> Tempel link Google Drive atau Dropbox — akan otomatis dikonversi ke direct link.</p>
                 <div class="ep-list" id="pubEpList"></div>
                 <button class="add-ep-btn" onclick="addEpField()"><i class="fas fa-plus"></i> Tambah Episode</button>
-                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-                    <button class="btn btn-ghost btn-sm" onclick="convertAllEpUrls()"><i class="fas fa-magic"></i> Konversi Semua URL</button>
-                </div>
+                <div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="convertAllEpUrls()"><i class="fas fa-magic"></i> Konversi Semua URL</button></div>
             </div>
 
-            <div id="pubVideoSection" style="display:none;background:var(--bg);border-radius:12px;padding:18px;border:1px solid var(--border);margin-bottom:18px">
-                <h4 style="font-size:.9rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px;color:var(--text)"><i class="fas fa-link" style="color:var(--accent)"></i> URL Video</h4>
-                <p style="font-size:.78rem;color:var(--text2);margin-bottom:10px"><i class="fas fa-info-circle"></i> Google Drive: tempel link share, akan dikonversi otomatis. Dropbox: tempel link dl=0, klik konversi.</p>
+            <!-- Video section (movie) -->
+            <div id="pubVideoSection" class="modal-section" style="display:none">
+                <div class="modal-section-title"><i class="fas fa-link" style="color:var(--accent)"></i> URL Video</div>
+                <p style="font-size:.78rem;color:var(--text2);margin-bottom:10px"><i class="fas fa-info-circle"></i> Google Drive atau Dropbox — klik Konversi untuk mengubah ke direct link.</p>
                 <div class="url-convert-row">
                     <input type="url" class="form-input" id="pubVideoUrl" placeholder="https://drive.google.com/file/d/... atau https://www.dropbox.com/...">
                     <button class="btn btn-ghost btn-sm" onclick="convertVideoUrl()" style="white-space:nowrap"><i class="fas fa-magic"></i> Konversi</button>
@@ -277,10 +290,8 @@
                 <span class="ep-url-hint" id="pubVideoHint"></span>
             </div>
         </div>
-        <div class="modal-foot">
-            <button class="btn btn-ghost" onclick="closePublishModal()">Batal</button>
-            <button class="btn btn-coming btn-lg" id="btnComingSoon" onclick="publishMovie('coming_soon')"><i class="fas fa-hourglass-half"></i> Coming Soon</button>
-            <button class="btn btn-success btn-lg" id="btnPublish" onclick="publishMovie('published')"><i class="fas fa-upload"></i> Publikasikan</button>
+        <div class="modal-foot" id="publishModalFoot">
+            <!-- buttons injected dynamically -->
         </div>
     </div>
 </div>
@@ -319,51 +330,36 @@ const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
 const GDRIVE_API_KEY='AIzaSyBQByCxyGwLSkAJg3UA1supTgLzpcda-Gk';
-let allRequests=[],allPublished=[],currentFilter='pending',epFieldCounter=0,manageEpCounter=0;
+let allRequests=[],allMovies=[],currentFilter='pending',epFieldCounter=0,manageEpCounter=0;
+// modalMode: 'new_request' | 'new_manual' | 'edit_coming' | 'edit_published'
+let modalMode='new_manual';
 
 // ===== URL CONVERTERS =====
-function extractGDriveId(url){
-    const m=url.match(/\/file\/d\/([\w-]+)/)||url.match(/id=([\w-]+)/)||url.match(/open\?id=([\w-]+)/);
-    return m?m[1]:null;
-}
-function isGDriveUrl(url){
-    return url&&(url.includes('drive.google.com')||url.includes('docs.google.com'));
-}
-function isDropboxUrl(url){
-    return url&&url.includes('dropbox.com');
-}
+function extractGDriveId(url){const m=url.match(/\/file\/d\/([\w-]+)/)||url.match(/id=([\w-]+)/)||url.match(/open\?id=([\w-]+)/);return m?m[1]:null}
+function isGDriveUrl(url){return url&&(url.includes('drive.google.com')||url.includes('docs.google.com'))}
+function isDropboxUrl(url){return url&&url.includes('dropbox.com')}
 function convertDropboxUrl(url){
-    if(!url)return'';
-    url=url.trim();
+    if(!url)return'';url=url.trim();
     url=url.replace(/[?&]dl=[^&]*/g,'').replace(/[?&]raw=0[^&]*/g,'');
     url=url.replace(/\?&/g,'?').replace(/&&/g,'&').replace(/[?&]$/,'');
     if(/[?&]raw=1(?:&|$)/.test(url))return url;
-    url+=(url.includes('?')?'&raw=1':'?raw=1');
-    return url;
+    url+=(url.includes('?')?'&raw=1':'?raw=1');return url;
 }
-function convertGDriveUrl(url){
-    if(!url)return'';
-    const id=extractGDriveId(url);
-    if(!id)return url;
-    return`https://www.googleapis.com/drive/v3/files/${id}?alt=media&key=${GDRIVE_API_KEY}`;
-}
-function isAlreadyConverted(url){
-    return url&&(url.includes('googleapis.com/drive')||(/[?&]raw=1(?:&|$)/.test(url)));
-}
+function convertGDriveUrl(url){if(!url)return'';const id=extractGDriveId(url);if(!id)return url;return`https://www.googleapis.com/drive/v3/files/${id}?alt=media&key=${GDRIVE_API_KEY}`}
+function isAlreadyConverted(url){return url&&(url.includes('googleapis.com/drive')||(/[?&]raw=1(?:&|$)/.test(url)))}
 function convertUrl(url){
-    if(!url||!url.trim())return'';
-    url=url.trim();
+    if(!url||!url.trim())return'';url=url.trim();
     if(isAlreadyConverted(url))return url;
     if(isGDriveUrl(url))return convertGDriveUrl(url);
     if(isDropboxUrl(url))return convertDropboxUrl(url);
-    return url; // Direct link — return as-is
+    return url;
 }
 function getUrlHint(url){
     if(!url)return'';
     if(url.includes('googleapis.com/drive'))return'✅ Google Drive direct link (API)';
     if(/[?&]raw=1/.test(url))return'✅ Dropbox raw direct link';
     if(isGDriveUrl(url))return'⚠️ Google Drive — perlu dikonversi';
-    if(isDropboxUrl(url))return'⚠️ Dropbox — perlu dikonversi (dl=0)';
+    if(isDropboxUrl(url))return'⚠️ Dropbox — perlu dikonversi';
     return'ℹ️ Direct link';
 }
 
@@ -385,7 +381,8 @@ document.querySelectorAll('.sidebar-item[data-section]').forEach(item=>{
         item.classList.add('active');
         document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
         document.getElementById('sec-'+item.dataset.section).classList.add('active');
-        document.getElementById('pageTitle').textContent={dashboard:'Dashboard',requests:'Permintaan',published:'Film Terbit'}[item.dataset.section];
+        const titles={dashboard:'Dashboard',requests:'Permintaan',coming:'Coming Soon',published:'Film Terbit'};
+        document.getElementById('pageTitle').textContent=titles[item.dataset.section]||item.dataset.section;
         closeSidebar();
     });
 });
@@ -403,38 +400,34 @@ function closeSidebar(){sidebar.classList.remove('open');backdrop.classList.remo
 // ===== LOAD DATA =====
 function loadAllData(){
     onValue(ref(db,'requests'),snap=>{
-        allRequests=[];
-        const data=snap.val();
+        allRequests=[];const data=snap.val();
         if(data)Object.entries(data).forEach(([id,r])=>allRequests.push({id,...r}));
         allRequests.sort((a,b)=>(b.requestedAt||0)-(a.requestedAt||0));
         updateStats();renderRequests();renderRecentRequests();
     });
     onValue(ref(db,'movies'),snap=>{
-        allPublished=[];
-        const data=snap.val();
-        if(data)Object.entries(data).forEach(([id,m])=>allPublished.push({id,...m}));
-        allPublished.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-        updateStats();renderPublished();
+        allMovies=[];const data=snap.val();
+        if(data)Object.entries(data).forEach(([id,m])=>allMovies.push({id,...m}));
+        allMovies.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+        updateStats();renderPublished();renderComing();
     });
 }
 
 function updateStats(){
     const pending=allRequests.filter(r=>!r.status||r.status==='pending').length;
-    const published=allPublished.filter(m=>m.status!=='coming_soon').length;
-    const coming=allPublished.filter(m=>m.status==='coming_soon').length;
+    const published=allMovies.filter(m=>m.status!=='coming_soon').length;
+    const coming=allMovies.filter(m=>m.status==='coming_soon').length;
     const rejected=allRequests.filter(r=>r.status==='rejected').length;
-    let totalEp=0;
-    allPublished.forEach(m=>{
-        if(m.episodes)totalEp+=Object.keys(m.episodes).length;
-        else if(m.videoSource)totalEp++;
-    });
+    let totalEp=0;allMovies.forEach(m=>{if(m.episodes)totalEp+=Object.keys(m.episodes).length;else if(m.videoSource)totalEp++;});
     document.getElementById('statPending').textContent=pending;
     document.getElementById('statPublished').textContent=published;
     document.getElementById('statComing').textContent=coming;
     document.getElementById('statEpisodes').textContent=totalEp;
     document.getElementById('statRejected').textContent=rejected;
-    const badge=document.getElementById('pendingBadge');
-    if(pending>0){badge.style.display='inline';badge.textContent=pending}else{badge.style.display='none'}
+    const pb=document.getElementById('pendingBadge');
+    if(pending>0){pb.style.display='inline';pb.textContent=pending}else pb.style.display='none';
+    const cb=document.getElementById('comingBadge');
+    if(coming>0){cb.style.display='inline';cb.textContent=coming}else cb.style.display='none';
 }
 
 // ===== RENDER REQUESTS =====
@@ -442,15 +435,15 @@ function renderRequests(){
     const c=document.getElementById('requestsList');
     let filtered=allRequests;
     if(currentFilter!=='all')filtered=allRequests.filter(r=>(r.status||'pending')===currentFilter);
-    if(!filtered.length){c.innerHTML=`<div class="empty-state"><i class="fas fa-inbox"></i><h3>Tidak ada permintaan</h3><p>Status "${currentFilter}".</p></div>`;return}
+    if(!filtered.length){c.innerHTML=`<div class="empty-state"><i class="fas fa-inbox"></i><h3>Tidak ada permintaan</h3><p>Filter: "${currentFilter}"</p></div>`;return}
     c.innerHTML=filtered.map(r=>{
         const ct=(r.type||'movie').toLowerCase();
         const genres=Array.isArray(r.genres)?r.genres.join(', '):(r.genres||'-');
         const status=r.status||'pending';
         const isPending=status==='pending';
         let epInfo='';
-        if(ct==='series'){epInfo=r.episodeType==='specific'?`Ep. ${r.specificEpisode||'?'}`:r.season?`Season ${r.season} — Semua Episode`:'Semua Episode';}
-        else if(ct==='ova'){epInfo=r.season?`Season ${r.season}`:'OVA / Special'}
+        if(ct==='series')epInfo=r.episodeType==='specific'?`Ep. ${r.specificEpisode||'?'}`:r.season?`Season ${r.season} — Semua Episode`:'Semua Episode';
+        else if(ct==='ova')epInfo=r.season?`Season ${r.season}`:'OVA / Special';
         const refLink=r.referenceLink?`<a href="${escH(r.referenceLink)}" target="_blank" style="color:var(--accent);word-break:break-all">${escH(r.referenceLink)}</a>`:'-';
         const audioSub=Array.isArray(r.audioSub)?r.audioSub.join(', '):(r.audioSub||'-');
         const statusLabel={pending:'Pending',published:'Diterbitkan',coming_soon:'Coming Soon',rejected:'Ditolak'}[status]||status;
@@ -472,10 +465,10 @@ function renderRequests(){
                 <div style="margin-top:6px;font-size:.75rem;color:var(--text2)"><i class="far fa-clock"></i> ${formatDate(r.requestedAt)}</div>
             </div>
             ${isPending?`<div class="card-footer">
-                <button class="btn btn-success" onclick="openPublishModal('${r.id}')"><i class="fas fa-check"></i> Setujui & Publikasikan</button>
-                <button class="btn btn-coming btn-sm" onclick="openPublishModal('${r.id}','coming')"><i class="fas fa-hourglass-half"></i> Coming Soon</button>
-                <button class="btn btn-danger" onclick="rejectRequest('${r.id}')"><i class="fas fa-times"></i> Tolak</button>
-            </div>`:isPending?'':``}
+                <button class="btn btn-success" onclick="openPublishModal('new_request','${r.id}')"><i class="fas fa-check"></i> Setujui & Publikasikan</button>
+                <button class="btn btn-coming btn-sm" onclick="openPublishModal('new_request','${r.id}','coming_soon')"><i class="fas fa-hourglass-half"></i> Coming Soon</button>
+                <button class="btn btn-danger btn-sm" onclick="rejectRequest('${r.id}')"><i class="fas fa-times"></i> Tolak</button>
+            </div>`:''}
         </div>`;
     }).join('');
 }
@@ -487,37 +480,69 @@ function renderRecentRequests(){
     c.innerHTML=recent.map(r=>`<div class="card" style="margin-bottom:10px">
         <div class="card-header"><div class="card-title" style="font-size:.95rem">${escH(r.title)}<span class="type-tag ${(r.type||'movie').toLowerCase()}">${(r.type||'movie').toLowerCase()}</span></div><span class="status-tag pending">Pending</span></div>
         <div class="card-footer" style="margin-top:0;padding-top:10px;border:none">
-            <button class="btn btn-success btn-sm" onclick="openPublishModal('${r.id}')"><i class="fas fa-check"></i> Setujui</button>
-            <button class="btn btn-coming btn-sm" onclick="openPublishModal('${r.id}','coming')"><i class="fas fa-hourglass-half"></i> Coming Soon</button>
+            <button class="btn btn-success btn-sm" onclick="openPublishModal('new_request','${r.id}')"><i class="fas fa-check"></i> Setujui</button>
+            <button class="btn btn-coming btn-sm" onclick="openPublishModal('new_request','${r.id}','coming_soon')"><i class="fas fa-hourglass-half"></i> Coming Soon</button>
             <button class="btn btn-danger btn-sm" onclick="rejectRequest('${r.id}')"><i class="fas fa-times"></i> Tolak</button>
         </div>
     </div>`).join('');
 }
 
-function renderPublished(){
-    const c=document.getElementById('publishedList');
-    if(!allPublished.length){c.innerHTML='<div class="empty-state"><i class="fas fa-film"></i><h3>Belum Ada Film</h3></div>';return}
-    c.innerHTML=allPublished.map(m=>{
+// ===== RENDER COMING SOON TAB =====
+function renderComing(){
+    const c=document.getElementById('comingList');
+    const list=allMovies.filter(m=>m.status==='coming_soon');
+    if(!list.length){c.innerHTML='<div class="empty-state"><i class="fas fa-hourglass-half"></i><h3>Belum Ada Coming Soon</h3><p>Film yang disetujui sebagai Coming Soon akan muncul di sini.</p></div>';return}
+    c.innerHTML=list.map(m=>{
         const ct=(m.contentType||'movie').toLowerCase();
-        const epCount=m.episodes?Object.keys(m.episodes).length:0;
-        const filledEps=m.episodes?Object.values(m.episodes).filter(e=>e.videoSource).length:0;
-        const isComingSoon=m.status==='coming_soon';
         return`<div class="card">
             <div class="pub-card">
-                <div class="pub-poster"><img src="${m.poster||''}" onerror="this.src='https://picsum.photos/seed/pub/80/120'" alt=""></div>
+                <div class="pub-poster"><img src="${m.poster||''}" onerror="this.src='https://picsum.photos/seed/${m.id}/80/120'" alt=""></div>
                 <div class="pub-info">
                     <div class="pub-title">${escH(m.title)}</div>
                     <div class="pub-meta">
-                        <span class="type-tag ${ct}" style="position:static">${ct}</span>
+                        <span class="type-tag ${ct}">${ct}</span>
                         ${m.rating?`<span style="color:#f59e0b">⭐ ${m.rating}/10</span>`:''}
                         ${m.year?`<span>• ${m.year}</span>`:''}
-                        ${m.genre?`<span>• ${m.genre}</span>`:''}
-                        ${isComingSoon?`<span class="coming-badge"><i class="fas fa-hourglass-half"></i> Coming Soon</span>`:''}
+                        ${m.genre?`<span>• ${escH(m.genre)}</span>`:''}
                     </div>
-                    ${!isComingSoon?`${ct!=='movie'?`<div class="pub-ep-count ${filledEps>=epCount&&epCount>0?'ok':''}"><i class="fas fa-list-ol"></i> ${filledEps}/${epCount} Episode ${filledEps<epCount?'(belum lengkap)':''}</div>`:'<div class="pub-ep-count ok"><i class="fas fa-check"></i> Video tersedia</div>'}`:'<div class="pub-ep-count" style="color:var(--coming);background:var(--coming-light)"><i class="fas fa-hourglass-half"></i> Segera Hadir</div>'}
-                    <div class="card-footer" style="margin-top:10px;padding-top:10px;border:none">
-                        ${isComingSoon?`<button class="btn btn-success btn-sm" onclick="promoteToPublished('${m.id}')"><i class="fas fa-check"></i> Publikasikan Sekarang</button>`:''}
-                        ${ct!=='movie'&&!isComingSoon?`<button class="btn btn-warn btn-sm" onclick="openEpModal('${m.id}')"><i class="fas fa-list-ol"></i> Kelola Episode</button>`:''}
+                    <div class="coming-badge"><i class="fas fa-hourglass-half"></i> Segera Hadir</div>
+                    <div class="card-footer" style="margin-top:12px;padding-top:12px;border:none">
+                        <button class="btn btn-primary btn-sm" onclick="openPublishModal('edit_coming','${m.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-success btn-sm" onclick="promoteToPublished('${m.id}')"><i class="fas fa-check"></i> Publikasikan Sekarang</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMovie('${m.id}','${escH(m.title)}')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ===== RENDER PUBLISHED =====
+function renderPublished(){
+    const c=document.getElementById('publishedList');
+    const list=allMovies.filter(m=>m.status!=='coming_soon');
+    if(!list.length){c.innerHTML='<div class="empty-state"><i class="fas fa-film"></i><h3>Belum Ada Film Terbit</h3></div>';return}
+    c.innerHTML=list.map(m=>{
+        const ct=(m.contentType||'movie').toLowerCase();
+        const epCount=m.episodes?Object.keys(m.episodes).length:0;
+        const filledEps=m.episodes?Object.values(m.episodes).filter(e=>e.videoSource).length:0;
+        return`<div class="card">
+            <div class="pub-card">
+                <div class="pub-poster"><img src="${m.poster||''}" onerror="this.src='https://picsum.photos/seed/${m.id}/80/120'" alt=""></div>
+                <div class="pub-info">
+                    <div class="pub-title">${escH(m.title)}</div>
+                    <div class="pub-meta">
+                        <span class="type-tag ${ct}">${ct}</span>
+                        ${m.rating?`<span style="color:#f59e0b">⭐ ${m.rating}/10</span>`:''}
+                        ${m.year?`<span>• ${m.year}</span>`:''}
+                        ${m.genre?`<span>• ${escH(m.genre)}</span>`:''}
+                    </div>
+                    ${ct!=='movie'
+                        ?`<div class="pub-ep-count ${filledEps>=epCount&&epCount>0?'ok':''}"><i class="fas fa-list-ol"></i> ${filledEps}/${epCount} Episode ${filledEps<epCount?'(belum lengkap)':''}</div>`
+                        :`<div class="pub-ep-count ok"><i class="fas fa-check"></i> Video tersedia</div>`}
+                    <div class="card-footer" style="margin-top:12px;padding-top:12px;border:none">
+                        <button class="btn btn-primary btn-sm" onclick="openPublishModal('edit_published','${m.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        ${ct!=='movie'?`<button class="btn btn-warn btn-sm" onclick="openEpModal('${m.id}')"><i class="fas fa-list-ol"></i> Kelola Episode</button>`:''}
                         <button class="btn btn-danger btn-sm" onclick="deleteMovie('${m.id}','${escH(m.title)}')"><i class="fas fa-trash-alt"></i> Hapus</button>
                     </div>
                 </div>
@@ -533,122 +558,178 @@ function rejectRequest(id){
 window.rejectRequest=rejectRequest;
 
 async function promoteToPublished(movieId){
-    if(!confirm('Publikasikan film Coming Soon ini sekarang?'))return;
-    try{
-        await update(ref(db,'movies/'+movieId),{status:'published'});
-        showToast('Film dipublikasikan!');
-    }catch(err){showToast('Gagal: '+err.message,'error')}
+    if(!confirm('Publikasikan film ini sekarang?'))return;
+    try{await update(ref(db,'movies/'+movieId),{status:'published'});showToast('Film dipublikasikan!');}
+    catch(err){showToast('Gagal: '+err.message,'error')}
 }
 window.promoteToPublished=promoteToPublished;
 
-// ===== PUBLISH MODAL =====
-function openPublishModal(requestId,mode){
+// ===== MODAL OPEN =====
+// mode: 'new_manual' | 'new_request' | 'edit_coming' | 'edit_published'
+// refId: requestId (for new_request) OR movieId (for edit modes)
+// forceStatus: 'coming_soon' | 'published' (optional, for new_request shortcut)
+function openPublishModal(mode, refId, forceStatus){
+    modalMode=mode;
     document.getElementById('publishModal').classList.add('active');
     document.body.style.overflow='hidden';
     epFieldCounter=0;
     document.getElementById('pubEpList').innerHTML='';
     document.getElementById('pubVideoUrl').value='';
     document.getElementById('pubVideoHint').textContent='';
+    document.getElementById('pubMovieId').value='';
+    document.getElementById('pubRequestId').value='';
 
-    // Reset genre toggles
+    // Reset all fields
     document.querySelectorAll('#pub-genre-tags input[type="checkbox"]').forEach(i=>i.checked=false);
-    // Reset audio toggles
     document.querySelectorAll('#pubAudioSection input[type="checkbox"]').forEach(i=>i.checked=false);
-    // Reset radio
     document.getElementById('pt-movie').checked=true;
+    document.getElementById('pubTitle').value='';
+    document.getElementById('pubYear').value='';
+    document.getElementById('pubRating').value='';
+    document.getElementById('pubDesc').value='';
+    document.getElementById('pubPoster').value='';
+    document.getElementById('pubVideoUrl').classList.remove('converted','already');
 
-    if(requestId){
-        const r=allRequests.find(x=>x.id===requestId);
+    if(mode==='new_manual'){
+        document.getElementById('publishModalTitle').textContent='Publikasi Manual';
+        document.getElementById('pubYear').value=new Date().getFullYear();
+        updateModalSections('movie',null);
+        buildModalFooter('new_manual',null);
+
+    }else if(mode==='new_request'){
+        const r=allRequests.find(x=>x.id===refId);
         if(!r){showToast('Request tidak ditemukan','error');closePublishModal();return}
         document.getElementById('publishModalTitle').textContent='Setujui & Publikasikan';
-        document.getElementById('pubRequestId').value=requestId;
+        document.getElementById('pubRequestId').value=refId;
         document.getElementById('pubTitle').value=r.title||'';
         document.getElementById('pubYear').value=r.year||'';
-        document.getElementById('pubRating').value='';
-        document.getElementById('pubDesc').value='';
-        document.getElementById('pubPoster').value='';
-
-        // Set content type radio
+        // Set radio
         const ct=(r.type||'movie').toLowerCase();
-        const radio=document.getElementById(`pt-${ct}`);
-        if(radio)radio.checked=true;
-
-        // Set genres
+        const radio=document.getElementById(`pt-${ct}`);if(radio)radio.checked=true;
+        // Genres
         const genres=Array.isArray(r.genres)?r.genres:(r.genres?[r.genres]:[]);
-        document.querySelectorAll('#pub-genre-tags input[type="checkbox"]').forEach(i=>{
-            if(genres.includes(i.value))i.checked=true;
-        });
-
-        // Set audio/sub
+        document.querySelectorAll('#pub-genre-tags input').forEach(i=>{if(genres.includes(i.value))i.checked=true});
+        // Audio
         if(Array.isArray(r.audioSub)){
-            const audioMap={'Sub Indo':'pa-subin','Eng Sub':'pa-eng','Dub Indo':'pa-dubin','Dub Eng':'pa-duben'};
-            r.audioSub.forEach(a=>{const el=document.getElementById(audioMap[a]);if(el)el.checked=true});
+            const am={'Sub Indo':'pa-subin','Eng Sub':'pa-eng','Dub Indo':'pa-dubin','Dub Eng':'pa-duben'};
+            r.audioSub.forEach(a=>{const el=document.getElementById(am[a]);if(el)el.checked=true});
         }
-
-        // Show/hide sections based on type
         updateModalSections(ct,r);
+        buildModalFooter('new_request', forceStatus||null);
 
-        document.getElementById('btnComingSoon').style.display=mode==='coming'?'inline-flex':'inline-flex';
-    }else{
-        document.getElementById('publishModalTitle').textContent='Publikasi Manual';
-        document.getElementById('pubRequestId').value='';
-        document.getElementById('pubTitle').value='';
-        document.getElementById('pubYear').value=new Date().getFullYear();
-        document.getElementById('pubRating').value='';
-        document.getElementById('pubDesc').value='';
-        document.getElementById('pubPoster').value='';
-        updateModalSections('movie',null);
+    }else if(mode==='edit_coming'||mode==='edit_published'){
+        const m=allMovies.find(x=>x.id===refId);
+        if(!m){showToast('Film tidak ditemukan','error');closePublishModal();return}
+        const label=mode==='edit_coming'?'Edit Coming Soon':'Edit Film Terbit';
+        document.getElementById('publishModalTitle').textContent=label;
+        document.getElementById('pubMovieId').value=refId;
+        document.getElementById('pubTitle').value=m.title||'';
+        document.getElementById('pubYear').value=m.year||'';
+        document.getElementById('pubRating').value=m.rating||'';
+        document.getElementById('pubDesc').value=m.description||'';
+        document.getElementById('pubPoster').value=m.poster||'';
+        // Radio
+        const ct=(m.contentType||'movie').toLowerCase();
+        const radio=document.getElementById(`pt-${ct}`);if(radio)radio.checked=true;
+        // Genres
+        const genres=m.genre?m.genre.split(',').map(g=>g.trim()):[];
+        document.querySelectorAll('#pub-genre-tags input').forEach(i=>{if(genres.includes(i.value))i.checked=true});
+        // Audio
+        if(Array.isArray(m.audioSub)){
+            const am={'Sub Indo':'pa-subin','Eng Sub':'pa-eng','Dub Indo':'pa-dubin','Dub Eng':'pa-duben'};
+            m.audioSub.forEach(a=>{const el=document.getElementById(am[a]);if(el)el.checked=true});
+        }
+        // Load existing video/episodes
+        updateModalSections(ct, null, m);
+        buildModalFooter(mode, null);
     }
 
-    // Bind type change
-    document.querySelectorAll('input[name="pub-type"]').forEach(r=>r.addEventListener('change',()=>{
-        updateModalSections(r.value,null);
-    }));
+    // Bind type radio change
+    document.querySelectorAll('input[name="pub-type"]').forEach(r=>{
+        r.addEventListener('change',()=>updateModalSections(r.value,null,null));
+    });
 }
 window.openPublishModal=openPublishModal;
 
-function updateModalSections(ct,request){
+// Build footer buttons based on mode
+function buildModalFooter(mode, forceStatus){
+    const foot=document.getElementById('publishModalFoot');
+    foot.innerHTML='';
+    const cancelBtn=`<button class="btn btn-ghost" onclick="closePublishModal()">Batal</button>`;
+
+    if(mode==='new_manual'){
+        foot.innerHTML=cancelBtn+
+            `<button class="btn btn-coming btn-lg" onclick="saveMovie('coming_soon')"><i class="fas fa-hourglass-half"></i> Coming Soon</button>`+
+            `<button class="btn btn-success btn-lg" onclick="saveMovie('published')"><i class="fas fa-upload"></i> Publikasikan</button>`;
+    }else if(mode==='new_request'){
+        if(forceStatus==='coming_soon'){
+            foot.innerHTML=cancelBtn+
+                `<button class="btn btn-coming btn-lg" onclick="saveMovie('coming_soon')"><i class="fas fa-hourglass-half"></i> Simpan sebagai Coming Soon</button>`;
+        }else{
+            foot.innerHTML=cancelBtn+
+                `<button class="btn btn-coming btn-lg" onclick="saveMovie('coming_soon')"><i class="fas fa-hourglass-half"></i> Coming Soon</button>`+
+                `<button class="btn btn-success btn-lg" onclick="saveMovie('published')"><i class="fas fa-upload"></i> Publikasikan</button>`;
+        }
+    }else if(mode==='edit_coming'){
+        foot.innerHTML=cancelBtn+
+            `<button class="btn btn-primary btn-lg" onclick="saveMovie('coming_soon')"><i class="fas fa-save"></i> Simpan Perubahan</button>`+
+            `<button class="btn btn-success btn-lg" onclick="saveMovie('published')"><i class="fas fa-check"></i> Publikasikan Sekarang</button>`;
+    }else if(mode==='edit_published'){
+        foot.innerHTML=cancelBtn+
+            `<button class="btn btn-primary btn-lg" onclick="saveMovie('published')"><i class="fas fa-save"></i> Simpan Perubahan</button>`;
+    }
+}
+
+function updateModalSections(ct, request, existingMovie){
     const epSec=document.getElementById('pubEpSection');
     const vidSec=document.getElementById('pubVideoSection');
     if(ct==='movie'){
         epSec.style.display='none';vidSec.style.display='block';
+        // If editing existing movie, fill video url
+        if(existingMovie&&existingMovie.videoSource){
+            const inp=document.getElementById('pubVideoUrl');
+            inp.value=existingMovie.videoSource;
+            inp.classList.toggle('converted',isAlreadyConverted(existingMovie.videoSource));
+            document.getElementById('pubVideoHint').textContent=getUrlHint(existingMovie.videoSource);
+        }
     }else{
         epSec.style.display='block';vidSec.style.display='none';
-        let epNums=[];
-        if(request?.episodeType==='specific'&&request?.specificEpisode){
-            epNums=parseEpisodeNumbers(request.specificEpisode);
+        document.getElementById('pubEpList').innerHTML='';
+        epFieldCounter=0;
+        if(existingMovie&&existingMovie.episodes){
+            // Load existing episodes
+            Object.entries(existingMovie.episodes).sort((a,b)=>parseInt(a[0])-parseInt(b[0])).forEach(([num,ep])=>{
+                addEpField(parseInt(num),ep.title||'',ep.videoSource||'');
+            });
+        }else{
+            let epNums=[];
+            if(request?.episodeType==='specific'&&request?.specificEpisode)epNums=parseEpisodeNumbers(request.specificEpisode);
+            document.getElementById('pubEpCount').value=epNums.length||12;
+            if(!existingMovie)generateEpFields(epNums);
         }
-        document.getElementById('pubEpCount').value=epNums.length||12;
-        generateEpFields(epNums);
     }
 }
 
 function parseEpisodeNumbers(text){
-    if(!text)return[];
-    const nums=new Set();
-    text.split(',').forEach(p=>{
-        p=p.trim();
-        if(p.includes('-')){const[a,b]=p.split('-').map(Number);for(let i=a;i<=b;i++)nums.add(i)}
-        else{const n=parseInt(p);if(!isNaN(n))nums.add(n)}
-    });
+    if(!text)return[];const nums=new Set();
+    text.split(',').forEach(p=>{p=p.trim();if(p.includes('-')){const[a,b]=p.split('-').map(Number);for(let i=a;i<=b;i++)nums.add(i)}else{const n=parseInt(p);if(!isNaN(n))nums.add(n)}});
     return[...nums].sort((a,b)=>a-b);
 }
 
 function closePublishModal(){
     document.getElementById('publishModal').classList.remove('active');
     document.body.style.overflow='';
-    // Remove type change listeners
-    document.querySelectorAll('input[name="pub-type"]').forEach(r=>{
-        const c=r.cloneNode(true);r.parentNode.replaceChild(c,r);
-    });
+    // Remove type change listeners by cloning
+    document.querySelectorAll('input[name="pub-type"]').forEach(r=>{const c=r.cloneNode(true);r.parentNode.replaceChild(c,r)});
 }
 window.closePublishModal=closePublishModal;
 
+// ===== EP FIELD HELPERS =====
 function generateEpFields(predefinedNums){
     const list=document.getElementById('pubEpList');list.innerHTML='';epFieldCounter=0;
     const count=parseInt(document.getElementById('pubEpCount').value)||1;
     const nums=predefinedNums&&predefinedNums.length?predefinedNums:Array.from({length:count},(_,i)=>i+1);
-    nums.forEach(n=>addEpField(n));
+    nums.forEach(n=>addEpField(n,'',''));
 }
 window.generateEpFields=generateEpFields;
 
@@ -669,14 +750,14 @@ function createEpItemHTML(n,titleVal,urlVal){
     </div>`;
 }
 
-function addEpField(num){
+function addEpField(num,titleVal,urlVal){
     const list=document.getElementById('pubEpList');epFieldCounter++;
     const n=num||epFieldCounter;
     const div=document.createElement('div');
-    div.innerHTML=createEpItemHTML(n,'','');
+    div.innerHTML=createEpItemHTML(n,titleVal||'',urlVal||'');
     list.appendChild(div.firstElementChild);
 }
-window.addEpField=addEpField;
+window.addEpField=()=>addEpField(null,'','');
 
 function convertSingleEpUrl(btn){
     const item=btn.closest('.ep-item');
@@ -686,70 +767,69 @@ function convertSingleEpUrl(btn){
     if(isAlreadyConverted(input.value)){input.classList.add('already');hint.textContent='ℹ️ URL sudah berupa direct link';showToast('URL sudah direct link');return}
     input.value=convertUrl(input.value);
     input.classList.remove('already');input.classList.add('converted');
-    hint.textContent=getUrlHint(input.value);
-    showToast('URL dikonversi!');
+    hint.textContent=getUrlHint(input.value);showToast('URL dikonversi!');
 }
 window.convertSingleEpUrl=convertSingleEpUrl;
 
 function convertAllEpUrls(){
-    let converted=0,skipped=0;
+    let cv=0,sk=0;
     document.querySelectorAll('#pubEpList .ep-item').forEach(item=>{
-        const input=item.querySelector('.ep-url');
-        const hint=item.querySelector('.ep-url-hint');
+        const input=item.querySelector('.ep-url');const hint=item.querySelector('.ep-url-hint');
         if(!input.value.trim())return;
-        if(isAlreadyConverted(input.value)){input.classList.add('already');skipped++;return}
-        input.value=convertUrl(input.value);
-        input.classList.remove('already');input.classList.add('converted');
-        if(hint)hint.textContent=getUrlHint(input.value);
-        converted++;
+        if(isAlreadyConverted(input.value)){input.classList.add('already');sk++;return}
+        input.value=convertUrl(input.value);input.classList.remove('already');input.classList.add('converted');
+        if(hint)hint.textContent=getUrlHint(input.value);cv++;
     });
-    if(converted)showToast(`${converted} URL dikonversi!`);
-    else if(skipped)showToast(`${skipped} URL sudah direct link`);
-    else showToast('Tidak ada URL untuk dikonversi');
+    if(cv)showToast(`${cv} URL dikonversi!`);else if(sk)showToast(`${sk} URL sudah direct link`);else showToast('Tidak ada URL untuk dikonversi');
 }
 window.convertAllEpUrls=convertAllEpUrls;
 
 function convertVideoUrl(){
-    const input=document.getElementById('pubVideoUrl');
-    const hint=document.getElementById('pubVideoHint');
+    const input=document.getElementById('pubVideoUrl');const hint=document.getElementById('pubVideoHint');
     if(!input.value.trim())return;
     if(isAlreadyConverted(input.value)){input.classList.add('converted');hint.textContent=getUrlHint(input.value);showToast('URL sudah direct link');return}
-    input.value=convertUrl(input.value);
-    input.classList.add('converted');
-    hint.textContent=getUrlHint(input.value);
-    showToast('URL dikonversi!');
+    input.value=convertUrl(input.value);input.classList.add('converted');
+    hint.textContent=getUrlHint(input.value);showToast('URL dikonversi!');
 }
 window.convertVideoUrl=convertVideoUrl;
 
-async function publishMovie(publishStatus='published'){
+// ===== SAVE MOVIE (new + edit) =====
+async function saveMovie(publishStatus){
     const title=document.getElementById('pubTitle').value.trim();
     if(!title){showToast('Judul wajib diisi!','error');return}
     const ct=document.querySelector('input[name="pub-type"]:checked').value.toLowerCase();
     const poster=document.getElementById('pubPoster').value.trim();
     const rating=parseFloat(document.getElementById('pubRating').value)||null;
-    // Build genre string from tag toggles
     const genres=[...document.querySelectorAll('#pub-genre-tags input:checked')].map(i=>i.value).join(', ');
     const year=document.getElementById('pubYear').value;
     const desc=document.getElementById('pubDesc').value.trim();
     const audioSub=[...document.querySelectorAll('#pubAudioSection input:checked')].map(i=>i.value);
     const requestId=document.getElementById('pubRequestId').value;
+    const movieId=document.getElementById('pubMovieId').value; // set only in edit mode
 
-    const btn=publishStatus==='published'?document.getElementById('btnPublish'):document.getElementById('btnComingSoon');
-    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memproses...';
+    // Find the button that was clicked
+    const foot=document.getElementById('publishModalFoot');
+    const btns=foot.querySelectorAll('button:not(.btn-ghost)');
+    btns.forEach(b=>{b.disabled=true;if(b.textContent.trim().startsWith('Simpan')||b.textContent.trim().startsWith('Publikas')||b.textContent.trim().startsWith('Coming'))b.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memproses...'});
 
     try{
-        const movieData={title,contentType:ct,poster,genre:genres,year,rating,description:desc,audioSub,createdAt:Date.now(),status:publishStatus};
+        const movieData={title,contentType:ct,poster,genre:genres,year,rating,description:desc,audioSub,status:publishStatus};
 
         if(publishStatus==='coming_soon'){
-            // For coming soon, skip video validation
-            const newRef=push(ref(db,'movies'));
-            await set(newRef,movieData);
-            if(requestId)await update(ref(db,'requests/'+requestId),{status:'coming_soon',publishedAt:Date.now(),publishedId:newRef.key});
-            closePublishModal();
-            showToast(`"${title}" ditambahkan sebagai Coming Soon!`);
-            return;
+            // No video needed for coming soon
+            if(movieId){
+                await update(ref(db,'movies/'+movieId),movieData);
+                if(requestId)await update(ref(db,'requests/'+requestId),{status:'coming_soon'});
+            }else{
+                movieData.createdAt=Date.now();
+                const newRef=push(ref(db,'movies'));
+                await set(newRef,movieData);
+                if(requestId)await update(ref(db,'requests/'+requestId),{status:'coming_soon',publishedAt:Date.now(),publishedId:newRef.key});
+            }
+            closePublishModal();showToast(`"${title}" disimpan sebagai Coming Soon!`);return;
         }
 
+        // Published — need video
         if(ct==='movie'){
             const videoUrlRaw=document.getElementById('pubVideoUrl').value.trim();
             if(!videoUrlRaw){showToast('URL video wajib diisi!','error');return}
@@ -768,19 +848,27 @@ async function publishMovie(publishStatus='published'){
             if(!hasUrl){showToast('Minimal 1 episode harus punya URL!','error');return}
         }
 
-        const newRef=push(ref(db,'movies'));
-        await set(newRef,movieData);
-        if(requestId)await update(ref(db,'requests/'+requestId),{status:'published',publishedAt:Date.now(),publishedId:newRef.key});
-        closePublishModal();
-        showToast(`"${title}" berhasil dipublikasikan!`);
+        if(movieId){
+            // EDIT existing
+            await update(ref(db,'movies/'+movieId),movieData);
+            if(requestId)await update(ref(db,'requests/'+requestId),{status:'published'});
+            closePublishModal();showToast(`"${title}" berhasil diperbarui!`);
+        }else{
+            // NEW
+            movieData.createdAt=Date.now();
+            const newRef=push(ref(db,'movies'));
+            await set(newRef,movieData);
+            if(requestId)await update(ref(db,'requests/'+requestId),{status:'published',publishedAt:Date.now(),publishedId:newRef.key});
+            closePublishModal();showToast(`"${title}" berhasil dipublikasikan!`);
+        }
     }catch(err){console.error(err);showToast('Gagal: '+err.message,'error')}
-    finally{btn.disabled=false;btn.innerHTML=publishStatus==='published'?'<i class="fas fa-upload"></i> Publikasikan':'<i class="fas fa-hourglass-half"></i> Coming Soon'}
+    finally{btns.forEach(b=>{b.disabled=false});buildModalFooter(modalMode,null)}
 }
-window.publishMovie=publishMovie;
+window.saveMovie=saveMovie;
 
 // ===== EPISODES MANAGEMENT =====
 function openEpModal(movieId){
-    const m=allPublished.find(x=>x.id===movieId);
+    const m=allMovies.find(x=>x.id===movieId);
     if(!m){showToast('Film tidak ditemukan','error');return}
     document.getElementById('epModalTitle').textContent=m.title;
     document.getElementById('epModalMovieId').value=movieId;
@@ -798,8 +886,7 @@ function openEpModal(movieId){
 window.openEpModal=openEpModal;
 
 function createManageEpHTML(num,titleVal,urlVal){
-    const converted=isAlreadyConverted(urlVal||'');
-    const hint=getUrlHint(urlVal||'');
+    const converted=isAlreadyConverted(urlVal||'');const hint=getUrlHint(urlVal||'');
     return`<div class="ep-item" data-ep-num="${num}">
         <div class="ep-item-header">
             <input type="number" class="ep-num-input" value="${num}" min="1">
@@ -822,39 +909,29 @@ function addManageEpField(){
     const nextNum=list.children.length?Math.max(...[...list.querySelectorAll('.ep-num-input')].map(i=>parseInt(i.value)||0))+1:1;
     const div=document.createElement('div');
     div.innerHTML=createManageEpHTML(nextNum,'','');
-    list.appendChild(div.firstElementChild);
-    list.scrollTop=list.scrollHeight;
+    list.appendChild(div.firstElementChild);list.scrollTop=list.scrollHeight;
 }
 window.addManageEpField=addManageEpField;
 
 function convertSingleManageEpUrl(btn){
-    const item=btn.closest('.ep-item');
-    const input=item.querySelector('.ep-url');
-    const hint=item.querySelector('.ep-url-hint');
+    const item=btn.closest('.ep-item');const input=item.querySelector('.ep-url');const hint=item.querySelector('.ep-url-hint');
     if(!input.value.trim()){showToast('URL kosong','error');return}
     if(isAlreadyConverted(input.value)){input.classList.add('already');hint.textContent='ℹ️ Sudah direct link';showToast('URL sudah direct link');return}
-    input.value=convertUrl(input.value);
-    input.classList.remove('already');input.classList.add('converted');
-    if(hint)hint.textContent=getUrlHint(input.value);
-    showToast('URL dikonversi!');
+    input.value=convertUrl(input.value);input.classList.remove('already');input.classList.add('converted');
+    if(hint)hint.textContent=getUrlHint(input.value);showToast('URL dikonversi!');
 }
 window.convertSingleManageEpUrl=convertSingleManageEpUrl;
 
 function convertAllManageEpUrls(){
-    let converted=0,skipped=0;
+    let cv=0,sk=0;
     document.querySelectorAll('#epModalList .ep-item').forEach(item=>{
-        const input=item.querySelector('.ep-url');
-        const hint=item.querySelector('.ep-url-hint');
+        const input=item.querySelector('.ep-url');const hint=item.querySelector('.ep-url-hint');
         if(!input.value.trim())return;
-        if(isAlreadyConverted(input.value)){skipped++;return}
-        input.value=convertUrl(input.value);
-        input.classList.remove('already');input.classList.add('converted');
-        if(hint)hint.textContent=getUrlHint(input.value);
-        converted++;
+        if(isAlreadyConverted(input.value)){sk++;return}
+        input.value=convertUrl(input.value);input.classList.remove('already');input.classList.add('converted');
+        if(hint)hint.textContent=getUrlHint(input.value);cv++;
     });
-    if(converted)showToast(`${converted} URL dikonversi!`);
-    else if(skipped)showToast(`${skipped} URL sudah direct link`);
-    else showToast('Tidak ada URL untuk dikonversi');
+    if(cv)showToast(`${cv} URL dikonversi!`);else if(sk)showToast(`${sk} URL sudah direct link`);else showToast('Tidak ada URL');
 }
 window.convertAllManageEpUrls=convertAllManageEpUrls;
 
@@ -871,27 +948,24 @@ async function saveEpisodes(){
             const url=item.querySelector('.ep-url').value.trim();
             if(num)episodes[num]={title:title||`Episode ${num}`,videoSource:url?convertUrl(url):''};
         });
-        // Replace all episodes
         await set(ref(db,'movies/'+movieId+'/episodes'),episodes);
         closeEpModal();showToast('Episode berhasil diperbarui!');
-    }catch(err){console.error(err);showToast('Gagal: '+err.message,'error')}
+    }catch(err){showToast('Gagal: '+err.message,'error')}
     finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Simpan Perubahan'}
 }
 window.saveEpisodes=saveEpisodes;
 
 async function deleteMovie(id,title){
     if(!confirm(`Hapus "${title}"?\n\nTindakan ini tidak dapat dibatalkan!`))return;
-    try{await remove(ref(db,'movies/'+id));showToast(`"${title}" telah dihapus`)}
+    try{await remove(ref(db,'movies/'+id));showToast(`"${title}" dihapus`)}
     catch(err){showToast('Gagal menghapus','error')}
 }
 window.deleteMovie=deleteMovie;
 
-document.getElementById('btnManualPublish').addEventListener('click',()=>openPublishModal(null));
+document.getElementById('btnManualPublish').addEventListener('click',()=>openPublishModal('new_manual',null));
 
 document.querySelectorAll('.modal-overlay').forEach(ov=>{
-    ov.addEventListener('click',e=>{
-        if(e.target===ov){ov.classList.remove('active');document.body.style.overflow=''}
-    });
+    ov.addEventListener('click',e=>{if(e.target===ov){ov.classList.remove('active');document.body.style.overflow=''}});
 });
 
 loadAllData();
