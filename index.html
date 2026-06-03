@@ -410,7 +410,7 @@ let lastActiveView='home'; // Track last view for proper back navigation
 // ---- Genre Data (150+ Genres) ----
 const ALL_GENRES = [
     "Action","Adventure","Animation","Biography","Comedy","Crime","Documentary","Drama","Family","Fantasy","Film Noir","Game Show","History","Horror","Music","Musical","Mystery","News","Reality TV","Romance","Sci-Fi","Sport","Talk Show","Thriller","War","Western",
-    "Iyashikei","Shounen","Shoujo","Seinen","Josei","Slice of Life","Isekai","Reincarnation","Time Travel","Virtual Reality","Gender Bender","Mecha","Magic","Supernatural","Psychological","Cyberpunk","Dystopian","Samurai","Ninja","Vampire","Zombie","Post-Apocalyptic","School","Harem","Reverse Harem","Ecchi","Yuri","Yaoi","Demons","Gods","Ghosts","Space","Military","Police","Political","Historical","Martial Arts","Super Power","Monster","Survival","Battle Royale","Detective","Parody","Sports","Games","Idols","Mahou Shoujo","Kids","Chibi","CGDCT","Erotica","Hentai","Yaoi","Yuri","Boys Love","Girls Love","Thriller","Mystery","Horror","Psychological","Supernatural","Fantasy","Adventure","Action","Sci-Fi","Drama","Romance","Comedy","Slice of Life","School","Music","Super Power","Aliens","Angels","Anthropomorphic","Assassins","Basketball","Board Games","Cards","Combat","Cooking","Crossdressing","Delinquents","Dragons","Economics","Fantasy World","Festival","Full Color","Gag Humor","Gender Bender","Gore","Henshin","High Stakes Games","Historical","Isekai","Japan","Love Polygon","Magic","Mafia","Martial Arts","Mecha","Medical","Military","Monster Girls","Music","Mythology","Ninjas","Office Workers","Organized Crime","Otaku Culture","Parody","Performing Arts","Philosophical","Pirates","Police","Psychological","Racing","Reincarnation","Reverse Isekai","Robots","Romance","Samurai","School","Sci-Fi","Seinen","Shoujo","Shounen Ai","Shounen","Slice of Life","Space","Sports","Steampunk","Strategy","Superheroes","Supernatural","Survival","Swordplay","Terror","Time Travel","Tragedy","Vampires","Video Games","Visual Arts","War","Werewolves","Witches","Workplace","Wuxia","Yaoi","Yuri","Zombies"
+    "Iyashikei","Shounen","Shoujo","Seinen","Josei","Slice of Life","Isekai","Reincarnation","Time Travel","Virtual Reality","Gender Bender","Mecha","Magic","Supernatural","Psychological","Cyberpunk","Dendroid","Samurai","Ninja","Vampire","Zombie","Post-Apocalyptic","School","Harem","Reverse Harem","Ecchi","Yuri","Yaoi","Demons","Gods","Ghosts","Space","Military","Police","Political","Historical","Martial Arts","Super Power","Monster","Survival","Battle Royale","Detective","Parody","Sports","Games","Idols","Mahou Shoujo","Kids","Chibi","CGDCT","Erotica","Hentai","Yaoi","Yuri","Boys Love","Girls Love","Thriller","Mystery","Horror","Psychological","Supernatural","Fantasy","Adventure","Action","Sci-Fi","Drama","Romance","Comedy","Slice of Life","School","Music","Super Power","Aliens","Angels","Anthropomorphic","Assassins","Basketball","Board Games","Cards","Combat","Cooking","Crossdressing","Delinquents","Dragons","Economics","Fantasy World","Festival","Full Color","Gag Humor","Gender Bender","Gore","Henshin","High Stakes Games","Historical","Isekai","Japan","Love Polygon","Magic","Mafia","Martial Arts","Mecha","Medical","Military","Monster Girls","Music","Mythology","Ninjas","Office Workers","Organized Crime","Otaku Culture","Parody","Performing Arts","Philosophical","Pirates","Police","Psychological","Racing","Reincarnation","Reverse Isekai","Robots","Romance","Samurai","School","Sci-Fi","Seinen","Shoujo","Shounen Ai","Shounen","Slice of Life","Space","Sports","Steampunk","Strategy","Superheroes","Supernatural","Survival","Swordplay","Terror","Time Travel","Tragedy","Vampires","Video Games","Visual Arts","War","Werewolves","Witches","Workplace","Wuxia","Yaoi","Yuri","Zombies"
 ];
 let selectedGenresSet = new Set();
 
@@ -437,6 +437,31 @@ function toAMPM(t){
     let[h,m]=t.split(':');
     const ap=h>=12?'PM':'AM';h=h%12||12;
     return`${h}:${m} ${ap}`;
+}
+
+// ---- Parser Poster (Support HTML/BBCode/URL) ----
+function parsePosterInput(input) {
+    if (!input) return '';
+    input = input.trim();
+    
+    // 1. Check direct URL
+    if (input.match(/^https?:\/\//i)) {
+        return input;
+    }
+
+    // 2. Check HTML <img src="...">
+    const htmlMatch = input.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+    if (htmlMatch && htmlMatch[1]) {
+        return htmlMatch[1];
+    }
+
+    // 3. Check BBCode [img]...[/img]
+    const bbMatch = input.match(/\[img\]([^\]]+)\[\/img\]/i);
+    if (bbMatch && bbMatch[1]) {
+        return bbMatch[1];
+    }
+
+    return ''; // Fallback: return empty if format unrecognised
 }
 
 // ---- Load Movies ----
@@ -543,7 +568,7 @@ function showDetail(movie){
             const epJson=JSON.stringify(ep).replace(/"/g,'&quot;');
             epHtml+=`<div class="ep-card" onclick="selectEpisode(${epJson})">
                 <div class="ep-num">${ep.num}</div>
-                <div><div class="ep-title">${ep.title||'Episode '+ep.num}</div><div class="ep-label">Episode ${ep.num}</div></div>
+                <div><div class="ep-title">${ep.title||'Episode '+ep.num}</div><div class="ep-label">Episode ${ep.num}</div></div></div>
             </div>`;
         });
         epHtml+='</div></div>';
@@ -553,8 +578,8 @@ function showDetail(movie){
 
     document.getElementById('detail-content').innerHTML=`
     <div class="detail-hero">
-        <div class="detail-backdrop" style="background-image:url('${movie.poster||''}')"></div>
-        <div class="detail-poster"><img src="${movie.poster||''}" onerror="this.src='https://picsum.photos/seed/fb/220/330'"></div>
+        <div class="detail-backdrop" style="background-image:url('${parsePosterInput(movie.poster||'')}')"></div>
+        <div class="detail-poster"><img src="${parsePosterInput(movie.poster||'')}" onerror="this.src='https://picsum.photos/seed/fb/220/330'"></div>
         <div class="detail-info">
             <div class="detail-meta">
                 <span class="tag">${ct}</span>
@@ -762,7 +787,6 @@ function switchView(v){
     if(v==='private')renderPrivate();
     if(v==='rooms')loadRooms();
     if(v==='request') {
-        // Initialize genre list if empty
         if(document.getElementById('genre-list-container').children.length === 0) renderGenreList();
     }
     // Reset grid visibility when switching to home or private to ensure no hidden items persist
@@ -810,7 +834,7 @@ function handleSearch(){
             const div = document.createElement('div');
             div.className = 'search-item';
             div.innerHTML = `
-                <img src="${m.poster||'https://picsum.photos/seed/empty/50/50'}" onerror="this.src='https://picsum.photos/seed/empty/50/50'">
+                <img src="${parsePosterInput(m.poster||'')}" onerror="this.src='https://picsum.photos/seed/empty/50/50'">
                 <div class="s-details">
                     <div class="s-title">${m.title}</div>
                     <div class="s-meta">${m.contentType?.toUpperCase()||'MOVIE'}</div>
@@ -878,7 +902,7 @@ function confirmBooking(){
         id:Date.now(),
         date:new Date().toLocaleDateString('id-ID'),
         videoSource:currentBooking.videoSource,
-        poster:currentBooking.poster,
+        poster:parsePosterInput(currentBooking.poster||''),
         contentType:currentBooking.contentType||'movie',
         episodeNum:currentBooking.episodeNum||null,
         seriesTitle:currentBooking.seriesTitle||null
@@ -898,7 +922,7 @@ function renderTickets(){
         return;
     }
     [...tickets].reverse().forEach(t=>{
-        const poster=t.poster||'https://picsum.photos/seed/ticket/100/150';
+        const poster=parsePosterInput(t.poster||'https://picsum.photos/seed/ticket/100/150');
         const ct=(t.contentType||'movie').toLowerCase();
         const header=t.roomType==='PRIVATE'?`Private — ${t.movie}`:`Publik — ${t.movie}`;
         l.innerHTML+=`<div class="ticket-card">
@@ -936,7 +960,7 @@ function watchNow(id){
     if(!videoSrc){showToast('Video source tidak tersedia!','error');return}
     sessionStorage.setItem('activeMovieTitle',t.movie);
     sessionStorage.setItem('activeVideoSource',videoSrc);
-    sessionStorage.setItem('activePoster',t.poster||'');
+    sessionStorage.setItem('activePoster',parsePosterInput(t.poster||''));
     sessionStorage.setItem('activeBookingTime',String(t.bookingTimestamp||0));
     sessionStorage.setItem('activeRoomType',t.roomType||'PUBLIC');
     sessionStorage.setItem('activeContentType',t.contentType||'movie');
@@ -964,7 +988,7 @@ function renderPrivate(){
         
         card.innerHTML=`
             <div class="poster">
-                <img src="${m.poster||''}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'">
+                <img src="${parsePosterInput(m.poster||'')}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'">
                 <div class="type-badge ${ct}">${ct==='series'?'SERIES':ct==='ova'?'OVA':'MOVIE'}</div>
             </div>
             <div class="movie-info">
