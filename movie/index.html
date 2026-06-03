@@ -308,7 +308,7 @@
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getDatabase,ref,set,onValue,onDisconnect,remove,push,query,limitToLast,onChildAdded,get}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,onValue,onDisconnect,remove,push,query,limitToLast,onChildAdded,get,update}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig={apiKey:"AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",authDomain:"thmovie-3646f.firebaseapp.com",databaseURL:"https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"thmovie-3646f",storageBucket:"thmovie-3646f.firebasestorage.app",messagingSenderId:"1041137356432",appId:"1:1041137356432:web:96edbe3402937c82f09215",measurementId:"G-6SNE976L7G"};
 const app=initializeApp(firebaseConfig);
@@ -353,6 +353,16 @@ let unreadCount=0,ctrlHideTimer=null,contentType='movie',roomCleaned=false;
 let seriesTitle='',currentEpisodeNum='',allEpisodesData={};
 let guestInitStarted=false,hostMetaSet=false;
 const CTRL_DELAY=3500;
+
+// ===== URL PROCESSING (DROPBOX SUPPORT) =====
+function processVideoUrl(url){
+    if(!url) return url;
+    // Fix Dropbox links
+    if(url.includes('dropbox.com')){
+        return url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+    }
+    return url;
+}
 
 // ===== INTERACT OVERLAY =====
 tapBtn.addEventListener('click',activateInteraction);
@@ -450,7 +460,14 @@ video.addEventListener('pause',showCtrlBar);
 const fsBtn=document.getElementById('fsBtn');
 fsBtn.addEventListener('click',()=>{
     if(!document.fullscreenElement&&!document.webkitFullscreenElement){
-        (contentArea.requestFullscreen||contentArea.webkitRequestFullscreen).call(contentArea).catch(()=>showToast('Fullscreen tidak didukung'));
+        (contentArea.requestFullscreen||contentArea.webkitRequestFullscreen).call(contentArea).then(()=>{
+            // Force Landscape on Mobile
+            try{
+                if(screen.orientation && screen.orientation.lock){
+                    screen.orientation.lock('landscape').catch(e=>console.log('Orientation lock failed/not supported', e));
+                }
+            }catch(e){}
+        }).catch(()=>showToast('Fullscreen tidak didukung'));
     }else{
         (document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{});
     }
@@ -463,7 +480,7 @@ document.getElementById('shareToggle').addEventListener('click',()=>{
     shareArea.style.display=shareArea.style.display==='flex'?'none':'flex';
 });
 
-// ===== NEXT EPISODE =====
+// ===== NEXT EPISODE (INSTANT LOAD) =====
 function getNextEpisodeNum(currentNum,allEps){
     const nums=Object.keys(allEps).map(Number).sort((a,b)=>a-b);
     const idx=nums.indexOf(Number(currentNum));
@@ -473,33 +490,86 @@ function getNextEpisodeNum(currentNum,allEps){
 
 function setupNextEpisode(){
     if(contentType==='movie'||!seriesTitle||!currentEpisodeNum)return;
-    get(ref(db,'movies')).then(snap=>{
-        const data=snap.val();
-        if(!data)return;
-        const movieEntry=Object.entries(data).find(([,m])=>m.title===seriesTitle);
-        if(!movieEntry)return;
-        const [,movie]=movieEntry;
-        if(!movie.episodes)return;
-        allEpisodesData=movie.episodes;
-        const nextNum=getNextEpisodeNum(currentEpisodeNum,allEpisodesData);
-        if(nextNum&&allEpisodesData[nextNum]?.videoSource){
-            nextEpBtn.style.display='inline-flex';
-            nextEpCtrlBtn.classList.remove('hidden-btn');
+    // If we don't have the data yet, fetch it
+    if(Object.keys(allEpisodesData).length === 0) {
+        get(ref(db,'movies')).then(snap=>{
+            const data=snap.val();
+            if(!data)return;
+            const movieEntry=Object.entries(data).find(([,m])=>m.title===seriesTitle);
+            if(!movieEntry)return;
+            const [,movie]=movieEntry;
+            if(!movie.episodes)return;
+            allEpisodesData=movie.episodes;
+            checkNextAvailability();
+        }).catch(()=>{});
+    } else {
+        checkNextAvailability();
+    }
+}
+
+function checkNextAvailability(){
+    const nextNum=getNextEpisodeNum(currentEpisodeNum,allEpisodesData);
+    if(nextNum&&allEpisodesData[nextNum]?.videoSource){
+        nextEpBtn.style.display='inline-flex';
+        nextEpCtrlBtn.classList.remove('hidden-btn');
+        // Only Host can trigger next episode
+        if(isHost){
             nextEpBtn.onclick=()=>goToNextEpisode(nextNum);
             nextEpCtrlBtn.onclick=()=>goToNextEpisode(nextNum);
+        } else {
+            nextEpBtn.onclick=()=>showToast('Tunggu Host untuk lanjut ke episode berikutnya');
+            nextEpCtrlBtn.onclick=()=>showToast('Tunggu Host untuk lanjut ke episode berikutnya');
         }
-    }).catch(()=>{});
+    }
 }
 
 function goToNextEpisode(nextNum){
     const ep=allEpisodesData[nextNum];
     if(!ep||!ep.videoSource){showToast('Video episode berikutnya belum tersedia!');return}
-    sessionStorage.setItem('activeMovieTitle',`${seriesTitle} - Ep.${nextNum}`);
-    sessionStorage.setItem('activeVideoSource',ep.videoSource);
-    sessionStorage.setItem('activeBookingTime','0');
-    sessionStorage.setItem('activeEpisodeNum',String(nextNum));
-    sessionStorage.setItem('activeSeriesTitle',seriesTitle);
-    location.reload();
+    
+    // Process URL (Dropbox fix)
+    const newSrc = processVideoUrl(ep.videoSource);
+    const newTitle = `${seriesTitle} - Ep.${nextNum}`;
+    
+    // Update local state
+    currentEpisodeNum = nextNum;
+    
+    // Update UI immediately
+    titleEl.textContent = newTitle;
+    if(ep.poster) setPoster(ep.poster); // Use episode poster if available
+    
+    video.src = newSrc;
+    video.currentTime = 0;
+    bookingTimestamp = Date.now(); // Reset timestamp to avoid countdown logic if checked
+    
+    // Update Session Storage
+    sessionStorage.setItem('activeEpisodeNum', String(nextNum));
+    sessionStorage.setItem('activeVideoSource', newSrc);
+    sessionStorage.setItem('activeMovieTitle', newTitle);
+    
+    // Hide button temporarily
+    nextEpBtn.style.display='none';
+    nextEpCtrlBtn.classList.add('hidden-btn');
+    endScreen.classList.remove('show');
+
+    if(isHost){
+        // Update Firebase Meta for guests
+        set(ref(db,'sync_rooms/'+roomId+'/meta'),{
+            title: newTitle,
+            videoSrc: newSrc,
+            episodeNum: String(nextNum),
+            // Keep other props
+            createdAt: Date.now(),
+            isPrivate: sessionStorage.getItem('activeRoomType') === 'PRIVATE',
+            contentType: 'series',
+            seriesTitle: seriesTitle
+        }).then(()=>{
+            // Force Sync Update for everyone to jump to 0 and Play
+            sendSync(); 
+            video.play().catch(()=>{});
+            showToast('Memulai Episode Berikutnya...');
+        }).catch(()=>{showToast('Gagal update info ke server')});
+    }
 }
 
 // ===== ROOM CLEANUP =====
@@ -513,7 +583,7 @@ function cleanupRoom(){
         remove(ref(db,'sync_rooms/'+roomId)).catch(()=>{});
         showToast('Selesai. Ruangan ditutup.',3000,'success');
     }
-    setupNextEpisode();
+    setupNextEpisode(); // Check if there is next
     setTimeout(()=>{if(!nextEpBtn.style.display||nextEpBtn.style.display==='none')location.href='../index.html'},6000);
 }
 video.addEventListener('ended',()=>{if(!modalActive)cleanupRoom()});
@@ -536,7 +606,8 @@ function initHost(){
     shareInput.value=location.href;
 
     const t=sessionStorage.getItem('activeMovieTitle');
-    const v=sessionStorage.getItem('activeVideoSource');
+    const vRaw=sessionStorage.getItem('activeVideoSource');
+    const v=processVideoUrl(vRaw); // Process URL
     const p=sessionStorage.getItem('activePoster');
     const bt=sessionStorage.getItem('activeBookingTime');
     const rt=sessionStorage.getItem('activeRoomType')||'PUBLIC';
@@ -565,6 +636,7 @@ function initHost(){
     registerViewer();
     setupSync();
     setupSender();
+    setupNextEpisode(); // Check for next episode availability initially
 
     onInteractionReady=()=>decideMode();
 
@@ -575,7 +647,7 @@ function initHost(){
     },8000);
 }
 
-// ===== GUEST (FIXED) =====
+// ===== GUEST (UPDATED FOR EPISODE SWITCH) =====
 function initGuest(){
     isHost=false;
     shareArea.style.display='flex';
@@ -599,25 +671,51 @@ function initGuest(){
             return;
         }
 
-        titleEl.textContent=m.title||'Unknown';
-        setPoster(m.posterSrc);
-        contentType=(m.contentType||'movie').toLowerCase();
-        seriesTitle=m.seriesTitle||'';
-        currentEpisodeNum=m.episodeNum||'';
+        // Check if episode changed (Host switched episodes)
+        const currentTitle = titleEl.textContent;
+        const newTitle = m.title||'Unknown';
+        const newVideo = processVideoUrl(m.videoSrc);
 
-        if(contentType!=='movie'){
-            typeBadge.textContent=contentType.toUpperCase(); 
-            typeBadge.style.display='inline-flex';
-        }else{
-            typeBadge.style.display='none';
-        }
+        if(m.title && m.title !== currentTitle){
+            // Episode change detected
+            titleEl.textContent = newTitle;
+            setPoster(m.posterSrc);
+            contentType=(m.contentType||'movie').toLowerCase();
+            seriesTitle=m.seriesTitle||'';
+            currentEpisodeNum=m.episodeNum||'';
+            
+            if(contentType!=='movie'){
+                typeBadge.textContent=contentType.toUpperCase(); 
+                typeBadge.style.display='inline-flex';
+            }else{
+                typeBadge.style.display='none';
+            }
 
-        if(m.videoSrc && !video.src){
-            video.src=m.videoSrc;
-            videoReady=true;
-        }else if(!m.videoSrc){
-            showErr('Video Tidak Tersedia','Sumber video tidak ditemukan di server.');
-            return;
+            // Update Video Source
+            video.src = newVideo;
+            videoReady = true;
+            
+            // Update Session Storage
+            sessionStorage.setItem('activeMovieTitle', newTitle);
+            sessionStorage.setItem('activeVideoSource', m.videoSrc); // Save raw source
+            sessionStorage.setItem('activeEpisodeNum', m.episodeNum||'');
+            sessionStorage.setItem('activeSeriesTitle', m.seriesTitle||'');
+            
+            // Update Local All Episodes Data to check for next button availability
+            // Note: We might need to refetch or rely on existing data. 
+            // For simplicity, we rely on 'allEpisodesData' if already loaded, else silent fail.
+            // Re-populate allEpisodesData if possible or just hide next button
+            if(Object.keys(allEpisodesData).length > 0) {
+                 checkNextAvailability();
+            } else {
+                // Hide button as we don't know the sequence yet
+                nextEpBtn.style.display='none';
+                nextEpCtrlBtn.classList.add('hidden-btn');
+            }
+        } else if (newVideo && !video.src) {
+            // Initial load
+            video.src = newVideo;
+            videoReady = true;
         }
 
         bookingTimestamp=m.targetTime?parseInt(m.targetTime,10):null;
