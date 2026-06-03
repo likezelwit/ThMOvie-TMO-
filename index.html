@@ -765,7 +765,21 @@ function switchView(v){
         // Initialize genre list if empty
         if(document.getElementById('genre-list-container').children.length === 0) renderGenreList();
     }
+    // Reset grid visibility when switching to home or private to ensure no hidden items persist
+    if(v==='home' || v==='private') {
+        document.querySelectorAll('.movie-card').forEach(c=>c.style.display='block');
+        document.getElementById('searchInput').value = '';
+        document.getElementById('search-results').style.display = 'none';
+    }
     window.scrollTo(0,0);
+}
+
+// ---- Reset Search Helper ----
+function resetSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('search-results').style.display = 'none';
+    // Show all movie cards in both public and private containers
+    document.querySelectorAll('.movie-card').forEach(c=>c.style.display='block');
 }
 
 // ---- Search with Dropdown ----
@@ -803,8 +817,7 @@ function handleSearch(){
                 </div>
             `;
             div.onclick = () => {
-                document.getElementById('searchInput').value = '';
-                resultsBox.style.display = 'none';
+                resetSearch(); // FIX: Call reset to clear input and show all cards before navigating
                 // Determine source based on active tab (Private vs Public)
                 const isPrivate = document.getElementById('view-private').classList.contains('active');
                 handleMovieClick(m, isPrivate ? 'PRIVATE' : 'PUBLIC');
@@ -985,6 +998,7 @@ window.toggleGenreSelection=toggleGenreSelection;
 window.filterGenreList=filterGenreList;
 window.goBackFromClass=goBackFromClass;
 window.goBackFromDetail=goBackFromDetail;
+window.resetSearch=resetSearch;
 
 loadMovies();
 </script>
