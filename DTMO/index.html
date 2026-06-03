@@ -20,7 +20,7 @@
         .sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s;box-shadow:2px 0 8px rgba(0,0,0,.04)}
         .sidebar-logo{padding:22px 24px;font-size:1.5rem;font-weight:900;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#eff6ff,#fff)}
         .sidebar-logo i{color:var(--accent)}.sidebar-logo span{color:var(--accent)}
-        .sidebar-nav{flex:1;padding:14px;display:flex;flex-direction:column;gap:4px}
+        .sidebar-nav{flex:1;padding:14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
         .sidebar-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:10px;color:var(--text2);cursor:pointer;transition:.2s;font-weight:600;font-size:.88rem;position:relative;text-decoration:none}
         .sidebar-item:hover{background:var(--accent-light);color:var(--accent)}
         .sidebar-item.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3)}
@@ -75,7 +75,7 @@
         .radio-card label{display:block;padding:12px;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;transition:.2s;font-weight:600;font-size:.82rem;color:var(--text2)}
         .radio-card input:checked+label{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
         .radio-card label:hover{border-color:#bbb}
-        .tag-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+        .tag-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px; max-height: 150px; overflow-y: auto; padding: 4px; border: 1px solid var(--border); border-radius: 8px;}
         .tag-toggle{position:relative}
         .tag-toggle input{position:absolute;opacity:0;pointer-events:none}
         .tag-toggle label{display:inline-block;padding:7px 14px;border:2px solid var(--border);border-radius:20px;cursor:pointer;transition:.2s;font-weight:600;font-size:.8rem;color:var(--text2)}
@@ -232,23 +232,19 @@
                         <div class="radio-card"><input type="radio" name="pub-type" id="pt-ova" value="ova"><label for="pt-ova"><i class="fas fa-star"></i><br>OVA / Special</label></div>
                     </div>
                 </div>
-                <div class="form-group"><label class="form-label">Genre</label>
+                <div class="form-group">
+                    <label class="form-label">Genre</label>
                     <div class="tag-grid" id="pub-genre-tags">
-                        <div class="tag-toggle"><input type="checkbox" id="pg-action" value="Action"><label for="pg-action">Action</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="pg-comedy" value="Comedy"><label for="pg-comedy">Comedy</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="pg-drama" value="Drama"><label for="pg-drama">Drama</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="pg-horror" value="Horror"><label for="pg-horror">Horror</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="pg-scifi" value="Sci-Fi"><label for="pg-scifi">Sci-Fi</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="pg-romance" value="Romance"><label for="pg-romance">Romance</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="pg-psych" value="Psychological"><label for="pg-psych">Psychological</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="pg-fantasy" value="Fantasy"><label for="pg-fantasy">Fantasy</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="pg-thriller" value="Thriller"><label for="pg-thriller">Thriller</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="pg-sol" value="Slice of Life"><label for="pg-sol">Slice of Life</label></div>
+                        <!-- 150+ Genres will be injected here via JS -->
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label class="form-label">Rating / 10</label><input type="number" class="form-input" id="pubRating" placeholder="8.5" min="0" max="10" step="0.1"></div>
-                    <div class="form-group"><label class="form-label">URL Poster</label><input type="url" class="form-input" id="pubPoster" placeholder="https://..."></div>
+                    <div class="form-group">
+                        <label class="form-label">Poster (URL / HTML / BBCode)</label>
+                        <input type="text" class="form-input" id="pubPoster" placeholder="https://... atau &lt;img src...&gt;">
+                        <span class="ep-url-hint" style="font-size:.7rem;color:var(--text2);display:block;margin-top:2px">Mendukung URL langsung, kode HTML & BBCode.</span>
+                    </div>
                 </div>
                 <div class="form-group"><label class="form-label">Deskripsi / Sinopsis</label><textarea class="form-input" id="pubDesc" placeholder="Sinopsis atau deskripsi singkat..."></textarea></div>
             </div>
@@ -334,6 +330,12 @@ let allRequests=[],allMovies=[],currentFilter='pending',epFieldCounter=0,manageE
 // modalMode: 'new_request' | 'new_manual' | 'edit_coming' | 'edit_published'
 let modalMode='new_manual';
 
+// ===== GENRE DATA (150+ Genres - Sama dengan Landing Page) =====
+const ALL_GENRES = [
+    "Action","Adventure","Animation","Biography","Comedy","Crime","Documentary","Drama","Family","Fantasy","Film Noir","Game Show","History","Horror","Music","Musical","Mystery","News","Reality TV","Romance","Sci-Fi","Sport","Talk Show","Thriller","War","Western",
+    "Iyashikei","Shounen","Shoujo","Seinen","Josei","Slice of Life","Isekai","Reincarnation","Time Travel","Virtual Reality","Gender Bender","Mecha","Magic","Supernatural","Psychological","Cyberpunk","Dystopian","Samurai","Ninja","Vampire","Zombie","Post-Apocalyptic","School","Harem","Reverse Harem","Ecchi","Yuri","Yaoi","Demons","Gods","Ghosts","Space","Military","Police","Political","Historical","Martial Arts","Super Power","Monster","Survival","Battle Royale","Detective","Parody","Sports","Games","Idols","Mahou Shoujo","Kids","Chibi","CGDCT","Erotica","Hentai","Yaoi","Yuri","Boys Love","Girls Love","Thriller","Mystery","Horror","Psychological","Supernatural","Fantasy","Adventure","Action","Sci-Fi","Drama","Romance","Comedy","Slice of Life","School","Music","Super Power","Aliens","Angels","Anthropomorphic","Assassins","Basketball","Board Games","Cards","Combat","Cooking","Crossdressing","Delinquents","Dragons","Economics","Fantasy World","Festival","Full Color","Gag Humor","Gender Bender","Gore","Henshin","High Stakes Games","Historical","Isekai","Japan","Love Polygon","Magic","Mafia","Martial Arts","Mecha","Medical","Military","Monster Girls","Music","Mythology","Ninjas","Office Workers","Organized Crime","Otaku Culture","Parody","Performing Arts","Philosophical","Pirates","Police","Psychological","Racing","Reincarnation","Reverse Isekai","Robots","Romance","Samurai","School","Sci-Fi","Seinen","Shoujo","Shounen Ai","Shounen","Slice of Life","Space","Sports","Steampunk","Strategy","Superheroes","Supernatural","Survival","Swordplay","Terror","Time Travel","Tragedy","Vampires","Video Games","Visual Arts","War","Werewolves","Witches","Workplace","Wuxia","Yaoi","Yuri","Zombies"
+];
+
 // ===== URL CONVERTERS =====
 function extractGDriveId(url){const m=url.match(/\/file\/d\/([\w-]+)/)||url.match(/id=([\w-]+)/)||url.match(/open\?id=([\w-]+)/);return m?m[1]:null}
 function isGDriveUrl(url){return url&&(url.includes('drive.google.com')||url.includes('docs.google.com'))}
@@ -363,6 +365,32 @@ function getUrlHint(url){
     return'ℹ️ Direct link';
 }
 
+// ===== POSTER PARSER (HTML/BBCode/URL) =====
+function parsePosterInput(input) {
+    if (!input) return '';
+    input = input.trim();
+    
+    // 1. Direct URL Check
+    if (input.match(/^https?:\/\//i)) {
+        return input;
+    }
+
+    // 2. HTML <img src="..."> Check
+    // Regex to find src attribute within img tag
+    const htmlMatch = input.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+    if (htmlMatch && htmlMatch[1]) {
+        return htmlMatch[1];
+    }
+
+    // 3. BBCode [img]...[/img] Check
+    const bbMatch = input.match(/\[img\]([^\]]+)\[\/img\]/i);
+    if (bbMatch && bbMatch[1]) {
+        return bbMatch[1];
+    }
+
+    return ''; // Fallback: return empty if format unrecognised
+}
+
 // ===== TOAST =====
 function showToast(msg,type='success'){
     const c=document.getElementById('toastContainer'),t=document.createElement('div');
@@ -373,6 +401,25 @@ function showToast(msg,type='success'){
 }
 function formatDate(ts){if(!ts)return'-';return new Date(ts).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
 function escH(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+// ===== INITIALIZE GENRE CHECKBOXES =====
+function initGenreCheckboxes() {
+    const container = document.getElementById('pub-genre-tags');
+    container.innerHTML = '';
+    ALL_GENRES.forEach(genre => {
+        const safeId = 'pg-' + genre.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const div = document.createElement('div');
+        div.className = 'tag-toggle';
+        div.innerHTML = `
+            <input type="checkbox" id="${safeId}" value="${genre}">
+            <label for="${safeId}">${genre}</label>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Run initialization
+initGenreCheckboxes();
 
 // ===== NAV =====
 document.querySelectorAll('.sidebar-item[data-section]').forEach(item=>{
@@ -588,7 +635,6 @@ function openPublishModal(mode, refId, forceStatus){
     document.getElementById('pubRating').value='';
     document.getElementById('pubDesc').value='';
     document.getElementById('pubPoster').value='';
-    document.getElementById('pubVideoUrl').classList.remove('converted','already');
 
     if(mode==='new_manual'){
         document.getElementById('publishModalTitle').textContent='Publikasi Manual';
@@ -761,13 +807,12 @@ window.addEpField=()=>addEpField(null,'','');
 
 function convertSingleEpUrl(btn){
     const item=btn.closest('.ep-item');
-    const input=item.querySelector('.ep-url');
-    const hint=item.querySelector('.ep-url-hint');
+    const input=item.querySelector('.ep-url');const hint=item.querySelector('.ep-url-hint');
     if(!input.value.trim()){showToast('URL kosong','error');return}
     if(isAlreadyConverted(input.value)){input.classList.add('already');hint.textContent='ℹ️ URL sudah berupa direct link';showToast('URL sudah direct link');return}
     input.value=convertUrl(input.value);
     input.classList.remove('already');input.classList.add('converted');
-    hint.textContent=getUrlHint(input.value);showToast('URL dikonversi!');
+    if(hint)hint.textContent=getUrlHint(input.value);showToast('URL dikonversi!');
 }
 window.convertSingleEpUrl=convertSingleEpUrl;
 
@@ -798,7 +843,11 @@ async function saveMovie(publishStatus){
     const title=document.getElementById('pubTitle').value.trim();
     if(!title){showToast('Judul wajib diisi!','error');return}
     const ct=document.querySelector('input[name="pub-type"]:checked').value.toLowerCase();
-    const poster=document.getElementById('pubPoster').value.trim();
+    
+    // PARSE POSTER HERE (HTML/BBCode/URL support)
+    const rawPoster = document.getElementById('pubPoster').value.trim();
+    const posterUrl = parsePosterInput(rawPoster);
+
     const rating=parseFloat(document.getElementById('pubRating').value)||null;
     const genres=[...document.querySelectorAll('#pub-genre-tags input:checked')].map(i=>i.value).join(', ');
     const year=document.getElementById('pubYear').value;
@@ -813,7 +862,7 @@ async function saveMovie(publishStatus){
     btns.forEach(b=>{b.disabled=true;if(b.textContent.trim().startsWith('Simpan')||b.textContent.trim().startsWith('Publikas')||b.textContent.trim().startsWith('Coming'))b.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memproses...'});
 
     try{
-        const movieData={title,contentType:ct,poster,genre:genres,year,rating,description:desc,audioSub,status:publishStatus};
+        const movieData={title,contentType:ct,poster:posterUrl,genre:genres,year,rating,description:desc,audioSub,status:publishStatus};
 
         if(publishStatus==='coming_soon'){
             // No video needed for coming soon
