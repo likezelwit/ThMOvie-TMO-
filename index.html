@@ -20,6 +20,14 @@
         .search-bar input{width:100%;padding:10px 40px 10px 15px;border-radius:20px;border:1px solid #ddd;background:#f9f9f9;outline:none}
         .search-bar input:focus{border-color:var(--primary);background:#fff}
         .search-bar i{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--gray)}
+        /* Search Dropdown Style */
+        .search-results-box{position:absolute;top:100%;left:0;right:0;background:#fff;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);margin-top:5px;z-index:200;max-height:400px;overflow-y:auto;display:none;border:1px solid #eee}
+        .search-item{padding:12px 15px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.2s}
+        .search-item:hover{background:#f0f8ff}
+        .search-item img{width:35px;height:50px;border-radius:4px;object-fit:cover}
+        .search-item .s-details{display:flex;flex-direction:column}
+        .search-item .s-title{font-weight:600;font-size:.9rem;color:var(--text)}
+        .search-item .s-meta{font-size:.75rem;color:#777}
         .sub-nav{background:var(--white);padding:8px 0;border-bottom:1px solid #eee;position:sticky;top:70px;z-index:90;overflow-x:auto;-webkit-overflow-scrolling:touch}
         .nav-icons{max-width:1000px;margin:0 auto;display:flex;justify-content:center;gap:30px;list-style:none;padding:0 10px}
         .nav-item{display:flex;flex-direction:column;align-items:center;color:var(--gray);font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
@@ -73,7 +81,7 @@
         .class-btn:hover{border-color:var(--primary);background:#e3f2fd;color:var(--primary);transform:translateY(-3px)}
         .time-input-group{margin-top:25px;text-align:left}
         .time-input-group label{display:block;font-weight:700;margin-bottom:8px;color:var(--gray);font-size:.9rem}
-        .time-input-wrapper{display:flex;gap:10px;align-items:center}
+        .time-input-wrapper{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
         .time-input-group input{width:100%;padding:14px;font-size:1.1rem;border:2px solid #ddd;border-radius:12px;outline:none;font-family:'Inter',sans-serif;flex:1}
         .time-input-group input:focus{border-color:var(--primary)}
         .back-link{display:inline-block;margin-top:18px;color:var(--gray);font-weight:600;cursor:pointer;font-size:.9rem}
@@ -160,6 +168,17 @@
         .btn-submit:hover{background:#e68900;transform:translateY(-1px)}
         .btn-submit:disabled{background:#ccc;cursor:not-allowed;transform:none}
 
+        /* Genre Search UI */
+        .genre-search-wrapper{position:relative}
+        .genre-list-container{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e0e0e0;border-radius:12px;margin-top:5px;max-height:250px;overflow-y:auto;z-index:50;box-shadow:0 5px 20px rgba(0,0,0,.1);display:none}
+        .genre-list-item{padding:10px 15px;cursor:pointer;transition:.2s;font-size:.9rem;color:#444}
+        .genre-list-item:hover{background:#f5f5f5;color:var(--primary)}
+        .genre-list-item.selected{background:#e3f2fd;color:var(--primary);font-weight:600}
+        .selected-genres-display{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+        .genre-chip{background:#e0e0e0;color:#333;padding:5px 12px;border-radius:20px;font-size:.8rem;display:flex;align-items:center;gap:6px}
+        .genre-chip i{cursor:pointer;color:#777;font-size:.9rem}
+        .genre-chip i:hover{color:#f44336}
+
         /* Toast */
         .toast-container{position:fixed;top:80px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
         .toast{background:#222;color:#fff;padding:14px 22px;border-radius:10px;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.3);border-left:4px solid var(--success);pointer-events:auto;transform:translateX(120%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);max-width:340px;display:flex;align-items:center;gap:10px}
@@ -209,6 +228,7 @@
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Cari film..." oninput="handleSearch()" onfocus="handleSearchFocus()">
             <i class="fas fa-search"></i>
+            <div id="search-results" class="search-results-box"></div>
         </div>
     </div>
 </header>
@@ -250,7 +270,7 @@
                 <div class="class-btn" onclick="selectClassType('REGULAR')">REGULAR</div>
                 <div class="class-btn" onclick="selectClassType('PREMIERE')">PREMIERE</div>
             </div>
-            <div class="back-link" onclick="switchView('home')"><i class="fas fa-arrow-left"></i> Kembali</div>
+            <div class="back-link" onclick="goBackFromClass()"><i class="fas fa-arrow-left"></i> Kembali</div>
         </div>
     </div>
 
@@ -262,6 +282,7 @@
                 <label for="user-time">Jam Tayang:</label>
                 <div class="time-input-wrapper">
                     <input type="time" id="user-time" min="09:00" max="23:59">
+                    <button class="btn" onclick="setTimeNowPlus5()" style="padding:0 15px;font-size:.85rem;white-space:nowrap;background:#ff9800">+ 5 Detik</button>
                     <button class="btn" onclick="setTimeNowPlus2()" style="padding:0 15px;font-size:.85rem;white-space:nowrap">+ 2 Menit</button>
                 </div>
             </div><br>
@@ -303,18 +324,12 @@
                     </div>
                 </div>
                 <div class="form-group"><label>Tahun Rilis</label><input type="number" class="form-input" id="req-year" placeholder="2024" min="1950" max="2030"></div>
-                <div class="form-group"><label>Genre</label>
-                    <div class="tag-grid">
-                        <div class="tag-toggle"><input type="checkbox" id="g-action" value="Action"><label for="g-action">Action</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="g-comedy" value="Comedy"><label for="g-comedy">Comedy</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="g-drama" value="Drama"><label for="g-drama">Drama</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="g-horror" value="Horror"><label for="g-horror">Horror</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="g-sci" value="Sci-Fi"><label for="g-sci">Sci-Fi</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="g-romance" value="Romance"><label for="g-romance">Romance</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="g-psych" value="Psychological"><label for="g-psych">Psychological</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="g-fantasy" value="Fantasy"><label for="g-fantasy">Fantasy</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="g-thriller" value="Thriller"><label for="g-thriller">Thriller</label></div>
-                        <div class="tag-toggle"><input type="checkbox" id="g-sol" value="Slice of Life"><label for="g-sol">Slice of Life</label></div>
+                <div class="form-group">
+                    <label>Genre (Cari & Pilih)</label>
+                    <div class="genre-search-wrapper">
+                        <input type="text" class="form-input" id="genre-search-input" placeholder="Ketik genre (cth: Action, Isekai)..." oninput="filterGenreList()" onfocus="document.getElementById('genre-list-container').style.display=allGenres.length?'block':'none'">
+                        <div id="genre-list-container" class="genre-list-container"></div>
+                        <div id="selected-genres-display" class="selected-genres-display"></div>
                     </div>
                 </div>
             </div>
@@ -358,7 +373,7 @@
 
     <!-- DETAIL (Series/Anime/OVA) -->
     <div id="view-detail" class="view-section">
-        <div class="back-link" onclick="switchView('home')" style="margin-bottom:16px"><i class="fas fa-arrow-left"></i> Kembali ke Daftar Film</div>
+        <div class="back-link" onclick="goBackFromDetail()" style="margin-bottom:16px"><i class="fas fa-arrow-left"></i> Kembali ke Daftar Film</div>
         <div id="detail-content"></div>
     </div>
 </main>
@@ -390,6 +405,14 @@ let currentBooking={movie:'',type:'',roomType:'PUBLIC',videoSource:'',poster:'',
 let allMovies=[];
 let currentDetailMovie=null;
 let roomsUnsub=null;
+let lastActiveView='home'; // Track last view for proper back navigation
+
+// ---- Genre Data (150+ Genres) ----
+const ALL_GENRES = [
+    "Action","Adventure","Animation","Biography","Comedy","Crime","Documentary","Drama","Family","Fantasy","Film Noir","Game Show","History","Horror","Music","Musical","Mystery","News","Reality TV","Romance","Sci-Fi","Sport","Talk Show","Thriller","War","Western",
+    "Iyashikei","Shounen","Shoujo","Seinen","Josei","Slice of Life","Isekai","Reincarnation","Time Travel","Virtual Reality","Gender Bender","Mecha","Magic","Supernatural","Psychological","Cyberpunk","Dystopian","Samurai","Ninja","Vampire","Zombie","Post-Apocalyptic","School","Harem","Reverse Harem","Ecchi","Yuri","Yaoi","Demons","Gods","Ghosts","Space","Military","Police","Political","Historical","Martial Arts","Super Power","Monster","Survival","Battle Royale","Detective","Parody","Sports","Games","Idols","Mahou Shoujo","Kids","Chibi","CGDCT","Erotica","Hentai","Yaoi","Yuri","Boys Love","Girls Love","Thriller","Mystery","Horror","Psychological","Supernatural","Fantasy","Adventure","Action","Sci-Fi","Drama","Romance","Comedy","Slice of Life","School","Music","Super Power","Aliens","Angels","Anthropomorphic","Assassins","Basketball","Board Games","Cards","Combat","Cooking","Crossdressing","Delinquents","Dragons","Economics","Fantasy World","Festival","Full Color","Gag Humor","Gender Bender","Gore","Henshin","High Stakes Games","Historical","Isekai","Japan","Love Polygon","Magic","Mafia","Martial Arts","Mecha","Medical","Military","Monster Girls","Music","Mythology","Ninjas","Office Workers","Organized Crime","Otaku Culture","Parody","Performing Arts","Philosophical","Pirates","Police","Psychological","Racing","Reincarnation","Reverse Isekai","Robots","Romance","Samurai","School","Sci-Fi","Seinen","Shoujo","Shounen Ai","Shounen","Slice of Life","Space","Sports","Steampunk","Strategy","Superheroes","Supernatural","Survival","Swordplay","Terror","Time Travel","Tragedy","Vampires","Video Games","Visual Arts","War","Werewolves","Witches","Workplace","Wuxia","Yaoi","Yuri","Zombies"
+];
+let selectedGenresSet = new Set();
 
 // ---- Toast ----
 function showToast(msg,type='success'){
@@ -435,7 +458,6 @@ function loadMovies(){
                 const isComingSoon=m.status==='coming_soon';
 
                 if(isComingSoon){
-                    // Coming Soon card — no booking, just info
                     hasComingSoon=true;
                     const card=document.createElement('div');
                     card.className='movie-card';
@@ -457,12 +479,11 @@ function loadMovies(){
                         </div>`;
                     cc.appendChild(card);
                 } else {
-                    // Normal card
                     const card=document.createElement('div');
                     card.className='movie-card';
                     card.dataset.title=m.title.toLowerCase();
                     card.dataset.type=ct;
-                    card.onclick=()=>handleMovieClick(m);
+                    card.onclick=()=>handleMovieClick(m, 'PUBLIC');
                     card.innerHTML=`
                         <div class="poster">
                             <img src="${m.poster||''}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/${m.title}/200/300'">
@@ -491,13 +512,16 @@ function loadMovies(){
 }
 
 // ---- Handle movie click ----
-function handleMovieClick(movie){
+function handleMovieClick(movie, sourceRoomType = 'PUBLIC'){
     const ct=(movie.contentType||'movie').toLowerCase();
+    currentBooking.roomType = sourceRoomType; // Set context
+    lastActiveView = sourceRoomType === 'PUBLIC' ? 'home' : 'private';
+    
     if(ct==='movie'){
         currentBooking.videoSource=movie.videoSource;
         currentBooking.poster=movie.poster;
         currentBooking.contentType='movie';
-        startBooking(movie.title,'PUBLIC');
+        startBooking(movie.title, sourceRoomType);
     }else{
         showDetail(movie);
     }
@@ -513,7 +537,6 @@ function showDetail(movie){
 
     let epHtml='';
     if(episodes.length>0){
-        // Sort episodes numerically
         episodes.sort((a,b)=>parseInt(a.num)-parseInt(b.num));
         epHtml=`<div class="ep-section"><h3><i class="fas fa-list"></i> Daftar Episode (${episodes.length})</h3><div class="ep-grid">`;
         episodes.forEach(ep=>{
@@ -546,7 +569,12 @@ function showDetail(movie){
     switchView('detail');
 }
 
-// ---- Select episode → booking ----
+function goBackFromDetail(){
+    if(lastActiveView === 'private') switchView('private');
+    else switchView('home');
+}
+
+// ---- Select episode -> booking ----
 function selectEpisode(ep){
     if(!currentDetailMovie)return;
     if(!ep.videoSource){
@@ -558,7 +586,7 @@ function selectEpisode(ep){
     currentBooking.contentType=currentDetailMovie.contentType||'series';
     currentBooking.episodeNum=ep.num;
     currentBooking.seriesTitle=currentDetailMovie.title;
-    startBooking(`${currentDetailMovie.title} - Ep.${ep.num}`,'PUBLIC');
+    startBooking(`${currentDetailMovie.title} - Ep.${ep.num}`, currentBooking.roomType || 'PUBLIC');
 }
 
 // ---- Load rooms ----
@@ -572,7 +600,7 @@ function loadRooms(){
         if(data){
             Object.entries(data).forEach(([rid,room])=>{
                 const meta=room.meta;
-                if(!meta||meta.isPrivate)return;
+                if(!meta||meta.isPrivate)return; // Filter Private rooms from public list
                 const age=Date.now()-(room.status?.lastUpdate||meta.createdAt||0);
                 if(age>3600000)return;
                 const viewers=room.viewers?Object.keys(room.viewers).length:0;
@@ -607,6 +635,65 @@ function loadRooms(){
 
 function joinRoom(rid){window.location.href=`movie/index.html?room=${rid}`}
 
+// ---- Genre Search Logic ----
+function renderGenreList(filterText = ''){
+    const container = document.getElementById('genre-list-container');
+    container.innerHTML = '';
+    const filtered = ALL_GENRES.filter(g => g.toLowerCase().includes(filterText.toLowerCase()));
+    
+    if(filtered.length > 0){
+        container.style.display = 'block';
+        filtered.forEach(g => {
+            const div = document.createElement('div');
+            div.className = `genre-list-item ${selectedGenresSet.has(g) ? 'selected' : ''}`;
+            div.innerText = g;
+            div.onclick = () => toggleGenreSelection(g);
+            container.appendChild(div);
+        });
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+function filterGenreList(){
+    const val = document.getElementById('genre-search-input').value;
+    renderGenreList(val);
+}
+
+function toggleGenreSelection(genre){
+    if(selectedGenresSet.has(genre)){
+        selectedGenresSet.delete(genre);
+    } else {
+        selectedGenresSet.add(genre);
+    }
+    renderGenreList(document.getElementById('genre-search-input').value);
+    renderSelectedGenres();
+}
+
+function renderSelectedGenres(){
+    const d = document.getElementById('selected-genres-display');
+    d.innerHTML = '';
+    selectedGenresSet.forEach(g => {
+        const chip = document.createElement('div');
+        chip.className = 'genre-chip';
+        chip.innerHTML = `${g} <i class="fas fa-times" onclick="toggleGenreSelection('${g}')"></i>`;
+        d.appendChild(chip);
+    });
+}
+
+// Close genre list when clicking outside
+document.addEventListener('click', (e) => {
+    const wrapper = document.querySelector('.genre-search-wrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+        document.getElementById('genre-list-container').style.display = 'none';
+    }
+    // Also close main search results
+    const searchBar = document.querySelector('.search-bar');
+    if (searchBar && !searchBar.contains(e.target)) {
+        document.getElementById('search-results').style.display = 'none';
+    }
+});
+
 // ---- Request form logic ----
 document.querySelectorAll('input[name="req-type"]').forEach(r=>r.addEventListener('change',()=>{
     document.getElementById('sec-episodes').classList.toggle('show',r.value==='series');
@@ -620,7 +707,9 @@ function submitRequest(){
     if(!title){showToast('Judul wajib diisi!','error');return}
     const type=document.querySelector('input[name="req-type"]:checked').value;
     const year=document.getElementById('req-year').value;
-    const genres=[...document.querySelectorAll('.tag-grid input:checked')].map(i=>i.value);
+    const genres = Array.from(selectedGenresSet);
+    if(genres.length === 0) {showToast('Pilih minimal satu genre!','error'); return;}
+    
     const season=document.getElementById('req-season').value;
     const epType=document.querySelector('input[name="req-ep-type"]:checked')?.value;
     const epNum=document.getElementById('req-ep-num').value;
@@ -646,6 +735,9 @@ function submitRequest(){
         document.getElementById('req-year').value='';
         document.getElementById('req-link').value='';
         document.getElementById('req-notes').value='';
+        document.getElementById('genre-search-input').value='';
+        selectedGenresSet.clear();
+        renderSelectedGenres();
         document.querySelectorAll('.req-form input[type="checkbox"],.req-form input[type="radio"]').forEach(i=>{
             if(i.id==='rt-movie'||i.id==='ep-all'||i.id==='res-hd')i.checked=true;
             else i.checked=false;
@@ -663,18 +755,65 @@ function switchView(v){
     document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
     const navMap={home:'nav-movies',ticket:'nav-ticket',rooms:'nav-rooms',private:'nav-private',request:'nav-request'};
     if(navMap[v])document.getElementById(navMap[v]).classList.add('active');
+    
+    if(v!=='detail') lastActiveView = v;
+    
     if(v==='ticket')renderTickets();
     if(v==='private')renderPrivate();
     if(v==='rooms')loadRooms();
+    if(v==='request') {
+        // Initialize genre list if empty
+        if(document.getElementById('genre-list-container').children.length === 0) renderGenreList();
+    }
     window.scrollTo(0,0);
 }
 
-// ---- Search ----
-function handleSearchFocus(){if(!document.getElementById('view-home').classList.contains('active'))switchView('home')}
+// ---- Search with Dropdown ----
+function handleSearchFocus(){
+    if(!document.getElementById('view-home').classList.contains('active')&&!document.getElementById('view-private').classList.contains('active'))switchView('home');
+}
 function handleSearch(){
-    if(!document.getElementById('view-home').classList.contains('active'))switchView('home');
     const q=document.getElementById('searchInput').value.toLowerCase();
+    const resultsBox = document.getElementById('search-results');
+    
+    if(q.length < 1){
+        resultsBox.style.display = 'none';
+        document.querySelectorAll('.movie-card').forEach(c=>c.style.display='block');
+        return;
+    }
+
+    // Filter allMovies for suggestions
+    const matches = allMovies.filter(m => m.title.toLowerCase().includes(q) && m.status !== 'coming_soon');
+    
+    // Update Main Grid (existing behavior)
     document.querySelectorAll('.movie-card').forEach(c=>c.style.display=c.dataset.title&&c.dataset.title.includes(q)?'block':'none');
+
+    // Render Dropdown
+    resultsBox.innerHTML = '';
+    if(matches.length > 0){
+        resultsBox.style.display = 'block';
+        matches.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'search-item';
+            div.innerHTML = `
+                <img src="${m.poster||'https://picsum.photos/seed/empty/50/50'}" onerror="this.src='https://picsum.photos/seed/empty/50/50'">
+                <div class="s-details">
+                    <div class="s-title">${m.title}</div>
+                    <div class="s-meta">${m.contentType?.toUpperCase()||'MOVIE'}</div>
+                </div>
+            `;
+            div.onclick = () => {
+                document.getElementById('searchInput').value = '';
+                resultsBox.style.display = 'none';
+                // Determine source based on active tab (Private vs Public)
+                const isPrivate = document.getElementById('view-private').classList.contains('active');
+                handleMovieClick(m, isPrivate ? 'PRIVATE' : 'PUBLIC');
+            };
+            resultsBox.appendChild(div);
+        });
+    } else {
+        resultsBox.style.display = 'none';
+    }
 }
 
 // ---- Booking flow ----
@@ -690,6 +829,21 @@ function selectClassType(type){
     document.getElementById('display-class-time').innerText=type;
     document.getElementById('user-time').value='';
     switchView('time');
+}
+function goBackFromClass(){
+    // If series came from detail, go back to detail
+    if(currentDetailMovie && (currentDetailMovie.contentType === 'series' || currentDetailMovie.contentType === 'ova')) {
+        switchView('detail');
+    } else {
+        // Otherwise go back to source (Home/Private)
+        if(lastActiveView === 'private') switchView('private');
+        else switchView('home');
+    }
+}
+function setTimeNowPlus5(){
+    const n=new Date();
+    n.setSeconds(n.getSeconds()+5);
+    document.getElementById('user-time').value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
 }
 function setTimeNowPlus2(){
     const n=new Date();
@@ -718,7 +872,6 @@ function confirmBooking(){
     });
     localStorage.setItem('tmoTickets',JSON.stringify(tickets));
     showToast(`Tiket berhasil! ${currentBooking.movie} — ${disp}`);
-    // Reset
     currentBooking.episodeNum=null;
     currentBooking.seriesTitle=null;
     switchView('ticket');
@@ -738,7 +891,7 @@ function renderTickets(){
         l.innerHTML+=`<div class="ticket-card">
             <div class="t-poster"><img src="${poster}" style="width:100%;height:100%;object-fit:cover" onerror="this.src='https://picsum.photos/seed/ticket/100/150'"></div>
             <div class="t-details">
-                <div style="font-size:.72rem;color:var(--primary);font-weight:800;text-transform:uppercase;margin-bottom:2px">${header}</div>
+                <div style="font-size:.72rem;color:${t.roomType==='PRIVATE'?'var(--private)':'var(--primary)'};font-weight:800;text-transform:uppercase;margin-bottom:2px">${header}</div>
                 <div class="t-title">${t.movie}</div>
                 <div class="t-info"><i class="far fa-calendar"></i> ${t.date}</div>
                 <div class="t-info"><i class="far fa-clock"></i> ${t.timeDisplay||'-'}</div>
@@ -766,28 +919,21 @@ function deleteTicket(id){
 function watchNow(id){
     const t=tickets.find(x=>x.id===id);
     if(!t){showToast('Tiket tidak ditemukan!','error');return}
-
-    // Prioritize ticket data
     const videoSrc=t.videoSource;
-    if(!videoSrc){
-        showToast('Video source tidak tersedia!','error');
-        return;
-    }
-
+    if(!videoSrc){showToast('Video source tidak tersedia!','error');return}
     sessionStorage.setItem('activeMovieTitle',t.movie);
     sessionStorage.setItem('activeVideoSource',videoSrc);
     sessionStorage.setItem('activePoster',t.poster||'');
     sessionStorage.setItem('activeBookingTime',String(t.bookingTimestamp||0));
     sessionStorage.setItem('activeRoomType',t.roomType||'PUBLIC');
     sessionStorage.setItem('activeContentType',t.contentType||'movie');
-    // Series: pass series title + current episode info for next-episode navigation
     sessionStorage.setItem('activeSeriesTitle',t.seriesTitle||'');
     sessionStorage.setItem('activeEpisodeNum',String(t.episodeNum||''));
-
     window.location.href='movie/index.html';
 }
 
 function renderPrivate(){
+    lastActiveView = 'private';
     const c=document.getElementById('private-movies-container');
     c.innerHTML='';
     const available=allMovies.filter(m=>m.status!=='coming_soon');
@@ -799,20 +945,19 @@ function renderPrivate(){
         const card=document.createElement('div');
         card.className='movie-card';
         card.dataset.title=m.title.toLowerCase();
-        card.onclick=()=>{
-            currentBooking.videoSource=m.videoSource;
-            currentBooking.poster=m.poster;
-            currentBooking.contentType=m.contentType||'movie';
-            startBooking(m.title,'PRIVATE');
-        };
+        card.onclick=()=>handleMovieClick(m, 'PRIVATE'); // Use same logic but enforce Private
+        
+        const ct=(m.contentType||'movie').toLowerCase();
+        
         card.innerHTML=`
             <div class="poster">
                 <img src="${m.poster||''}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/fb/200/300'">
+                <div class="type-badge ${ct}">${ct==='series'?'SERIES':ct==='ova'?'OVA':'MOVIE'}</div>
             </div>
             <div class="movie-info">
                 <div class="movie-title">${m.title}</div>
                 <div class="movie-genre">${m.genre||''}</div>
-                <button class="movie-btn" style="background:var(--private);color:#fff">Beli Tiket Private</button>
+                <button class="movie-btn" style="background:var(--private);color:#fff">${ct==='movie'?'Beli Tiket Private':'Lihat Detail'}</button>
             </div>`;
         c.appendChild(card);
     });
@@ -830,11 +975,16 @@ window.confirmBooking=confirmBooking;
 window.handleSearch=handleSearch;
 window.handleSearchFocus=handleSearchFocus;
 window.setTimeNowPlus2=setTimeNowPlus2;
+window.setTimeNowPlus5=setTimeNowPlus5;
 window.watchNow=watchNow;
 window.deleteTicket=deleteTicket;
 window.selectEpisode=selectEpisode;
 window.joinRoom=joinRoom;
 window.submitRequest=submitRequest;
+window.toggleGenreSelection=toggleGenreSelection;
+window.filterGenreList=filterGenreList;
+window.goBackFromClass=goBackFromClass;
+window.goBackFromDetail=goBackFromDetail;
 
 loadMovies();
 </script>
