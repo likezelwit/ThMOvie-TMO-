@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThMovie - Player</title>
+    <title>ThMovie - Player Premium</title>
     <style>
         body {
             background-color: #0d0d13;
@@ -15,28 +15,42 @@
             height: 100vh;
             font-family: Arial, sans-serif;
         }
-        .video-container {
+        .video-wrapper {
             width: 90%;
-            max-width: 800px;
+            max-width: 850px;
             background-color: #000;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
         }
-        video {
+        /* Membuat container video responsive 16:9 agar pas di layar PC atau HP */
+        .iframe-container {
+            position: relative;
+            padding-bottom: 56.25%; /* Rasio 16:9 */
+            height: 0;
+            overflow: hidden;
+        }
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            display: block;
+            height: 100%;
+            border: 0;
         }
     </style>
 </head>
 <body>
 
-<div class="video-container">
-    <!-- Atribut dioptimalkan agar tidak memicu limit API Google di tengah jalan -->
-    <video controls preload="metadata" crossorigin="anonymous">
-        <source src="https://www.googleapis.com/drive/v3/files/1qJ26IK0GYZD4G0tdluOpFyLhSHsWCn0q?alt=media&lud=1743502542&pid=6242&sid=31979" type="video/mp4">
-        Browser kamu gak support tag video ini, Lang.
-    </video>
+<div class="video-wrapper">
+    <div class="iframe-container">
+        <!-- Menggunakan ID file 1qJ26IK0GYZD4G0tdluOpFyLhSHsWCn0q dengan jalur /preview resmi Google -->
+        <iframe 
+            src="https://drive.google.com/file/d/1qJ26IK0GYZD4G0tdluOpFyLhSHsWCn0q/preview" 
+            allow="autoplay; encrypted-media" 
+            allowfullscreen>
+        </iframe>
+    </div>
 </div>
 
 </body>
