@@ -404,7 +404,7 @@ function processVideoUrl(url){
 async function fetchRefreshedUrl() {
     try {
         // GANTI URL INI DENGAN URL DOMAIN VERCEL ANDA YANG ASLI
-        const response = await fetch('https://NAMA-PROYEK-ANDA.vercel.app/api/get-link');
+        const response = await fetch('/api/get-link');
         const data = await response.json();
         
         if(data && data.newUrl) {
