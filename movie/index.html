@@ -233,7 +233,7 @@
         <p id="endSub">Ruangan akan ditutup otomatis...</p>
         <div class="end-btns">
             <button class="btn-p" id="nextEpBtn" style="display:none;background:linear-gradient(135deg,#ff9800,#f57c00)"><i class="fas fa-forward"></i> Episode Berikutnya</button>
-            <button class="btn-p" onclick="location.href=../index.html'"><i class="fas fa-home"></i> Kembali ke Beranda</button>
+            <button class="btn-p" onclick="location.href='../index.html'"><i class="fas fa-home"></i> Kembali ke Beranda</button>
         </div>
     </div>
 
@@ -270,7 +270,6 @@
             <p class="m-sub">Film dapat diputar pada jam tayang:</p>
             <div class="m-time" id="cdTarget">--:--</div>
             <p class="m-sub" style="color:#4caf50;font-size:.82rem"><i class="fas fa-check-circle"></i> Siap! Film akan otomatis mulai saat jam tayang tiba.</p>
-            <button id="btnCdSkip" class="btn-s" style="margin-top:8px"><i class="fas fa-forward"></i> Lewati Countdown</button>
         </div>
         <div id="modeReady" class="mode">
             <div class="m-icon" style="border-color:#4caf50"><i class="fas fa-play" style="font-size:1.4rem;color:#4caf50"></i></div>
@@ -352,12 +351,13 @@ let syncListenerOn=false,chatOpen=false,chatName=null,chatUserId=null;
 let unreadCount=0,ctrlHideTimer=null,contentType='movie',roomCleaned=false;
 let seriesTitle='',currentEpisodeNum='',allEpisodesData={};
 let guestInitStarted=false,hostMetaSet=false;
+// isPrivate: controls whether non-host users can seek/pause (private = URL-only open access, public = strict guest control)
+let isPrivateRoom=false;
 const CTRL_DELAY=3500;
 
 // ===== URL PROCESSING (DROPBOX SUPPORT) =====
 function processVideoUrl(url){
     if(!url) return url;
-    // Fix Dropbox links
     if(url.includes('dropbox.com')){
         return url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
     }
@@ -461,7 +461,6 @@ const fsBtn=document.getElementById('fsBtn');
 fsBtn.addEventListener('click',()=>{
     if(!document.fullscreenElement&&!document.webkitFullscreenElement){
         (contentArea.requestFullscreen||contentArea.webkitRequestFullscreen).call(contentArea).then(()=>{
-            // Force Landscape on Mobile
             try{
                 if(screen.orientation && screen.orientation.lock){
                     screen.orientation.lock('landscape').catch(e=>console.log('Orientation lock failed/not supported', e));
@@ -480,7 +479,7 @@ document.getElementById('shareToggle').addEventListener('click',()=>{
     shareArea.style.display=shareArea.style.display==='flex'?'none':'flex';
 });
 
-// ===== NEXT EPISODE (INSTANT LOAD) =====
+// ===== NEXT EPISODE (PERSISTENT ACROSS ALL EPISODES) =====
 function getNextEpisodeNum(currentNum,allEps){
     const nums=Object.keys(allEps).map(Number).sort((a,b)=>a-b);
     const idx=nums.indexOf(Number(currentNum));
@@ -488,10 +487,10 @@ function getNextEpisodeNum(currentNum,allEps){
     return null;
 }
 
+// Called whenever currentEpisodeNum changes or allEpisodesData is loaded/refreshed
 function setupNextEpisode(){
     if(contentType==='movie'||!seriesTitle||!currentEpisodeNum)return;
-    // If we don't have the data yet, fetch it
-    if(Object.keys(allEpisodesData).length === 0) {
+    if(Object.keys(allEpisodesData).length === 0){
         get(ref(db,'movies')).then(snap=>{
             const data=snap.val();
             if(!data)return;
@@ -502,7 +501,7 @@ function setupNextEpisode(){
             allEpisodesData=movie.episodes;
             checkNextAvailability();
         }).catch(()=>{});
-    } else {
+    }else{
         checkNextAvailability();
     }
 }
@@ -512,64 +511,122 @@ function checkNextAvailability(){
     if(nextNum&&allEpisodesData[nextNum]?.videoSource){
         nextEpBtn.style.display='inline-flex';
         nextEpCtrlBtn.classList.remove('hidden-btn');
-        // Only Host can trigger next episode
         if(isHost){
             nextEpBtn.onclick=()=>goToNextEpisode(nextNum);
             nextEpCtrlBtn.onclick=()=>goToNextEpisode(nextNum);
-        } else {
+        }else{
             nextEpBtn.onclick=()=>showToast('Tunggu Host untuk lanjut ke episode berikutnya');
             nextEpCtrlBtn.onclick=()=>showToast('Tunggu Host untuk lanjut ke episode berikutnya');
         }
+    }else{
+        // No more episodes — hide buttons
+        nextEpBtn.style.display='none';
+        nextEpCtrlBtn.classList.add('hidden-btn');
     }
 }
 
 function goToNextEpisode(nextNum){
     const ep=allEpisodesData[nextNum];
     if(!ep||!ep.videoSource){showToast('Video episode berikutnya belum tersedia!');return}
-    
-    // Process URL (Dropbox fix)
-    const newSrc = processVideoUrl(ep.videoSource);
-    const newTitle = `${seriesTitle} - Ep.${nextNum}`;
-    
-    // Update local state
-    currentEpisodeNum = nextNum;
-    
-    // Update UI immediately
-    titleEl.textContent = newTitle;
-    if(ep.poster) setPoster(ep.poster); // Use episode poster if available
-    
-    video.src = newSrc;
-    video.currentTime = 0;
-    bookingTimestamp = Date.now(); // Reset timestamp to avoid countdown logic if checked
-    
-    // Update Session Storage
-    sessionStorage.setItem('activeEpisodeNum', String(nextNum));
-    sessionStorage.setItem('activeVideoSource', newSrc);
-    sessionStorage.setItem('activeMovieTitle', newTitle);
-    
-    // Hide button temporarily
+
+    const newSrc=processVideoUrl(ep.videoSource);
+    const newTitle=`${seriesTitle} - Ep.${nextNum}`;
+
+    currentEpisodeNum=nextNum;
+
+    titleEl.textContent=newTitle;
+    if(ep.poster)setPoster(ep.poster);
+
+    video.src=newSrc;
+    video.currentTime=0;
+    bookingTimestamp=Date.now();
+
+    sessionStorage.setItem('activeEpisodeNum',String(nextNum));
+    sessionStorage.setItem('activeVideoSource',newSrc);
+    sessionStorage.setItem('activeMovieTitle',newTitle);
+
+    // Hide next ep buttons until we confirm there's a further episode
     nextEpBtn.style.display='none';
     nextEpCtrlBtn.classList.add('hidden-btn');
     endScreen.classList.remove('show');
+    roomCleaned=false; // Allow ended event to fire again for this episode
 
     if(isHost){
-        // Update Firebase Meta for guests
         set(ref(db,'sync_rooms/'+roomId+'/meta'),{
-            title: newTitle,
-            videoSrc: newSrc,
-            episodeNum: String(nextNum),
-            // Keep other props
-            createdAt: Date.now(),
-            isPrivate: sessionStorage.getItem('activeRoomType') === 'PRIVATE',
-            contentType: 'series',
-            seriesTitle: seriesTitle
+            title:newTitle,
+            videoSrc:newSrc,
+            episodeNum:String(nextNum),
+            createdAt:Date.now(),
+            isPrivate:isPrivateRoom,
+            contentType:'series',
+            seriesTitle:seriesTitle,
+            posterSrc:ep.poster||''
         }).then(()=>{
-            // Force Sync Update for everyone to jump to 0 and Play
-            sendSync(); 
+            sendSync();
             video.play().catch(()=>{});
             showToast('Memulai Episode Berikutnya...');
+            // After switching, re-check if the NEXT next episode exists
+            setupNextEpisode();
         }).catch(()=>{showToast('Gagal update info ke server')});
     }
+}
+
+// ===== HOST TRANSFER (PUBLIC ROOMS ONLY) =====
+// When the host disconnects, promote the oldest remaining active viewer to host.
+function setupHostTransfer(){
+    if(isPrivateRoom)return; // Only for public rooms
+    if(!isHost)return;
+
+    // Write this user as the current host in Firebase so guests can detect changes
+    set(ref(db,'sync_rooms/'+roomId+'/hostId'),chatUserId).catch(()=>{});
+
+    // When host disconnects: Firebase will remove hostId node via onDisconnect
+    onDisconnect(ref(db,'sync_rooms/'+roomId+'/hostId')).remove();
+}
+
+function watchForHostTransfer(){
+    if(isPrivateRoom)return; // Only for public rooms
+    if(isHost)return;
+
+    onValue(ref(db,'sync_rooms/'+roomId+'/hostId'),(snap)=>{
+        if(!snap.exists()||snap.val()===null){
+            // Host left — attempt to become new host
+            attemptBecomeHost();
+        }
+    });
+}
+
+function attemptBecomeHost(){
+    if(isHost)return;
+
+    // Use a transaction-like approach: the viewer with the smallest chatUserId among active viewers wins
+    get(ref(db,'sync_rooms/'+roomId+'/viewers')).then(snap=>{
+        if(!snap.exists())return;
+        const viewers=snap.val();
+        const ids=Object.keys(viewers).sort(); // Lexicographic sort — smallest ID wins
+        if(ids.length===0)return;
+        if(ids[0]===chatUserId){
+            // This user becomes the new host
+            promoteToHost();
+        }
+    }).catch(()=>{});
+}
+
+function promoteToHost(){
+    isHost=true;
+    viewerBadge.style.display='none';
+    showToast('Anda sekarang menjadi Host!',4000,'success');
+
+    // Write new hostId
+    set(ref(db,'sync_rooms/'+roomId+'/hostId'),chatUserId).catch(()=>{});
+    onDisconnect(ref(db,'sync_rooms/'+roomId+'/hostId')).remove();
+
+    // Also take over onDisconnect for the room cleanup
+    onDisconnect(ref(db,'sync_rooms/'+roomId)).remove();
+
+    setupSender();
+    syncBadge.innerHTML='<i class="fas fa-crown"></i> HOST';
+    syncBadge.className='badge badge-sync';
 }
 
 // ===== ROOM CLEANUP =====
@@ -583,8 +640,14 @@ function cleanupRoom(){
         remove(ref(db,'sync_rooms/'+roomId)).catch(()=>{});
         showToast('Selesai. Ruangan ditutup.',3000,'success');
     }
-    setupNextEpisode(); // Check if there is next
-    setTimeout(()=>{if(!nextEpBtn.style.display||nextEpBtn.style.display==='none')location.href='../index.html'},6000);
+    // Check for next episode — if available, show button indefinitely (don't auto-redirect)
+    setupNextEpisode();
+    // Only auto-redirect if there's no next episode
+    setTimeout(()=>{
+        if(!nextEpBtn.style.display||nextEpBtn.style.display==='none'){
+            location.href='../index.html';
+        }
+    },6000);
 }
 video.addEventListener('ended',()=>{if(!modalActive)cleanupRoom()});
 
@@ -607,10 +670,12 @@ function initHost(){
 
     const t=sessionStorage.getItem('activeMovieTitle');
     const vRaw=sessionStorage.getItem('activeVideoSource');
-    const v=processVideoUrl(vRaw); // Process URL
+    const v=processVideoUrl(vRaw);
     const p=sessionStorage.getItem('activePoster');
     const bt=sessionStorage.getItem('activeBookingTime');
     const rt=sessionStorage.getItem('activeRoomType')||'PUBLIC';
+
+    isPrivateRoom=(rt==='PRIVATE');
 
     if(!v||!t){showErr('Data Film Tidak Ditemukan','Kembali ke halaman Tiket.');return}
 
@@ -623,10 +688,9 @@ function initHost(){
 
     if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex';}
 
-    const isPrivate=rt==='PRIVATE';
     set(ref(db,'sync_rooms/'+roomId+'/meta'),{
         title:t,videoSrc:v,posterSrc:p||'',targetTime:bookingTimestamp||0,
-        createdAt:Date.now(),isPrivate,contentType:contentType||'movie',seriesTitle,episodeNum:currentEpisodeNum
+        createdAt:Date.now(),isPrivate:isPrivateRoom,contentType:contentType||'movie',seriesTitle,episodeNum:currentEpisodeNum
     }).then(()=>{
         setSyncStatus(true);
         hostMetaSet=true;
@@ -636,7 +700,8 @@ function initHost(){
     registerViewer();
     setupSync();
     setupSender();
-    setupNextEpisode(); // Check for next episode availability initially
+    setupNextEpisode();
+    setupHostTransfer();
 
     onInteractionReady=()=>decideMode();
 
@@ -647,7 +712,7 @@ function initHost(){
     },8000);
 }
 
-// ===== GUEST (UPDATED FOR EPISODE SWITCH) =====
+// ===== GUEST =====
 function initGuest(){
     isHost=false;
     shareArea.style.display='flex';
@@ -671,51 +736,62 @@ function initGuest(){
             return;
         }
 
-        // Check if episode changed (Host switched episodes)
-        const currentTitle = titleEl.textContent;
-        const newTitle = m.title||'Unknown';
-        const newVideo = processVideoUrl(m.videoSrc);
+        // Detect if this is a private room — guests can freely join via URL
+        isPrivateRoom=!!(m.isPrivate);
 
-        if(m.title && m.title !== currentTitle){
+        const currentTitle=titleEl.textContent;
+        const newTitle=m.title||'Unknown';
+        const newVideo=processVideoUrl(m.videoSrc);
+
+        if(m.title && m.title !== currentTitle && currentTitle !== 'Memuat...'){
             // Episode change detected
-            titleEl.textContent = newTitle;
+            titleEl.textContent=newTitle;
             setPoster(m.posterSrc);
             contentType=(m.contentType||'movie').toLowerCase();
             seriesTitle=m.seriesTitle||'';
             currentEpisodeNum=m.episodeNum||'';
-            
+
             if(contentType!=='movie'){
-                typeBadge.textContent=contentType.toUpperCase(); 
+                typeBadge.textContent=contentType.toUpperCase();
                 typeBadge.style.display='inline-flex';
             }else{
                 typeBadge.style.display='none';
             }
 
-            // Update Video Source
-            video.src = newVideo;
-            videoReady = true;
-            
-            // Update Session Storage
-            sessionStorage.setItem('activeMovieTitle', newTitle);
-            sessionStorage.setItem('activeVideoSource', m.videoSrc); // Save raw source
-            sessionStorage.setItem('activeEpisodeNum', m.episodeNum||'');
-            sessionStorage.setItem('activeSeriesTitle', m.seriesTitle||'');
-            
-            // Update Local All Episodes Data to check for next button availability
-            // Note: We might need to refetch or rely on existing data. 
-            // For simplicity, we rely on 'allEpisodesData' if already loaded, else silent fail.
-            // Re-populate allEpisodesData if possible or just hide next button
-            if(Object.keys(allEpisodesData).length > 0) {
-                 checkNextAvailability();
-            } else {
-                // Hide button as we don't know the sequence yet
+            video.src=newVideo;
+            videoReady=true;
+            roomCleaned=false;
+
+            sessionStorage.setItem('activeMovieTitle',newTitle);
+            sessionStorage.setItem('activeVideoSource',m.videoSrc);
+            sessionStorage.setItem('activeEpisodeNum',m.episodeNum||'');
+            sessionStorage.setItem('activeSeriesTitle',m.seriesTitle||'');
+
+            if(Object.keys(allEpisodesData).length>0){
+                checkNextAvailability();
+            }else{
                 nextEpBtn.style.display='none';
                 nextEpCtrlBtn.classList.add('hidden-btn');
             }
-        } else if (newVideo && !video.src) {
+
+            // Hide end screen if shown
+            endScreen.classList.remove('show');
+
+        }else if(newVideo && !video.src){
             // Initial load
-            video.src = newVideo;
-            videoReady = true;
+            titleEl.textContent=newTitle;
+            setPoster(m.posterSrc);
+            contentType=(m.contentType||'movie').toLowerCase();
+            seriesTitle=m.seriesTitle||'';
+            currentEpisodeNum=m.episodeNum||'';
+
+            if(contentType!=='movie'){
+                typeBadge.textContent=contentType.toUpperCase();
+                typeBadge.style.display='inline-flex';
+            }
+
+            video.src=newVideo;
+            videoReady=true;
         }
 
         bookingTimestamp=m.targetTime?parseInt(m.targetTime,10):null;
@@ -726,6 +802,7 @@ function initGuest(){
         if(!chatUserId){
             registerViewer();
             setupSync();
+            watchForHostTransfer();
         }
 
         checkGuestState();
@@ -896,13 +973,6 @@ function startCdGuest(ts){
     tick();cdInterval=setInterval(tick,500);
 }
 
-document.getElementById('btnCdSkip').addEventListener('click',()=>{
-    if(cdInterval){clearInterval(cdInterval);cdInterval=null;}
-    hideModal();
-    video.currentTime=0;
-    video.play().then(()=>{if(isHost)sendSync()}).catch(()=>{});
-});
-
 function showReadyMode(){
     document.getElementById('readyTitle').textContent='Siap Menonton';
     document.getElementById('readySub').textContent='Bagikan link ke teman, lalu klik tombol di bawah.';
@@ -948,7 +1018,11 @@ video.addEventListener('waiting',()=>{if(!video.paused)bufferOv.classList.add('s
 video.addEventListener('canplay',()=>bufferOv.classList.remove('show'));
 video.addEventListener('playing',()=>bufferOv.classList.remove('show'));
 video.addEventListener('pause',()=>{
-    if(!isHost&&!isSyncing&&hasInteracted&&!modalActive)showToast('Hanya Host yang dapat mengontrol');
+    // For private rooms: guests can freely control (no warning)
+    // For public rooms: only host can control
+    if(!isHost && !isSyncing && hasInteracted && !modalActive && !isPrivateRoom){
+        showToast('Hanya Host yang dapat mengontrol');
+    }
 });
 video.addEventListener('error',function(){
     const e=video.error;let m='Sumber video tidak dapat dimuat.';
@@ -956,9 +1030,15 @@ video.addEventListener('error',function(){
     showErr('Gagal Memuat Video',m);
 });
 video.addEventListener('seeking',()=>{
-    if(!isHost&&!isSyncing&&hasInteracted){
+    // For private rooms: allow all users to seek without any overlay warning
+    // For public rooms: only host can seek
+    if(!isHost && !isSyncing && hasInteracted && !isPrivateRoom){
         showToast('Hanya Host yang dapat mengontrol video');
     }
+    // For private rooms, if guest seeks, send sync so others follow (optional: only if they are acting as co-host)
+    // We keep it simple: in private rooms guests CAN seek locally, but only the host's position is broadcast
+    // If you want guests to broadcast seeks in private rooms, uncomment:
+    // if(!isHost && isPrivateRoom && !isSyncing) sendSync();
 });
 
 // ===== SYNC SENDER =====
@@ -972,6 +1052,7 @@ function sendSync(){
     }).catch(()=>setSyncStatus(false));
 }
 function setupSender(){
+    if(sendInterval)clearInterval(sendInterval); // Prevent duplicate intervals on host transfer
     sendInterval=setInterval(()=>{if(isHost&&!video.paused&&!isSyncing&&videoReady)sendSync()},1500);
     video.addEventListener('play',()=>{if(isHost&&!isSyncing)sendSync()});
     video.addEventListener('pause',()=>{if(isHost&&!isSyncing)sendSync()});
@@ -1012,6 +1093,8 @@ function setupSync(){
             return;
         }
 
+        // For private rooms: guests follow sync but are NOT blocked from local control
+        // Sync correction still applies so everyone stays together
         if(!isHost&&!isSyncing&&Math.abs(video.currentTime-(d.currentTime||0))>2){
             flashSync();
             setSyncFlag(true);
