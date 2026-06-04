@@ -332,7 +332,7 @@ import{getDatabase,ref,set,onValue,onDisconnect,remove,push,query,limitToLast,on
 
 const firebaseConfig={apiKey:"AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",authDomain:"thmovie-3646f.firebaseapp.com",databaseURL:"https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.com",projectId:"thmovie-3646f",storageBucket:"thmovie-3646f.firebasestorage.app",messagingSenderId:"1041137356432",appId:"1:1041137356432:web:96edbe3402937c82f09215",measurementId:"G-6SNE976L7G"};
 const app=initializeApp(firebaseConfig);
-const database = getDatabase(app, "wss://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.com");
+const db = getDatabase(app, "wss://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.com");
 
 const video=document.getElementById('mainVideo');
 const titleEl=document.getElementById('m-title');
