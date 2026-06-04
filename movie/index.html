@@ -92,6 +92,19 @@
         .sync-seek-ov{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:4;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px)}
         .sync-seek-ov.show{opacity:1}.sync-seek-ov div{text-align:center}.sync-seek-ov i{font-size:1.6rem;color:#4fc3f7;margin-bottom:8px;display:block}.sync-seek-ov span{display:block;font-size:.85rem;color:#ccc;font-weight:600}
 
+        /* VIDEO ERROR OVERLAY */
+        .video-error-ov{position:absolute;inset:0;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:7;opacity:0;pointer-events:none;transition:opacity .4s;text-align:center;padding:24px;backdrop-filter:blur(6px)}
+        .video-error-ov.show{opacity:1;pointer-events:all}
+        .video-error-ov i.err-icon{font-size:3rem;color:#f44336;margin-bottom:16px;text-shadow:0 0 24px rgba(244,67,54,.3)}
+        .video-error-ov h3{font-size:1.1rem;font-weight:800;margin:0 0 8px;color:#fff}
+        .video-error-ov p{color:#aaa;font-size:.82rem;margin:0 0 24px;max-width:280px;line-height:1.5}
+        .err-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+        .err-retry-btn{background:linear-gradient(135deg,#0078ff,#005ecb);color:#fff;border:none;padding:11px 24px;border-radius:50px;cursor:pointer;font-weight:700;font-size:.85rem;display:inline-flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:.2s;box-shadow:0 3px 14px rgba(0,120,255,.3)}
+        .err-retry-btn:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,120,255,.4)}.err-retry-btn:active{transform:scale(.96)}
+        .err-resume-btn{background:linear-gradient(135deg,#4caf50,#388e3c);color:#fff;border:none;padding:11px 24px;border-radius:50px;cursor:pointer;font-weight:700;font-size:.85rem;display:inline-flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:.2s;box-shadow:0 3px 14px rgba(76,175,80,.3)}
+        .err-resume-btn:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(76,175,80,.4)}.err-resume-btn:active{transform:scale(.96)}
+        .err-count{font-size:.72rem;color:#666;margin-top:10px}
+
         .end-screen{position:absolute;inset:0;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:8;opacity:0;pointer-events:none;transition:opacity .5s;text-align:center;padding:24px;backdrop-filter:blur(8px)}
         .end-screen.show{opacity:1;pointer-events:all}
         .end-screen i{font-size:3.5rem;color:#4caf50;margin-bottom:20px;text-shadow:0 0 30px rgba(76,175,80,.3)}
@@ -164,8 +177,9 @@
             .interact-box i{font-size:3rem}.interact-box h3{font-size:1.1rem}
             .interact-box .tap-btn{padding:14px 32px;font-size:.95rem}
             .end-screen h2{font-size:1.3rem}.end-screen i{font-size:2.8rem}
+            .err-btns{flex-direction:column;align-items:center}
+            .err-retry-btn,.err-resume-btn{width:100%;max-width:260px;justify-content:center}
         }
-
         @media(max-width:380px){
             .movie-title{max-width:90px;font-size:.75rem}
             .badges{gap:3px}
@@ -173,7 +187,6 @@
             .modal-card{padding:24px 16px}
             .m-title{font-size:1.1rem}.m-sub{font-size:.82rem}
         }
-
         @media(max-width:320px){
             .movie-title{max-width:70px;font-size:.7rem}
             .ctrl-btn{width:40px;height:40px;font-size:.9rem}
@@ -182,7 +195,6 @@
         :fullscreen .player-header{display:none}
         :fullscreen .control-bar{padding-bottom:env(safe-area-inset-bottom,14px)}
         :-webkit-full-screen .player-header{display:none}
-
         @supports(padding:max(0px)){
             .player-header{padding-top:max(10px,env(safe-area-inset-top))}
             .control-bar{padding-bottom:max(12px,env(safe-area-inset-bottom))}
@@ -226,6 +238,18 @@
     <video id="mainVideo" preload="auto" playsinline webkit-playsinline></video>
     <div class="buffering-ov" id="bufferOv"><i class="fas fa-circle-notch fa-spin"></i></div>
     <div class="sync-seek-ov" id="syncSeekOv"><div><i class="fas fa-sync-alt fa-spin"></i><span>Menyinkronkan...</span></div></div>
+
+    <!-- VIDEO ERROR OVERLAY (muncul saat video error, bukan modal utama) -->
+    <div class="video-error-ov" id="videoErrorOv">
+        <i class="fas fa-exclamation-circle err-icon"></i>
+        <h3 id="videoErrTitle">Video Terputus</h3>
+        <p id="videoErrMsg">Koneksi bermasalah atau sumber video tidak dapat dimuat.</p>
+        <div class="err-btns">
+            <button class="err-retry-btn" id="btnErrRetry"><i class="fas fa-redo"></i> Coba Lagi dari Awal</button>
+            <button class="err-resume-btn" id="btnErrResume"><i class="fas fa-play"></i> Lanjutkan dari Detik Terakhir</button>
+        </div>
+        <div class="err-count" id="errRetryCount"></div>
+    </div>
 
     <div class="end-screen" id="endScreen">
         <i class="fas fa-check-circle"></i>
@@ -307,7 +331,7 @@
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getDatabase,ref,set,onValue,onDisconnect,remove,push,query,limitToLast,onChildAdded,get,update}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,onValue,onDisconnect,remove,push,query,limitToLast,onChildAdded,get,update,runTransaction}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig={apiKey:"AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",authDomain:"thmovie-3646f.firebaseapp.com",databaseURL:"https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"thmovie-3646f",storageBucket:"thmovie-3646f.firebasestorage.app",messagingSenderId:"1041137356432",appId:"1:1041137356432:web:96edbe3402937c82f09215",measurementId:"G-6SNE976L7G"};
 const app=initializeApp(firebaseConfig);
@@ -342,6 +366,10 @@ const interactOv=document.getElementById('interactOv');
 const tapBtn=document.getElementById('tapBtn');
 const nextEpBtn=document.getElementById('nextEpBtn');
 const nextEpCtrlBtn=document.getElementById('nextEpCtrlBtn');
+const videoErrorOv=document.getElementById('videoErrorOv');
+const btnErrRetry=document.getElementById('btnErrRetry');
+const btnErrResume=document.getElementById('btnErrResume');
+const errRetryCount=document.getElementById('errRetryCount');
 const modes={loading:document.getElementById('modeLoading'),countdown:document.getElementById('modeCountdown'),ready:document.getElementById('modeReady'),waiting:document.getElementById('modeWaiting'),join:document.getElementById('modeJoin'),late:document.getElementById('modeLate'),error:document.getElementById('modeError')};
 
 let roomId=null,isHost=false,bookingTimestamp=null,isSyncing=false,lastSentTs=0;
@@ -350,107 +378,72 @@ let modalActive=false,currentMode=null,syncSeekTo=null,toastTo=null;
 let syncListenerOn=false,chatOpen=false,chatName=null,chatUserId=null;
 let unreadCount=0,ctrlHideTimer=null,contentType='movie',roomCleaned=false;
 let seriesTitle='',currentEpisodeNum='',allEpisodesData={};
-let guestInitStarted=false,hostMetaSet=false;
-// isPrivate: controls whether non-host users can seek/pause (private = URL-only open access, public = strict guest control)
-let isPrivateRoom=false;
+let guestInitStarted=false,hostMetaSet=false,isPrivateRoom=false;
+
+// ===== VIDEO ERROR / RECOVERY STATE =====
+let currentVideoSrc='';       // aktif src
+let lastGoodTime=0;           // detik terakhir video berjalan normal
+let retryCount=0;             // jumlah retry otomatis
+const MAX_AUTO_RETRY=3;       // maks retry otomatis sebelum tampilkan overlay
+let autoRetryTimer=null;      // timer retry otomatis
+let videoErrShown=false;      // apakah overlay error sedang tampil
+let saveTimeInterval=null;    // interval simpan posisi tiap 2 detik
+
 const CTRL_DELAY=3500;
 
-// ===== URL PROCESSING (DROPBOX SUPPORT) =====
+// ===== URL PROCESSING =====
 function processVideoUrl(url){
-    if(!url) return url;
-    if(url.includes('dropbox.com')){
-        return url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
-    }
+    if(!url)return url;
+    if(url.includes('dropbox.com'))return url.replace('www.dropbox.com','dl.dropboxusercontent.com');
     return url;
 }
 
 // ===== INTERACT OVERLAY =====
 tapBtn.addEventListener('click',activateInteraction);
 interactOv.addEventListener('click',activateInteraction);
-
 function activateInteraction(){
     if(hasInteracted)return;
     hasInteracted=true;
     video.muted=true;
-    video.play().then(()=>{
-        video.pause();
-        video.muted=false;
-        video.currentTime=0;
-    }).catch(()=>{video.muted=false});
+    video.play().then(()=>{video.pause();video.muted=false;video.currentTime=0;}).catch(()=>{video.muted=false});
     interactOv.classList.add('hide');
-    if(onInteractionReady) onInteractionReady();
+    if(onInteractionReady)onInteractionReady();
 }
-
 let onInteractionReady=null;
 
 // ===== UTILS =====
 function showToast(m,d=2500,type=''){
     if(toastTo)clearTimeout(toastTo);
-    toastEl.textContent=m;
-    toastEl.className='toast'+(type?' '+type:'');
-    void toastEl.offsetWidth;
-    toastEl.classList.add('show');
+    toastEl.textContent=m;toastEl.className='toast'+(type?' '+type:'');
+    void toastEl.offsetWidth;toastEl.classList.add('show');
     toastTo=setTimeout(()=>toastEl.classList.remove('show'),d);
 }
 function showModal(){
     if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
-    mainModal.classList.add('active');
-    modalActive=true;
-    showCtrlBar();
+    mainModal.classList.add('active');modalActive=true;showCtrlBar();
 }
-function hideModal(){
-    mainModal.classList.remove('active');
-    modalActive=false;
-    resetCtrlTimer();
-}
-function showMode(n){
-    Object.values(modes).forEach(e=>e.style.display='none');
-    currentMode=n;
-    if(modes[n])modes[n].style.display='block';
-}
+function hideModal(){mainModal.classList.remove('active');modalActive=false;resetCtrlTimer();}
+function showMode(n){Object.values(modes).forEach(e=>e.style.display='none');currentMode=n;if(modes[n])modes[n].style.display='block';}
 function setSyncStatus(on){
-    if(on){
-        syncDot.classList.remove('off');
-        syncLabel.textContent='Sync: ON';
-        syncBadge.className='badge badge-sync';
-        syncBadge.innerHTML='<i class="fas fa-check-circle"></i> ON';
-    }else{
-        syncDot.classList.add('off');
-        syncLabel.textContent='Sync: OFF';
-        syncBadge.className='badge badge-sync err';
-        syncBadge.innerHTML='<i class="fas fa-times-circle"></i> OFF';
-    }
+    if(on){syncDot.classList.remove('off');syncLabel.textContent='Sync: ON';syncBadge.className='badge badge-sync';syncBadge.innerHTML='<i class="fas fa-check-circle"></i> ON';}
+    else{syncDot.classList.add('off');syncLabel.textContent='Sync: OFF';syncBadge.className='badge badge-sync err';syncBadge.innerHTML='<i class="fas fa-times-circle"></i> OFF';}
 }
-function fmtCd(ms){
-    if(ms<=0)return'00:00:00';
-    const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;
-    return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
-}
+function fmtCd(ms){if(ms<=0)return'00:00:00';const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;}
 function fmtTime(ts){return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}
 function setPoster(src){
-    if(src&&src!=='null'&&src!=='undefined'){
-        posterEl.src=src;
-        posterEl.style.display='block';
-        posterEl.onerror=()=>{posterEl.style.display='none'};
-    }else{
-        posterEl.style.display='none';
-    }
+    if(src&&src!=='null'&&src!=='undefined'){posterEl.src=src;posterEl.style.display='block';posterEl.onerror=()=>{posterEl.style.display='none'};}
+    else posterEl.style.display='none';
 }
 function flashSync(){syncSeekOv.classList.add('show');setTimeout(()=>syncSeekOv.classList.remove('show'),700)}
-function setSyncFlag(v){
-    isSyncing=v;
-    if(syncSeekTo){clearTimeout(syncSeekTo);syncSeekTo=null}
-    if(v)syncSeekTo=setTimeout(()=>{isSyncing=false;syncSeekTo=null},3000);
-}
+function setSyncFlag(v){isSyncing=v;if(syncSeekTo){clearTimeout(syncSeekTo);syncSeekTo=null}if(v)syncSeekTo=setTimeout(()=>{isSyncing=false;syncSeekTo=null},3000);}
 
 // ===== CONTROL BAR =====
 function showCtrlBar(){controlBar.classList.remove('bar-hidden');resetCtrlTimer()}
 function hideCtrlBar(){if(!chatOpen&&!video.paused&&!modalActive)controlBar.classList.add('bar-hidden')}
 function resetCtrlTimer(){
     clearTimeout(ctrlHideTimer);
-    if(!video.paused&&!chatOpen&&!modalActive&&document.activeElement!==msgInput){
+    if(!video.paused&&!chatOpen&&!modalActive&&document.activeElement!==msgInput)
         ctrlHideTimer=setTimeout(hideCtrlBar,CTRL_DELAY);
-    }
 }
 contentArea.addEventListener('mousemove',showCtrlBar);
 contentArea.addEventListener('touchstart',showCtrlBar,{passive:true});
@@ -461,136 +454,215 @@ const fsBtn=document.getElementById('fsBtn');
 fsBtn.addEventListener('click',()=>{
     if(!document.fullscreenElement&&!document.webkitFullscreenElement){
         (contentArea.requestFullscreen||contentArea.webkitRequestFullscreen).call(contentArea).then(()=>{
-            try{
-                if(screen.orientation && screen.orientation.lock){
-                    screen.orientation.lock('landscape').catch(e=>console.log('Orientation lock failed/not supported', e));
-                }
-            }catch(e){}
+            try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});}catch(e){}
         }).catch(()=>showToast('Fullscreen tidak didukung'));
-    }else{
-        (document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{});
-    }
+    }else{(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{});}
 });
 function onFsCh(){fsBtn.querySelector('i').className=!!(document.fullscreenElement||document.webkitFullscreenElement)?'fas fa-compress':'fas fa-expand'}
 document.addEventListener('fullscreenchange',onFsCh);
 document.addEventListener('webkitfullscreenchange',onFsCh);
+document.getElementById('shareToggle').addEventListener('click',()=>{shareArea.style.display=shareArea.style.display==='flex'?'none':'flex';});
 
-document.getElementById('shareToggle').addEventListener('click',()=>{
-    shareArea.style.display=shareArea.style.display==='flex'?'none':'flex';
+// ===== SAVE LAST GOOD TIME =====
+function startSavingTime(){
+    if(saveTimeInterval)clearInterval(saveTimeInterval);
+    saveTimeInterval=setInterval(()=>{
+        if(!video.paused&&!video.ended&&video.currentTime>0){
+            lastGoodTime=video.currentTime;
+        }
+    },2000);
+}
+video.addEventListener('timeupdate',()=>{
+    if(video.currentTime>0&&!video.paused&&!video.ended)lastGoodTime=video.currentTime;
 });
 
-// ===== NEXT EPISODE (PERSISTENT ACROSS ALL EPISODES) =====
+// ===== VIDEO ERROR OVERLAY =====
+function showVideoError(title,msg){
+    videoErrShown=true;
+    document.getElementById('videoErrTitle').textContent=title||'Video Terputus';
+    document.getElementById('videoErrMsg').textContent=msg||'Koneksi bermasalah atau sumber video tidak dapat dimuat.';
+    if(retryCount>0)errRetryCount.textContent=`Sudah mencoba ${retryCount}x otomatis`;
+    else errRetryCount.textContent='';
+    videoErrorOv.classList.add('show');
+    bufferOv.classList.remove('show');
+    showCtrlBar();
+}
+function hideVideoError(){
+    videoErrShown=false;
+    videoErrorOv.classList.remove('show');
+    errRetryCount.textContent='';
+}
+
+// Tombol Coba Lagi dari Awal
+btnErrRetry.addEventListener('click',()=>{
+    hideVideoError();
+    retryCount=0;
+    doRetry(0);
+});
+
+// Tombol Lanjutkan dari Detik Terakhir
+btnErrResume.addEventListener('click',()=>{
+    hideVideoError();
+    retryCount=0;
+    doRetry(lastGoodTime);
+});
+
+function doRetry(seekTo){
+    if(autoRetryTimer){clearTimeout(autoRetryTimer);autoRetryTimer=null;}
+    bufferOv.classList.add('show');
+    // Reload src
+    const src=currentVideoSrc||video.src;
+    video.src='';
+    video.load();
+    setTimeout(()=>{
+        video.src=src;
+        video.load();
+        const onCanPlay=()=>{
+            video.removeEventListener('canplay',onCanPlay);
+            bufferOv.classList.remove('show');
+            if(seekTo>1){
+                video.currentTime=seekTo;
+                const onSeeked=()=>{
+                    video.removeEventListener('seeked',onSeeked);
+                    if(hasInteracted&&!modalActive)video.play().catch(()=>{});
+                };
+                video.addEventListener('seeked',onSeeked);
+            }else{
+                if(hasInteracted&&!modalActive)video.play().catch(()=>{});
+            }
+        };
+        video.addEventListener('canplay',onCanPlay);
+    },800);
+}
+
+// ===== VIDEO ERROR EVENT =====
+video.addEventListener('error',function(){
+    if(video.src===''||video.src==='about:blank')return; // ignore blank
+    const e=video.error;
+    let code=e?e.code:0;
+
+    if(autoRetryTimer){clearTimeout(autoRetryTimer);autoRetryTimer=null;}
+
+    // Auto-retry sampai MAX_AUTO_RETRY kali
+    if(retryCount<MAX_AUTO_RETRY){
+        retryCount++;
+        showToast(`Koneksi bermasalah, mencoba ulang (${retryCount}/${MAX_AUTO_RETRY})...`,3000,'error');
+        bufferOv.classList.add('show');
+        autoRetryTimer=setTimeout(()=>doRetry(lastGoodTime),3000+(retryCount*1000));
+    }else{
+        // Tampilkan overlay error dengan tombol manual
+        let msg='Sumber video tidak dapat dimuat.';
+        if(code===2)msg='Error jaringan. Periksa koneksi internet Anda.';
+        else if(code===3)msg='Dekode gagal. Format video mungkin tidak didukung.';
+        else if(code===4)msg='Sumber tidak valid atau tautan sudah kedaluwarsa.';
+        showVideoError('Video Tidak Dapat Dimuat',msg);
+    }
+});
+
+// Reset retry counter saat video berhasil main
+video.addEventListener('playing',()=>{
+    retryCount=0;
+    hideVideoError();
+    bufferOv.classList.remove('show');
+});
+video.addEventListener('waiting',()=>{if(!video.paused)bufferOv.classList.add('show')});
+video.addEventListener('canplay',()=>bufferOv.classList.remove('show'));
+
+// ===== STALL DETECTOR (video stuck tanpa event error) =====
+let stallTimer=null,lastTimeCheck=0,lastTimestamp=0;
+setInterval(()=>{
+    if(video.paused||video.ended||modalActive||videoErrShown||!videoReady||!hasInteracted)return;
+    if(video.currentTime===lastTimeCheck&&video.readyState<3){
+        stallTimer=(stallTimer||0)+1;
+        if(stallTimer>=5){ // 5 detik stuck
+            stallTimer=0;
+            showToast('Video seperti terhenti, mencoba ulang...',2500,'error');
+            if(retryCount<MAX_AUTO_RETRY){
+                retryCount++;
+                doRetry(lastGoodTime);
+            }else{
+                showVideoError('Video Terhenti','Koneksi tidak stabil. Pilih opsi di bawah untuk melanjutkan.');
+            }
+        }
+    }else{
+        stallTimer=0;
+    }
+    lastTimeCheck=video.currentTime;
+},1000);
+
+// ===== NEXT EPISODE =====
 function getNextEpisodeNum(currentNum,allEps){
     const nums=Object.keys(allEps).map(Number).sort((a,b)=>a-b);
     const idx=nums.indexOf(Number(currentNum));
     if(idx>=0&&idx<nums.length-1)return String(nums[idx+1]);
     return null;
 }
-
-// Called whenever currentEpisodeNum changes or allEpisodesData is loaded/refreshed
 function setupNextEpisode(){
     if(contentType==='movie'||!seriesTitle||!currentEpisodeNum)return;
-    if(Object.keys(allEpisodesData).length === 0){
+    if(Object.keys(allEpisodesData).length===0){
         get(ref(db,'movies')).then(snap=>{
-            const data=snap.val();
-            if(!data)return;
+            const data=snap.val();if(!data)return;
             const movieEntry=Object.entries(data).find(([,m])=>m.title===seriesTitle);
             if(!movieEntry)return;
-            const [,movie]=movieEntry;
-            if(!movie.episodes)return;
-            allEpisodesData=movie.episodes;
-            checkNextAvailability();
+            const[,movie]=movieEntry;if(!movie.episodes)return;
+            allEpisodesData=movie.episodes;checkNextAvailability();
         }).catch(()=>{});
-    }else{
-        checkNextAvailability();
-    }
+    }else{checkNextAvailability();}
 }
-
 function checkNextAvailability(){
     const nextNum=getNextEpisodeNum(currentEpisodeNum,allEpisodesData);
     if(nextNum&&allEpisodesData[nextNum]?.videoSource){
-        nextEpBtn.style.display='inline-flex';
-        nextEpCtrlBtn.classList.remove('hidden-btn');
-        if(isHost){
-            nextEpBtn.onclick=()=>goToNextEpisode(nextNum);
-            nextEpCtrlBtn.onclick=()=>goToNextEpisode(nextNum);
-        }else{
-            nextEpBtn.onclick=()=>showToast('Tunggu Host untuk lanjut ke episode berikutnya');
-            nextEpCtrlBtn.onclick=()=>showToast('Tunggu Host untuk lanjut ke episode berikutnya');
-        }
-    }else{
-        // No more episodes — hide buttons
-        nextEpBtn.style.display='none';
-        nextEpCtrlBtn.classList.add('hidden-btn');
-    }
+        nextEpBtn.style.display='inline-flex';nextEpCtrlBtn.classList.remove('hidden-btn');
+        if(isHost){nextEpBtn.onclick=()=>goToNextEpisode(nextNum);nextEpCtrlBtn.onclick=()=>goToNextEpisode(nextNum);}
+        else{nextEpBtn.onclick=()=>showToast('Tunggu Host untuk lanjut ke episode berikutnya');nextEpCtrlBtn.onclick=()=>showToast('Tunggu Host untuk lanjut ke episode berikutnya');}
+    }else{nextEpBtn.style.display='none';nextEpCtrlBtn.classList.add('hidden-btn');}
 }
-
 function goToNextEpisode(nextNum){
     const ep=allEpisodesData[nextNum];
     if(!ep||!ep.videoSource){showToast('Video episode berikutnya belum tersedia!');return}
-
     const newSrc=processVideoUrl(ep.videoSource);
     const newTitle=`${seriesTitle} - Ep.${nextNum}`;
-
     currentEpisodeNum=nextNum;
-
     titleEl.textContent=newTitle;
     if(ep.poster)setPoster(ep.poster);
-
-    video.src=newSrc;
-    video.currentTime=0;
-    bookingTimestamp=Date.now();
-
+    currentVideoSrc=newSrc;
+    lastGoodTime=0;retryCount=0;hideVideoError();
+    video.src=newSrc;video.currentTime=0;bookingTimestamp=Date.now();
     sessionStorage.setItem('activeEpisodeNum',String(nextNum));
     sessionStorage.setItem('activeVideoSource',newSrc);
     sessionStorage.setItem('activeMovieTitle',newTitle);
-
-    // Hide next ep buttons until we confirm there's a further episode
-    nextEpBtn.style.display='none';
-    nextEpCtrlBtn.classList.add('hidden-btn');
-    endScreen.classList.remove('show');
-    roomCleaned=false; // Allow ended event to fire again for this episode
-
+    nextEpBtn.style.display='none';nextEpCtrlBtn.classList.add('hidden-btn');
+    endScreen.classList.remove('show');roomCleaned=false;
     if(isHost){
         set(ref(db,'sync_rooms/'+roomId+'/meta'),{
-            title:newTitle,
-            videoSrc:newSrc,
-            episodeNum:String(nextNum),
-            createdAt:Date.now(),
-            isPrivate:isPrivateRoom,
-            contentType:'series',
-            seriesTitle:seriesTitle,
-            posterSrc:ep.poster||''
-        }).then(()=>{
-            sendSync();
-            video.play().catch(()=>{});
-            showToast('Memulai Episode Berikutnya...');
-            // After switching, re-check if the NEXT next episode exists
-            setupNextEpisode();
-        }).catch(()=>{showToast('Gagal update info ke server')});
+            title:newTitle,videoSrc:newSrc,episodeNum:String(nextNum),
+            createdAt:Date.now(),isPrivate:isPrivateRoom,contentType:'series',
+            seriesTitle:seriesTitle,posterSrc:ep.poster||''
+        }).then(()=>{sendSync();video.play().catch(()=>{});showToast('Memulai Episode Berikutnya...');setupNextEpisode();})
+        .catch(()=>{showToast('Gagal update info ke server')});
     }
 }
 
-// ===== HOST TRANSFER (PUBLIC ROOMS ONLY) =====
-// When the host disconnects, promote the oldest remaining active viewer to host.
+// ===== HOST TRANSFER (PUBLIC ROOMS ONLY) — FIXED dengan runTransaction =====
 function setupHostTransfer(){
-    if(isPrivateRoom)return; // Only for public rooms
+    if(isPrivateRoom)return;
     if(!isHost)return;
-
-    // Write this user as the current host in Firebase so guests can detect changes
     set(ref(db,'sync_rooms/'+roomId+'/hostId'),chatUserId).catch(()=>{});
-
-    // When host disconnects: Firebase will remove hostId node via onDisconnect
     onDisconnect(ref(db,'sync_rooms/'+roomId+'/hostId')).remove();
 }
 
 function watchForHostTransfer(){
-    if(isPrivateRoom)return; // Only for public rooms
+    if(isPrivateRoom)return;
     if(isHost)return;
-
+    let hostWasPresent=false;
     onValue(ref(db,'sync_rooms/'+roomId+'/hostId'),(snap)=>{
-        if(!snap.exists()||snap.val()===null){
-            // Host left — attempt to become new host
+        if(snap.exists()&&snap.val()!==null){
+            hostWasPresent=true;
+            return;
+        }
+        // hostId hilang (host disconnect) — HANYA jalankan jika sebelumnya ada host
+        if(hostWasPresent){
+            hostWasPresent=false;
             attemptBecomeHost();
         }
     });
@@ -598,17 +670,18 @@ function watchForHostTransfer(){
 
 function attemptBecomeHost(){
     if(isHost)return;
-
-    // Use a transaction-like approach: the viewer with the smallest chatUserId among active viewers wins
-    get(ref(db,'sync_rooms/'+roomId+'/viewers')).then(snap=>{
-        if(!snap.exists())return;
-        const viewers=snap.val();
-        const ids=Object.keys(viewers).sort(); // Lexicographic sort — smallest ID wins
-        if(ids.length===0)return;
-        if(ids[0]===chatUserId){
-            // This user becomes the new host
+    // Gunakan runTransaction agar hanya SATU user yang jadi host (atomic)
+    const hostRef=ref(db,'sync_rooms/'+roomId+'/hostId');
+    runTransaction(hostRef,(current)=>{
+        // Jika sudah ada yang mengklaim, batalkan
+        if(current!==null&&current!==undefined)return; // abort
+        // Klaim slot host untuk diri sendiri
+        return chatUserId;
+    }).then((result)=>{
+        if(result.committed&&result.snapshot.val()===chatUserId){
             promoteToHost();
         }
+        // Jika tidak committed, berarti user lain lebih cepat — diam saja
     }).catch(()=>{});
 }
 
@@ -616,38 +689,24 @@ function promoteToHost(){
     isHost=true;
     viewerBadge.style.display='none';
     showToast('Anda sekarang menjadi Host!',4000,'success');
-
-    // Write new hostId
-    set(ref(db,'sync_rooms/'+roomId+'/hostId'),chatUserId).catch(()=>{});
     onDisconnect(ref(db,'sync_rooms/'+roomId+'/hostId')).remove();
-
-    // Also take over onDisconnect for the room cleanup
     onDisconnect(ref(db,'sync_rooms/'+roomId)).remove();
-
     setupSender();
     syncBadge.innerHTML='<i class="fas fa-crown"></i> HOST';
     syncBadge.className='badge badge-sync';
+    // Update viewer badge ke host indicator
+    update(ref(db,'sync_rooms/'+roomId+'/viewers/'+chatUserId),{isHost:true}).catch(()=>{});
 }
 
 // ===== ROOM CLEANUP =====
 function cleanupRoom(){
-    if(roomCleaned)return;
-    roomCleaned=true;
+    if(roomCleaned)return;roomCleaned=true;
     endScreen.classList.add('show');
     document.getElementById('endTitle').textContent=contentType==='movie'?'Film Selesai':'Episode Selesai';
     document.getElementById('endSub').textContent='Ruangan akan ditutup otomatis...';
-    if(isHost){
-        remove(ref(db,'sync_rooms/'+roomId)).catch(()=>{});
-        showToast('Selesai. Ruangan ditutup.',3000,'success');
-    }
-    // Check for next episode — if available, show button indefinitely (don't auto-redirect)
+    if(isHost){remove(ref(db,'sync_rooms/'+roomId)).catch(()=>{});showToast('Selesai. Ruangan ditutup.',3000,'success');}
     setupNextEpisode();
-    // Only auto-redirect if there's no next episode
-    setTimeout(()=>{
-        if(!nextEpBtn.style.display||nextEpBtn.style.display==='none'){
-            location.href='../index.html';
-        }
-    },6000);
+    setTimeout(()=>{if(!nextEpBtn.style.display||nextEpBtn.style.display==='none')location.href='../index.html';},6000);
 }
 video.addEventListener('ended',()=>{if(!modalActive)cleanupRoom()});
 
@@ -657,7 +716,6 @@ roomId=urlP.get('room');
 contentType=(sessionStorage.getItem('activeContentType')||'movie').toLowerCase();
 seriesTitle=sessionStorage.getItem('activeSeriesTitle')||'';
 currentEpisodeNum=sessionStorage.getItem('activeEpisodeNum')||'';
-
 if(!roomId)initHost();else initGuest();
 
 // ===== HOST =====
@@ -665,259 +723,134 @@ function initHost(){
     isHost=true;
     roomId='room_'+Math.random().toString(36).substring(2,8)+Date.now().toString(36);
     window.history.replaceState({},'',`${location.pathname}?room=${roomId}`);
-    shareArea.style.display='flex';
-    shareInput.value=location.href;
-
+    shareArea.style.display='flex';shareInput.value=location.href;
     const t=sessionStorage.getItem('activeMovieTitle');
     const vRaw=sessionStorage.getItem('activeVideoSource');
     const v=processVideoUrl(vRaw);
     const p=sessionStorage.getItem('activePoster');
     const bt=sessionStorage.getItem('activeBookingTime');
     const rt=sessionStorage.getItem('activeRoomType')||'PUBLIC';
-
     isPrivateRoom=(rt==='PRIVATE');
-
     if(!v||!t){showErr('Data Film Tidak Ditemukan','Kembali ke halaman Tiket.');return}
-
-    titleEl.textContent=t;
-    setPoster(p);
-    video.src=v;
-    videoReady=true;
+    titleEl.textContent=t;setPoster(p);
+    currentVideoSrc=v;
+    video.src=v;videoReady=true;
     bookingTimestamp=bt?parseInt(bt,10):null;
     if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
-
     if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex';}
-
     set(ref(db,'sync_rooms/'+roomId+'/meta'),{
         title:t,videoSrc:v,posterSrc:p||'',targetTime:bookingTimestamp||0,
         createdAt:Date.now(),isPrivate:isPrivateRoom,contentType:contentType||'movie',seriesTitle,episodeNum:currentEpisodeNum
-    }).then(()=>{
-        setSyncStatus(true);
-        hostMetaSet=true;
-    }).catch(()=>setSyncStatus(false));
-
+    }).then(()=>{setSyncStatus(true);hostMetaSet=true;}).catch(()=>setSyncStatus(false));
     onDisconnect(ref(db,'sync_rooms/'+roomId)).remove();
-    registerViewer();
-    setupSync();
-    setupSender();
-    setupNextEpisode();
-    setupHostTransfer();
-
+    registerViewer();setupSync();setupSender();setupNextEpisode();setupHostTransfer();
+    startSavingTime();
     onInteractionReady=()=>decideMode();
-
-    setTimeout(()=>{
-        if(modalActive && currentMode==='loading'){
-            showToast('Klik tombol di layar untuk memulai',4000);
-        }
-    },8000);
+    setTimeout(()=>{if(modalActive&&currentMode==='loading')showToast('Klik tombol di layar untuk memulai',4000);},8000);
 }
 
 // ===== GUEST =====
 function initGuest(){
     isHost=false;
-    shareArea.style.display='flex';
-    shareInput.value=location.href;
+    shareArea.style.display='flex';shareInput.value=location.href;
     viewerBadge.style.display='inline-flex';
-    showMode('loading');
-    showModal();
-
+    showMode('loading');showModal();
     guestInitStarted=true;
-
     const metaRef=ref(db,'sync_rooms/'+roomId+'/meta');
-
     onValue(metaRef,(snap)=>{
         const m=snap.val();
-
         if(!m){
-            if(guestInitStarted){
-                showErr('Room Tidak Ditemukan','Kamar ini mungkin sudah dihapus oleh host.');
-                setSyncStatus(false);
-            }
+            if(guestInitStarted){showErr('Room Tidak Ditemukan','Kamar ini mungkin sudah dihapus oleh host.');setSyncStatus(false);}
             return;
         }
-
-        // Detect if this is a private room — guests can freely join via URL
         isPrivateRoom=!!(m.isPrivate);
-
         const currentTitle=titleEl.textContent;
         const newTitle=m.title||'Unknown';
         const newVideo=processVideoUrl(m.videoSrc);
-
-        if(m.title && m.title !== currentTitle && currentTitle !== 'Memuat...'){
-            // Episode change detected
-            titleEl.textContent=newTitle;
-            setPoster(m.posterSrc);
+        if(m.title&&m.title!==currentTitle&&currentTitle!=='Memuat...'){
+            // Episode change
+            titleEl.textContent=newTitle;setPoster(m.posterSrc);
             contentType=(m.contentType||'movie').toLowerCase();
-            seriesTitle=m.seriesTitle||'';
-            currentEpisodeNum=m.episodeNum||'';
-
-            if(contentType!=='movie'){
-                typeBadge.textContent=contentType.toUpperCase();
-                typeBadge.style.display='inline-flex';
-            }else{
-                typeBadge.style.display='none';
-            }
-
-            video.src=newVideo;
-            videoReady=true;
-            roomCleaned=false;
-
+            seriesTitle=m.seriesTitle||'';currentEpisodeNum=m.episodeNum||'';
+            if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex';}
+            else typeBadge.style.display='none';
+            currentVideoSrc=newVideo;lastGoodTime=0;retryCount=0;hideVideoError();
+            video.src=newVideo;videoReady=true;roomCleaned=false;
             sessionStorage.setItem('activeMovieTitle',newTitle);
             sessionStorage.setItem('activeVideoSource',m.videoSrc);
             sessionStorage.setItem('activeEpisodeNum',m.episodeNum||'');
             sessionStorage.setItem('activeSeriesTitle',m.seriesTitle||'');
-
-            if(Object.keys(allEpisodesData).length>0){
-                checkNextAvailability();
-            }else{
-                nextEpBtn.style.display='none';
-                nextEpCtrlBtn.classList.add('hidden-btn');
-            }
-
-            // Hide end screen if shown
+            if(Object.keys(allEpisodesData).length>0)checkNextAvailability();
+            else{nextEpBtn.style.display='none';nextEpCtrlBtn.classList.add('hidden-btn');}
             endScreen.classList.remove('show');
-
-        }else if(newVideo && !video.src){
-            // Initial load
-            titleEl.textContent=newTitle;
-            setPoster(m.posterSrc);
+        }else if(newVideo&&!video.src){
+            titleEl.textContent=newTitle;setPoster(m.posterSrc);
             contentType=(m.contentType||'movie').toLowerCase();
-            seriesTitle=m.seriesTitle||'';
-            currentEpisodeNum=m.episodeNum||'';
-
-            if(contentType!=='movie'){
-                typeBadge.textContent=contentType.toUpperCase();
-                typeBadge.style.display='inline-flex';
-            }
-
-            video.src=newVideo;
-            videoReady=true;
+            seriesTitle=m.seriesTitle||'';currentEpisodeNum=m.episodeNum||'';
+            if(contentType!=='movie'){typeBadge.textContent=contentType.toUpperCase();typeBadge.style.display='inline-flex';}
+            currentVideoSrc=newVideo;
+            video.src=newVideo;videoReady=true;
         }
-
         bookingTimestamp=m.targetTime?parseInt(m.targetTime,10):null;
         if(isNaN(bookingTimestamp)||bookingTimestamp<=0)bookingTimestamp=null;
-
         setSyncStatus(true);
-
-        if(!chatUserId){
-            registerViewer();
-            setupSync();
-            watchForHostTransfer();
-        }
-
+        if(!chatUserId){registerViewer();setupSync();watchForHostTransfer();}
         checkGuestState();
-
+        startSavingTime();
     },(err)=>{
         console.error('Firebase error:',err);
         showErr('Gagal Terhubung','Tidak dapat membaca data room. Periksa koneksi internet.');
         setSyncStatus(false);
     });
-
-    setTimeout(()=>{
-        if(currentMode==='loading' && modalActive){
-            showErr('Koneksi Lambat','Tidak dapat terhubung ke server dalam waktu lama. Coba refresh halaman.');
-        }
-    },20000);
+    setTimeout(()=>{if(currentMode==='loading'&&modalActive)showErr('Koneksi Lambat','Tidak dapat terhubung ke server dalam waktu lama. Coba refresh halaman.');},20000);
 }
 
 function registerViewer(){
-    if(!chatUserId){
-        chatUserId='u_'+Math.random().toString(36).substring(2,7);
-        sessionStorage.setItem('tmo_uid',chatUserId);
-    }
+    if(!chatUserId){chatUserId='u_'+Math.random().toString(36).substring(2,7);sessionStorage.setItem('tmo_uid',chatUserId);}
     chatName=sessionStorage.getItem('tmo_name')||null;
     const vRef=ref(db,'sync_rooms/'+roomId+'/viewers/'+chatUserId);
     set(vRef,{name:chatName||'Anonim',joinedAt:Date.now(),lastSeen:Date.now()}).catch(()=>{});
     onDisconnect(vRef).remove();
 }
-
 onValue(ref(db,'sync_rooms/'+roomId+'/viewers'),(snap)=>{
     const count=snap.exists()?Object.keys(snap.val()).length:0;
     viewerBadge.innerHTML=`<i class="fas fa-eye"></i> ${count}`;
 });
 
-// ===== GUEST STATE CHECK =====
+// ===== GUEST STATE =====
 function checkGuestState(){
     get(ref(db,'sync_rooms/'+roomId+'/status')).then(snap=>{
         const s=snap.val();
-
-        if(s && s.isPlaying){
-            setSyncFlag(true);
-            video.currentTime=s.currentTime||0;
-
-            const h=()=>{
-                video.removeEventListener('seeked',h);
-                setTimeout(()=>setSyncFlag(false),300);
-            };
+        if(s&&s.isPlaying){
+            setSyncFlag(true);video.currentTime=s.currentTime||0;
+            const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300);};
             video.addEventListener('seeked',h);
-
-            if(bookingTimestamp && Date.now()>bookingTimestamp+60000){
-                showLateMode();
-            }else{
-                showJoinMode();
-            }
+            if(bookingTimestamp&&Date.now()>bookingTimestamp+60000)showLateMode();else showJoinMode();
             return;
         }
-
-        if(bookingTimestamp && bookingTimestamp>Date.now()){
-            startCdGuest(bookingTimestamp);
-        }else{
-            showWaitMode();
-        }
-
-    }).catch(err=>{
-        console.error('Error checking status:',err);
-        showErr('Gagal Memuat','Tidak dapat membaca status room.');
-    });
-
+        if(bookingTimestamp&&bookingTimestamp>Date.now())startCdGuest(bookingTimestamp);else showWaitMode();
+    }).catch(err=>{console.error('Error checking status:',err);showErr('Gagal Memuat','Tidak dapat membaca status room.');});
     setupGuestStatusListener();
 }
-
 function setupGuestStatusListener(){
     onValue(ref(db,'sync_rooms/'+roomId+'/status'),(snap)=>{
-        const s=snap.val();
-        if(!s || !videoReady) return;
-
-        if(s.isPlaying && modalActive && (currentMode==='waiting'||currentMode==='countdown'||currentMode==='join'||currentMode==='late')){
-            if(cdInterval){clearInterval(cdInterval); cdInterval=null;}
-
-            setSyncFlag(true);
-            video.currentTime=s.currentTime||0;
-
-            const h=()=>{
-                video.removeEventListener('seeked',h);
-                setTimeout(()=>setSyncFlag(false),300);
-            };
-            video.addEventListener('seeked',h);
-
-            hideModal();
-
-            if(hasInteracted){
-                video.play().catch(()=>showToast('Klik video untuk melanjutkan'));
-            }else{
-                interactOv.classList.remove('hide');
-                onInteractionReady=()=>{
-                    video.play().catch(()=>{});
-                };
-            }
+        const s=snap.val();if(!s||!videoReady)return;
+        if(s.isPlaying&&modalActive&&(currentMode==='waiting'||currentMode==='countdown'||currentMode==='join'||currentMode==='late')){
+            if(cdInterval){clearInterval(cdInterval);cdInterval=null;}
+            setSyncFlag(true);video.currentTime=s.currentTime||0;
+            const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300);};
+            video.addEventListener('seeked',h);hideModal();
+            if(hasInteracted)video.play().catch(()=>showToast('Klik video untuk melanjutkan'));
+            else{interactOv.classList.remove('hide');onInteractionReady=()=>{video.play().catch(()=>{});};}
         }
-
-        if(!modalActive && !isHost && !isSyncing){
+        if(!modalActive&&!isHost&&!isSyncing){
             if(Math.abs(video.currentTime-(s.currentTime||0))>2.5){
-                flashSync();
-                setSyncFlag(true);
-                video.currentTime=s.currentTime||0;
-                const h=()=>{
-                    video.removeEventListener('seeked',h);
-                    setTimeout(()=>setSyncFlag(false),300);
-                };
+                flashSync();setSyncFlag(true);video.currentTime=s.currentTime||0;
+                const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300);};
                 video.addEventListener('seeked',h);
             }
-            if(s.isPlaying && video.paused && hasInteracted){
-                video.play().catch(()=>{});
-            }else if(!s.isPlaying && !video.paused){
-                video.pause();
-            }
+            if(s.isPlaying&&video.paused&&hasInteracted)video.play().catch(()=>{});
+            else if(!s.isPlaying&&!video.paused)video.pause();
         }
     });
 }
@@ -925,87 +858,27 @@ function setupGuestStatusListener(){
 // ===== MODES =====
 function decideMode(){
     if(!videoReady){showErr('Video Tidak Tersedia','Sumber video tidak valid.');return}
-    if(bookingTimestamp && bookingTimestamp>Date.now()){
-        startCdHost(bookingTimestamp);
-    }else{
-        showReadyMode();
-    }
+    if(bookingTimestamp&&bookingTimestamp>Date.now())startCdHost(bookingTimestamp);else showReadyMode();
 }
-
 function startCdHost(ts){
-    showMode('countdown');
-    showModal();
-    document.getElementById('cdTarget').textContent=fmtTime(ts);
-    function tick(){
-        const d=ts-Date.now();
-        document.getElementById('cdTimer').textContent=fmtCd(d);
-        if(d<=0){
-            clearInterval(cdInterval);cdInterval=null;
-            document.getElementById('cdTimer').textContent='00:00:00';
-            hideModal();
-            video.currentTime=0;
-            video.play().then(()=>{sendSync()}).catch(()=>showToast('Klik video untuk memulai'));
-        }
-    }
+    showMode('countdown');showModal();document.getElementById('cdTarget').textContent=fmtTime(ts);
+    function tick(){const d=ts-Date.now();document.getElementById('cdTimer').textContent=fmtCd(d);if(d<=0){clearInterval(cdInterval);cdInterval=null;document.getElementById('cdTimer').textContent='00:00:00';hideModal();video.currentTime=0;video.play().then(()=>sendSync()).catch(()=>showToast('Klik video untuk memulai'));}}
     tick();cdInterval=setInterval(tick,500);
 }
-
 function startCdGuest(ts){
-    showMode('countdown');
-    showModal();
-    document.getElementById('cdTarget').textContent=fmtTime(ts);
-    function tick(){
-        const d=ts-Date.now();
-        document.getElementById('cdTimer').textContent=fmtCd(d);
-        if(d<=0){
-            clearInterval(cdInterval);cdInterval=null;
-            document.getElementById('cdTimer').textContent='00:00:00';
-            hideModal();
-            video.currentTime=0;
-            if(hasInteracted){
-                video.play().catch(()=>showToast('Klik video untuk melanjutkan'));
-            }else{
-                interactOv.classList.remove('hide');
-                onInteractionReady=()=>video.play().catch(()=>{});
-            }
-        }
-    }
+    showMode('countdown');showModal();document.getElementById('cdTarget').textContent=fmtTime(ts);
+    function tick(){const d=ts-Date.now();document.getElementById('cdTimer').textContent=fmtCd(d);if(d<=0){clearInterval(cdInterval);cdInterval=null;document.getElementById('cdTimer').textContent='00:00:00';hideModal();video.currentTime=0;if(hasInteracted)video.play().catch(()=>showToast('Klik video untuk melanjutkan'));else{interactOv.classList.remove('hide');onInteractionReady=()=>video.play().catch(()=>{});}}}
     tick();cdInterval=setInterval(tick,500);
 }
-
-function showReadyMode(){
-    document.getElementById('readyTitle').textContent='Siap Menonton';
-    document.getElementById('readySub').textContent='Bagikan link ke teman, lalu klik tombol di bawah.';
-    showMode('ready');showModal();
-}
+function showReadyMode(){document.getElementById('readyTitle').textContent='Siap Menonton';document.getElementById('readySub').textContent='Bagikan link ke teman, lalu klik tombol di bawah.';showMode('ready');showModal();}
 function showWaitMode(){showMode('waiting');showModal()}
 function showJoinMode(){showMode('join');showModal()}
 function showLateMode(){showMode('late');showModal()}
-function showErr(t,m){
-    document.getElementById('errTitle').textContent=t;
-    document.getElementById('errMsg').textContent=m;
-    showMode('error');
-    showModal();
-    setSyncStatus(false);
-}
+function showErr(t,m){document.getElementById('errTitle').textContent=t;document.getElementById('errMsg').textContent=m;showMode('error');showModal();setSyncStatus(false);}
 
 // ===== PLAYBACK ACTIONS =====
-function startPlay(){
-    if(cdInterval){clearInterval(cdInterval);cdInterval=null}
-    hideModal();
-    video.currentTime=0;
-    video.play().catch(()=>showToast('Klik video untuk memulai'));
-    if(isHost)sendSync();
-}
-function joinPlay(){
-    setSyncFlag(false);hideModal();
-    if(hasInteracted){
-        video.play().catch(()=>showToast('Klik video untuk melanjutkan'));
-    }else{
-        interactOv.classList.remove('hide');
-        onInteractionReady=()=>video.play().catch(()=>{});
-    }
-}
+function startPlay(){if(cdInterval){clearInterval(cdInterval);cdInterval=null}hideModal();video.currentTime=0;video.play().catch(()=>showToast('Klik video untuk memulai'));if(isHost)sendSync();}
+function joinPlay(){setSyncFlag(false);hideModal();if(hasInteracted)video.play().catch(()=>showToast('Klik video untuk melanjutkan'));else{interactOv.classList.remove('hide');onInteractionReady=()=>video.play().catch(()=>{});}}
 
 document.getElementById('btnReady').addEventListener('click',startPlay);
 document.getElementById('btnJoin').addEventListener('click',joinPlay);
@@ -1013,179 +886,98 @@ document.getElementById('btnLateJoin').addEventListener('click',joinPlay);
 document.getElementById('btnErrBack').addEventListener('click',()=>{location.href='../index.html'});
 document.getElementById('exitBtn').addEventListener('click',()=>{location.href='../index.html'});
 
-// Video events
-video.addEventListener('waiting',()=>{if(!video.paused)bufferOv.classList.add('show')});
-video.addEventListener('canplay',()=>bufferOv.classList.remove('show'));
-video.addEventListener('playing',()=>bufferOv.classList.remove('show'));
-video.addEventListener('pause',()=>{
-    // For private rooms: guests can freely control (no warning)
-    // For public rooms: only host can control
-    if(!isHost && !isSyncing && hasInteracted && !modalActive && !isPrivateRoom){
-        showToast('Hanya Host yang dapat mengontrol');
-    }
-});
-video.addEventListener('error',function(){
-    const e=video.error;let m='Sumber video tidak dapat dimuat.';
-    if(e){switch(e.code){case 2:m='Error jaringan.';break;case 3:m='Dekode gagal.';break;case 4:m='Sumber tidak valid atau kedaluwarsa.';break;}}
-    showErr('Gagal Memuat Video',m);
-});
-video.addEventListener('seeking',()=>{
-    // For private rooms: allow all users to seek without any overlay warning
-    // For public rooms: only host can seek
-    if(!isHost && !isSyncing && hasInteracted && !isPrivateRoom){
-        showToast('Hanya Host yang dapat mengontrol video');
-    }
-    // For private rooms, if guest seeks, send sync so others follow (optional: only if they are acting as co-host)
-    // We keep it simple: in private rooms guests CAN seek locally, but only the host's position is broadcast
-    // If you want guests to broadcast seeks in private rooms, uncomment:
-    // if(!isHost && isPrivateRoom && !isSyncing) sendSync();
-});
+video.addEventListener('pause',()=>{if(!isHost&&!isSyncing&&hasInteracted&&!modalActive&&!isPrivateRoom)showToast('Hanya Host yang dapat mengontrol');});
+video.addEventListener('seeking',()=>{if(!isHost&&!isSyncing&&hasInteracted&&!isPrivateRoom)showToast('Hanya Host yang dapat mengontrol video');});
 
 // ===== SYNC SENDER =====
 function sendSync(){
     if(!isHost||!videoReady)return;
     const n=Date.now();lastSentTs=n;
-    set(ref(db,'sync_rooms/'+roomId+'/status'),{
-        currentTime:video.currentTime,
-        isPlaying:!video.paused,
-        lastUpdate:n
-    }).catch(()=>setSyncStatus(false));
+    set(ref(db,'sync_rooms/'+roomId+'/status'),{currentTime:video.currentTime,isPlaying:!video.paused,lastUpdate:n}).catch(()=>setSyncStatus(false));
 }
 function setupSender(){
-    if(sendInterval)clearInterval(sendInterval); // Prevent duplicate intervals on host transfer
-    sendInterval=setInterval(()=>{if(isHost&&!video.paused&&!isSyncing&&videoReady)sendSync()},1500);
-    video.addEventListener('play',()=>{if(isHost&&!isSyncing)sendSync()});
-    video.addEventListener('pause',()=>{if(isHost&&!isSyncing)sendSync()});
-    video.addEventListener('seeked',()=>{if(isHost&&!isSyncing)sendSync()});
+    if(sendInterval)clearInterval(sendInterval);
+    sendInterval=setInterval(()=>{if(isHost&&!video.paused&&!isSyncing&&videoReady)sendSync();},1500);
+    video.addEventListener('play',()=>{if(isHost&&!isSyncing)sendSync();});
+    video.addEventListener('pause',()=>{if(isHost&&!isSyncing)sendSync();});
+    video.addEventListener('seeked',()=>{if(isHost&&!isSyncing)sendSync();});
 }
 
 // ===== SYNC LISTENER =====
 function setupSync(){
     if(syncListenerOn)return;syncListenerOn=true;
     onValue(ref(db,'sync_rooms/'+roomId+'/status'),(snap)=>{
-        const d=snap.val();
-        if(!d||!videoReady)return;
+        const d=snap.val();if(!d||!videoReady)return;
         const age=Date.now()-d.lastUpdate;
-        if(age>8000){setSyncStatus(false);return}
-        setSyncStatus(true);
+        if(age>8000){setSyncStatus(false);return}setSyncStatus(true);
         if(isHost&&Math.abs(d.lastUpdate-lastSentTs)<800)return;
-
         if(!isHost&&modalActive){
             if((currentMode==='waiting'||currentMode==='countdown'||currentMode==='late'||currentMode==='join')&&d.isPlaying){
-                if(cdInterval){clearInterval(cdInterval);cdInterval=null}
-                setSyncFlag(true);
-                video.currentTime=d.currentTime||0;
-                const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300)};
-                video.addEventListener('seeked',h);
-                if(currentMode==='late'||currentMode==='join'){
-                    joinPlay();
-                }else{
-                    hideModal();
-                    if(hasInteracted){
-                        video.play().catch(()=>{});
-                    }else{
-                        interactOv.classList.remove('hide');
-                        onInteractionReady=()=>video.play().catch(()=>{});
-                    }
-                }
+                if(cdInterval){clearInterval(cdInterval);cdInterval=null;}setSyncFlag(true);video.currentTime=d.currentTime||0;
+                const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300);};video.addEventListener('seeked',h);
+                if(currentMode==='late'||currentMode==='join')joinPlay();
+                else{hideModal();if(hasInteracted)video.play().catch(()=>{});else{interactOv.classList.remove('hide');onInteractionReady=()=>video.play().catch(()=>{});}}
                 return;
-            }
-            return;
+            }return;
         }
-
-        // For private rooms: guests follow sync but are NOT blocked from local control
-        // Sync correction still applies so everyone stays together
         if(!isHost&&!isSyncing&&Math.abs(video.currentTime-(d.currentTime||0))>2){
-            flashSync();
-            setSyncFlag(true);
-            video.currentTime=d.currentTime||0;
-            const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300)};
-            video.addEventListener('seeked',h);
+            flashSync();setSyncFlag(true);video.currentTime=d.currentTime||0;
+            const h=()=>{video.removeEventListener('seeked',h);setTimeout(()=>setSyncFlag(false),300);};video.addEventListener('seeked',h);
         }
-        if(d.isPlaying&&video.paused){
-            if(hasInteracted&&!modalActive)video.play().catch(()=>showToast('Klik video untuk melanjutkan'));
-        }else if(!d.isPlaying&&!video.paused){
-            if(!isHost)video.pause();
-        }
+        if(d.isPlaying&&video.paused){if(hasInteracted&&!modalActive)video.play().catch(()=>showToast('Klik video untuk melanjutkan'));}
+        else if(!d.isPlaying&&!video.paused){if(!isHost)video.pause();}
     });
 }
 
 // ===== CHAT =====
-function initChatUI(){
-    if(chatName){
-        nameSetup.style.display='none';
-        chatBody.style.display='flex';
-        chatInputArea.style.display='flex';
-        loadChatMessages();
-    }
-}
+function initChatUI(){if(chatName){nameSetup.style.display='none';chatBody.style.display='flex';chatInputArea.style.display='flex';loadChatMessages();}}
 function loadChatMessages(){
     const cr=query(ref(db,'sync_rooms/'+roomId+'/chat'),limitToLast(60));
     onChildAdded(cr,(snap)=>{
         const m=snap.val();if(!m)return;
-        if(chatEmpty)chatEmpty.style.display='none';
-        appendMsg(m);
-        if(chatOpen)chatBody.scrollTop=chatBody.scrollHeight;
-        else{unreadCount++;unreadDot.classList.add('show');}
+        if(chatEmpty)chatEmpty.style.display='none';appendMsg(m);
+        if(chatOpen)chatBody.scrollTop=chatBody.scrollHeight;else{unreadCount++;unreadDot.classList.add('show');}
     });
 }
 function appendMsg(m){
-    const isSelf=m.uid===chatUserId;
-    const div=document.createElement('div');div.className='msg '+(isSelf?'self':'other');
+    const isSelf=m.uid===chatUserId;const div=document.createElement('div');div.className='msg '+(isSelf?'self':'other');
     const ts=new Date(m.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
     div.innerHTML=`<span class="msg-name">${escH(m.name)}</span>${escH(m.text)}<span class="msg-time">${ts}</span>`;
     chatBody.appendChild(div);
 }
 function escH(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function sendMsg(){
-    const txt=msgInput.value.trim();if(!txt||!chatName)return;
-    msgInput.value='';
-    push(ref(db,'sync_rooms/'+roomId+'/chat'),{uid:chatUserId,name:chatName,text:txt,ts:Date.now()}).catch(()=>showToast('Gagal mengirim'));
-}
+function sendMsg(){const txt=msgInput.value.trim();if(!txt||!chatName)return;msgInput.value='';push(ref(db,'sync_rooms/'+roomId+'/chat'),{uid:chatUserId,name:chatName,text:txt,ts:Date.now()}).catch(()=>showToast('Gagal mengirim'));}
 document.getElementById('chatBtn').addEventListener('click',toggleChat);
 document.getElementById('chatClose').addEventListener('click',toggleChat);
 function toggleChat(){
-    chatOpen=!chatOpen;
-    chatPanel.classList.toggle('open',chatOpen);
-    if(chatOpen){
-        unreadCount=0;unreadDot.classList.remove('show');
-        setTimeout(()=>chatBody.scrollTop=chatBody.scrollHeight,100);
-        msgInput.focus();showCtrlBar();
-    }else{
-        resetCtrlTimer();
-        if(document.activeElement===msgInput)msgInput.blur();
-    }
+    chatOpen=!chatOpen;chatPanel.classList.toggle('open',chatOpen);
+    if(chatOpen){unreadCount=0;unreadDot.classList.remove('show');setTimeout(()=>chatBody.scrollTop=chatBody.scrollHeight,100);msgInput.focus();showCtrlBar();}
+    else{resetCtrlTimer();if(document.activeElement===msgInput)msgInput.blur();}
 }
 document.getElementById('nameSubmit').addEventListener('click',submitName);
 nameInput.addEventListener('keydown',(e)=>{if(e.key==='Enter')submitName()});
 function submitName(){
-    const n=nameInput.value.trim();
-    if(!n){nameInput.style.borderColor='#f44336';setTimeout(()=>nameInput.style.borderColor='',1500);return}
+    const n=nameInput.value.trim();if(!n){nameInput.style.borderColor='#f44336';setTimeout(()=>nameInput.style.borderColor='',1500);return}
     chatName=n;sessionStorage.setItem('tmo_name',n);
-    if(chatUserId){
-        set(ref(db,'sync_rooms/'+roomId+'/viewers/'+chatUserId+'/name'),n).catch(()=>{});
-    }
+    if(chatUserId)set(ref(db,'sync_rooms/'+roomId+'/viewers/'+chatUserId+'/name'),n).catch(()=>{});
     initChatUI();
 }
 document.getElementById('sendBtn').addEventListener('click',sendMsg);
 msgInput.addEventListener('keydown',(e)=>{if(e.key==='Enter')sendMsg()});
 msgInput.addEventListener('focus',showCtrlBar);
 
-// Copy
 document.getElementById('btnCopy').addEventListener('click',function(){
     const l=shareInput.value;if(!l)return;
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(l).then(onCopyOk).catch(fbCopy);}else{fbCopy();}
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(l).then(onCopyOk).catch(fbCopy);else fbCopy();
 });
 function fbCopy(){shareInput.select();shareInput.setSelectionRange(0,99999);try{document.execCommand('copy');onCopyOk()}catch(e){showToast('Gagal menyalin')}}
 function onCopyOk(){const b=document.getElementById('btnCopy');const o=b.innerHTML;b.innerHTML='<i class="fas fa-check"></i> OK';b.style.background='#4caf50';setTimeout(()=>{b.innerHTML=o;b.style.background=''},1800)}
 
-// Cleanup
 window.addEventListener('beforeunload',()=>{
-    if(cdInterval)clearInterval(cdInterval);
-    if(sendInterval)clearInterval(sendInterval);
-    if(syncSeekTo)clearTimeout(syncSeekTo);
-    if(toastTo)clearTimeout(toastTo);
-    if(ctrlHideTimer)clearTimeout(ctrlHideTimer);
+    if(cdInterval)clearInterval(cdInterval);if(sendInterval)clearInterval(sendInterval);
+    if(syncSeekTo)clearTimeout(syncSeekTo);if(toastTo)clearTimeout(toastTo);
+    if(ctrlHideTimer)clearTimeout(ctrlHideTimer);if(autoRetryTimer)clearTimeout(autoRetryTimer);
+    if(saveTimeInterval)clearInterval(saveTimeInterval);
 });
 
 setTimeout(initChatUI,100);
