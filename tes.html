@@ -2,63 +2,42 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>ThMovie - Jujutsu Kaisen Eps 1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThMovie - Player</title>
+    <style>
+        body {
+            background-color: #0d0d13;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        .video-container {
+            width: 90%;
+            max-width: 800px;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+        video {
+            width: 100%;
+            display: block;
+        }
+    </style>
 </head>
 <body>
 
-    <iframe id="odysee-iframe" style="width:100%; aspect-ratio:16 / 9; border: none;" allowfullscreen></iframe>
-
-    <div style="text-align: center; margin-top: 15px;">
-        <button onclick="startParty()" style="padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #ff0055; color: white; border: none; border-radius: 5px;">
-            Mulai Bareng
-        </button>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        // Konfigurasi Firebase ThMovie
-        const firebaseConfig = {
-            apiKey: "AIzaSyAumySmaAi8oHFnTu8QDtp_u_dZmoHlQd8",
-            authDomain: "thmovie-3646f.firebaseapp.com",
-            databaseURL: "https://thmovie-3646f-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "thmovie-3646f",
-            storageBucket: "thmovie-3646f.firebasestorage.app",
-            messagingSenderId: "1041137356432",
-            appId: "1:1041137356432:web:96edbe3402937c82f09215",
-            measurementId: "G-6SNE976L7G"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const roomRef = ref(db, "watch_party/jujutsu_eps1");
-
-        // Base URL Iframe Odysee milikmu
-        const baseEmbedUrl = "https://odysee.com/%24/embed/%40TheMOvie%3A2%2FTMOeps-01-Jujutsu-Kaisen-SUBindonesia%3A2?r=8aUi1qC869Qy7fAo9uPd7Xon6DPLNgAa&autoplay=true";
-        const player = document.getElementById("odysee-iframe");
-
-        // Fungsi Host untuk set jam mulai nonton
-        window.startParty = function() {
-            set(roomRef, { startTime: Date.now() });
-        };
-
-        // Fungsi sinkronisasi otomatis untuk penonton
-        onValue(roomRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data && data.startTime) {
-                const selisihDetik = Math.floor((Date.now() - data.startTime) / 1000);
-                if (selisihDetik > 0) {
-                    // Otomatis lompat ke detik yang sedang berjalan
-                    player.src = `${baseEmbedUrl}&t=${selisihDetik}`;
-                } else {
-                    player.src = baseEmbedUrl;
-                }
-            } else {
-                player.src = baseEmbedUrl;
-            }
-        });
-    </script>
+<div class="video-container">
+    <!-- Atribut dioptimalkan agar tidak memicu limit API Google di tengah jalan -->
+    <video controls preload="metadata" crossorigin="anonymous">
+        <source src="https://www.googleapis.com/drive/v3/files/1qJ26IK0GYZD4G0tdluOpFyLhSHsWCn0q?alt=media&lud=1743502542&pid=6242&sid=31979" type="video/mp4">
+        Browser kamu gak support tag video ini, Lang.
+    </video>
+</div>
 
 </body>
 </html>
